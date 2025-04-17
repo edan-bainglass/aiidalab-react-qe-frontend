@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Breadcrumb, Col, Container, Row } from "react-bootstrap";
 
 import StructureSelection from "./components/StructureSelection";
-import PropertySelection from "./components/PropertySelection";
+import {
+  default as PropertySelection,
+  Property,
+} from "./components/PropertySelection";
 import ParametersConfiguration from "./components/ParametersConfiguration";
 import ResourcesSelection from "./components/ResourcesSelection";
 import WorkflowSubmission from "./components/WorkflowSubmission";
@@ -19,7 +22,7 @@ const Wizard = () => {
   ];
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
+  const [selectedProperties, setSelectedProperties] = useState<Property[]>([]);
   const [parameters, setParameters] = useState<any>({});
 
   const goNext = () =>
@@ -33,7 +36,7 @@ const Wizard = () => {
       case 2:
         return (
           <PropertySelection
-            onConfirm={(selected: string[]) => {
+            onConfirm={(selected: Property[]) => {
               setSelectedProperties(selected);
               goNext();
             }}

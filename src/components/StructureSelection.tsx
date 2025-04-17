@@ -21,10 +21,10 @@ const StructureSelector: React.FC<StructureSelectorProps> = ({ onConfirm }) => {
         ],
         cell: [5, 5, 5],
       });
-      const editor = new WEAS({ domElement: viewerRef.current });
-      editor.avr.atoms = atoms;
-      editor.avr.modelStyle = 1;
-      editor.render();
+      // const editor = new WEAS({ domElement: viewerRef.current });
+      // editor.avr.atoms = atoms;
+      // editor.avr.modelStyle = 1;
+      // editor.render();
     }
   }, []);
 

@@ -1,56 +1,17 @@
 import Form from "@rjsf/core";
+import validator from "@rjsf/validator-ajv8";
 import { useEffect, useState } from "react";
-import { Accordion, Button } from "react-bootstrap";
+import { Button, Spinner, Tab, Tabs } from "react-bootstrap";
+
+import { Property } from "./PropertySelection";
 
 interface ParametersConfigurationProps {
-  selectedProperties: string[];
+  selectedProperties: Property[];
   parameters: any;
   setParameters: (params: any) => void;
   onConfirm: () => void;
   onBack: () => void;
 }
-
-// Example JSON schemas for demonstration
-const propertySchemas: Record<string, any> = {
-  bands: {
-    title: "Band Structure Parameters",
-    type: "object",
-    properties: {
-      energy_cutoff: {
-        type: "number",
-        title: "Energy Cutoff (Ry)",
-        default: 40,
-      },
-      kpoint_distance: {
-        type: "number",
-        title: "K-Point Distance",
-        default: 0.1,
-      },
-    },
-  },
-  pdos: {
-    title: "Projected DOS Parameters",
-    type: "object",
-    properties: {
-      energy_range: {
-        type: "string",
-        title: "Energy Range",
-        default: "0-100",
-      },
-    },
-  },
-  electronic_structure: {
-    title: "Electronic Structure Parameters",
-    type: "object",
-    properties: {
-      smearing: {
-        type: "number",
-        title: "Smearing (eV)",
-        default: 0.02,
-      },
-    },
-  },
-};
 
 const ParametersConfiguration = ({
   selectedProperties,
@@ -60,27 +21,44 @@ const ParametersConfiguration = ({
   onBack,
 }: ParametersConfigurationProps) => {
   const [localFormsData, setLocalFormsData] = useState<any>({});
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Initialize local form data for each selected property.
   useEffect(() => {
-    const initData: Record<string, any> = {};
-    selectedProperties.forEach((prop) => {
-      if (propertySchemas[prop] && !localFormsData[prop]) {
-        initData[prop] = {};
+    // console.log("Fetching input schemas for:", selectedProperties);
+    const fetchSchemas = async () => {
+      try {
+        const schemas: any = {};
+        for (const property of selectedProperties) {
+          const response = await fetch(`/api/plugins/${property.id}/input`);
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          const data = await response.json();
+          // console.log("Populating input schema for:", selectedProperties);
+          // console.log(data);
+          schemas[property.id] = data;
+        }
+        setLocalFormsData((prev: any) => ({
+          ...prev,
+          ...schemas,
+        }));
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching schemas:", error);
       }
-    });
-    setLocalFormsData((prev: any) => ({ ...initData, ...prev }));
+    };
+
+    fetchSchemas();
   }, [selectedProperties]);
 
   const handleFormChange = (propKey: string, formData: any) => {
     setLocalFormsData((prev: any) => ({
       ...prev,
-      [propKey]: formData,
+      [propKey]: { ...prev[propKey], formData: formData },
     }));
   };
 
   const handleNext = () => {
-    // Merge the data from all forms into the global state.
     setParameters({ ...parameters, ...localFormsData });
     onConfirm();
   };
@@ -88,29 +66,39 @@ const ParametersConfiguration = ({
   return (
     <div>
       <h2>Step 3: Calculation Parameters Configuration</h2>
-      {selectedProperties.length === 0 ? (
-        <p>No calculation properties selected.</p>
+      {loading ? (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <Spinner animation="border" />
+          <p>Loading properties...</p>
+        </div>
+      ) : selectedProperties.length === 0 ? (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <p>No properties selected</p>
+        </div>
       ) : (
-        <Accordion>
-          {selectedProperties.map((propKey) => (
-            <Accordion.Item eventKey={propKey} key={propKey}>
-              <Accordion.Header>
-                {propertySchemas[propKey]?.title || propKey}
-              </Accordion.Header>
-              <Accordion.Body>
-                <Form
-                  schema={propertySchemas[propKey]}
-                  formData={localFormsData[propKey]}
-                  onChange={({ formData }) =>
-                    handleFormChange(propKey, formData)
-                  }
-                >
-                  <div /> {/* No submit button within individual forms */}
-                </Form>
-              </Accordion.Body>
-            </Accordion.Item>
+        <Tabs
+          defaultActiveKey={selectedProperties[0].id}
+          id="controlled-tab-example"
+          className="mb-3"
+          style={{ marginTop: "20px" }}
+        >
+          {selectedProperties.map((property) => (
+            <Tab
+              eventKey={property.id}
+              title={localFormsData[property.id]?.title || property.id}
+              key={property.id}
+            >
+              <Form
+                schema={localFormsData[property.id]}
+                formData={localFormsData[property.id]?.formData}
+                onChange={(e) => handleFormChange(property.id, e.formData)}
+                validator={validator}
+                showErrorList={false}
+                liveValidate
+              />
+            </Tab>
           ))}
-        </Accordion>
+        </Tabs>
       )}
       <div style={{ marginTop: "20px" }}>
         <Button
