@@ -1,3 +1,3 @@
-# AiiDAlab Quantum ESPRESSO App... in React
+# AiiDAlab Quantum ESPRESSO App - Frontend
 
-Testing the concept... let's see if it works
+A React frontend for the AiiDAlab Quantum ESPRESSO App.
