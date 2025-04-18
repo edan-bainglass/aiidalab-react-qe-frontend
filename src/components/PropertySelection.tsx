@@ -54,7 +54,7 @@ const PropertySelector = ({
 
   return (
     <div>
-      <h2>Step 2: Calculation Selector</h2>
+      <h2>Step 2: Select proprties to compute</h2>
       {loading ? (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
           <Spinner animation="border" />

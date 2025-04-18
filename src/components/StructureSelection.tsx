@@ -33,7 +33,7 @@ const StructureSelector: React.FC<StructureSelectorProps> = ({ onConfirm }) => {
 
   return (
     <div className="structure-selection-step">
-      <h2>Step 1: Structure Selection</h2>
+      <h2>Step 1: Select a structure</h2>
       <div
         ref={viewerRef}
         style={{

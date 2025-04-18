@@ -9,7 +9,7 @@ const WorkflowSubmission = ({
 }) => {
   return (
     <div>
-      <h2>Step 5: Preview, Label, and Submit</h2>
+      <h2>Step 5: Submit the workflow</h2>
       <div
         style={{
           border: "1px dashed #ccc",

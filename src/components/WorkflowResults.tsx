@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 const WorkflowResults = ({ onBack }: { onBack: () => void }) => {
   return (
     <div>
-      <h2>Step 6: Monitor and Analyze Results</h2>
+      <h2>Step 6: Monitor and analyze results</h2>
       <div
         style={{
           border: "1px dashed #ccc",

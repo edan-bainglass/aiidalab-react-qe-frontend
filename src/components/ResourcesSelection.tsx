@@ -9,7 +9,7 @@ const ResourcesSelection = ({
 }) => {
   return (
     <div>
-      <h2>Step 4: Resources Selection</h2>
+      <h2>Step 4: Choose computational resources</h2>
       <div
         style={{
           border: "1px dashed #ccc",

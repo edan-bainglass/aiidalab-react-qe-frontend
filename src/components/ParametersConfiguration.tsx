@@ -144,7 +144,7 @@ const ParametersConfiguration = ({
 
   return (
     <div>
-      <h2>Step 3: Calculation Parameters Configuration</h2>
+      <h2>Step 3: Set calculation parameters</h2>
       <Tabs
         defaultActiveKey="basic"
         id="parameters-tabs"
