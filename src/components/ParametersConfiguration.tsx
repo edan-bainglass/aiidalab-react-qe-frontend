@@ -36,6 +36,86 @@ interface WorkflowInputs {
   [key: string]: InputModel;
 }
 
+const builtInSchemas: WorkflowInputs = {
+  convergence: {
+    schema: {
+      type: "object",
+      title: "Convergence",
+      properties: {
+        energyTolerance: {
+          type: "number",
+          title: "Energy Tolerance",
+          default: 1e-5,
+        },
+        maxSteps: { type: "integer", title: "Max Steps", default: 100 },
+      },
+    },
+    ui: {
+      energyTolerance: { "ui:placeholder": "e.g. 1e-5" },
+      maxSteps: { "ui:placeholder": "e.g. 100" },
+    },
+  },
+  smearing: {
+    schema: {
+      type: "object",
+      title: "Smearing",
+      properties: {
+        method: {
+          type: "string",
+          title: "Method",
+          enum: ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
+        },
+        width: { type: "number", title: "Width (eV)", default: 0.05 },
+      },
+    },
+    ui: {
+      method: { "ui:widget": "select" },
+      width: { "ui:placeholder": "e.g. 0.05" },
+    },
+  },
+  magnetization: {
+    schema: {
+      type: "object",
+      title: "Magnetization",
+      properties: {
+        initialMagnetization: {
+          type: "number",
+          title: "Initial Magnetization",
+          default: 0.5,
+        },
+      },
+    },
+    ui: {
+      initialMagnetization: { "ui:placeholder": "e.g. 0.5" },
+    },
+  },
+  hubbardU: {
+    schema: {
+      type: "object",
+      title: "Hubbard U",
+      properties: {
+        useHubbard: { type: "boolean", title: "Enable U" },
+        UValue: { type: "number", title: "U Value (eV)", default: 4.0 },
+      },
+    },
+    ui: {
+      UValue: { "ui:placeholder": "e.g. 4.0" },
+    },
+  },
+  pseudopotentials: {
+    schema: {
+      type: "object",
+      title: "Pseudopotentials",
+      properties: {
+        type: { type: "string", title: "Type", enum: ["PAW", "USPP", "NCPP"] },
+      },
+    },
+    ui: {
+      type: { "ui:widget": "select" },
+    },
+  },
+};
+
 const ParametersConfiguration = ({
   selectedProperties,
   parameters,
@@ -43,17 +123,22 @@ const ParametersConfiguration = ({
   onConfirm,
   onBack,
 }: ParametersConfigurationProps) => {
-  const [localFormsData, setLocalFormsData] = useState<WorkflowInputs>({});
-
   const handleFormChange = (propKey: string, formData: any) => {
-    setLocalFormsData((prev) => ({
+    setParameters((prev: any) => ({
       ...prev,
-      [propKey]: { ...prev[propKey], data: formData },
+      [propKey]: formData,
     }));
   };
 
   const handleNext = () => {
-    setParameters({ ...parameters, ...localFormsData });
+    const allParameters = Object.keys(builtInSchemas).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: parameters[key] || builtInSchemas[key].data,
+      }),
+      {}
+    );
+    setParameters(allParameters);
     onConfirm();
   };
 
@@ -73,8 +158,6 @@ const ParametersConfiguration = ({
         <Tab eventKey="advanced" title="Advanced settings" key="advanced">
           <AdvancedSettings
             selectedProperties={selectedProperties}
-            localFormsData={localFormsData}
-            setLocalFormsData={setLocalFormsData}
             onFormChange={handleFormChange}
           />
         </Tab>
@@ -92,8 +175,6 @@ const ParametersConfiguration = ({
   );
 };
 
-export default ParametersConfiguration;
-
 const BasicSettings = () => {
   return (
     <div>
@@ -105,98 +186,76 @@ const BasicSettings = () => {
 
 interface AdvancedSettingsProps {
   selectedProperties: Property[];
-  localFormsData: WorkflowInputs;
-  setLocalFormsData: React.Dispatch<React.SetStateAction<WorkflowInputs>>;
   onFormChange: (propKey: string, formData: any) => void;
 }
 
 const AdvancedSettings = ({
   selectedProperties,
-  localFormsData,
-  setLocalFormsData,
   onFormChange,
 }: AdvancedSettingsProps) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [activePluginId, setActivePluginId] = useState<string | null>(
-    selectedProperties[0]?.id || null
-  );
+  const [loadingPlugins, setLoadingPlugins] = useState<boolean>(true);
+  const builtInKeys = Object.keys(builtInSchemas);
+  const pluginKeys = selectedProperties.map((p) => p.id);
+  const [schemasMap, setSchemasMap] = useState(builtInSchemas);
+  const [activeKey, setActiveKey] = useState<string>(builtInKeys[0]);
 
   useEffect(() => {
-    const fetchSchemas = async () => {
+    const fetchPluginSchemas = async () => {
       try {
-        const schemas: Record<string, InputSchema> = {};
+        const fetched: WorkflowInputs = {};
         for (const property of selectedProperties) {
           const response = await fetch(`/api/plugins/${property.id}/input`);
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
+          if (!response.ok) throw new Error("Failed to fetch plugin schema");
           const data: InputSchema = await response.json();
-          schemas[property.id] = data;
+          fetched[property.id] = data;
         }
-        setLocalFormsData((prev) => ({
-          ...prev,
-          ...schemas,
-        }));
+        setSchemasMap((prev) => ({ ...prev, ...fetched }));
       } catch (error) {
-        console.error("Error fetching schemas:", error);
+        console.error("Error fetching plugin schemas:", error);
       } finally {
-        setLoading(false);
+        setLoadingPlugins(false);
       }
     };
+    if (pluginKeys.length > 0) fetchPluginSchemas();
+    else setLoadingPlugins(false);
+  }, [selectedProperties]);
 
-    fetchSchemas();
-  }, [selectedProperties, setLocalFormsData]);
-
-  if (loading) {
+  if (loadingPlugins) {
     return (
       <div style={{ textAlign: "center", marginTop: "20px" }}>
         <Spinner animation="border" />
-        <p>Loading properties...</p>
+        <p>Loading advanced parameters...</p>
       </div>
     );
   }
 
-  if (selectedProperties.length === 0) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
-        <p>No properties selected</p>
-      </div>
-    );
-  }
-
-  const currentForm = activePluginId && localFormsData[activePluginId];
+  const dropdownKeys = [...builtInKeys, ...pluginKeys];
+  const current = schemasMap[activeKey];
 
   return (
     <div>
-      <p>Configure advanced plugin-specific parameters.</p>
+      <p>Configure advanced calculation parameters.</p>
       <DropdownButton
-        title={
-          activePluginId
-            ? localFormsData[activePluginId]?.schema.title || activePluginId
-            : "Select a plugin"
-        }
+        title={current?.schema.title || activeKey}
         className="mb-3"
       >
-        {selectedProperties.map((property) => (
-          <Dropdown.Item
-            key={property.id}
-            onClick={() => setActivePluginId(property.id)}
-          >
-            {localFormsData[property.id]?.schema.title || property.id}
+        {dropdownKeys.map((key) => (
+          <Dropdown.Item key={key} onClick={() => setActiveKey(key)}>
+            {schemasMap[key]?.schema.title || key}
           </Dropdown.Item>
         ))}
       </DropdownButton>
 
-      {currentForm && (
+      {current && (
         <Form
           className={styles["input-panel"]}
-          schema={currentForm.schema}
+          schema={current.schema}
           uiSchema={{
-            ...currentForm.ui,
+            ...current.ui,
             "ui:submitButtonOptions": { norender: true },
           }}
-          formData={currentForm.data}
-          onChange={(e) => onFormChange(activePluginId!, e.formData)}
+          formData={current.data}
+          onChange={(e) => onFormChange(activeKey, e.formData)}
           validator={validator}
           showErrorList={false}
           liveValidate
@@ -205,3 +264,5 @@ const AdvancedSettings = ({
     </div>
   );
 };
+
+export default ParametersConfiguration;

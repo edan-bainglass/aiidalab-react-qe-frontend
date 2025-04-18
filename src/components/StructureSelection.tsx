@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "react-bootstrap";
 
-import { WEAS, Atoms } from "weas";
+import { Atoms, WEAS } from "weas";
 
 interface StructureSelectorProps {
   onConfirm: () => void;
@@ -9,8 +9,10 @@ interface StructureSelectorProps {
 
 const StructureSelector: React.FC<StructureSelectorProps> = ({ onConfirm }) => {
   const viewerRef = useRef<HTMLDivElement>(null);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    if (initialized) return;
     if (viewerRef.current) {
       const atoms = new Atoms({
         symbols: ["O", "H", "H"],
@@ -21,10 +23,11 @@ const StructureSelector: React.FC<StructureSelectorProps> = ({ onConfirm }) => {
         ],
         cell: [5, 5, 5],
       });
-      // const editor = new WEAS({ domElement: viewerRef.current });
-      // editor.avr.atoms = atoms;
-      // editor.avr.modelStyle = 1;
-      // editor.render();
+      const editor = new WEAS({ domElement: viewerRef.current });
+      editor.avr.atoms = atoms;
+      editor.avr.modelStyle = 1;
+      editor.render();
+      setInitialized(true);
     }
   }, []);
 
