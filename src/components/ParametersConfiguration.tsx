@@ -98,6 +98,12 @@ const ParametersConfiguration = ({
           className="mb-3"
           style={{ marginTop: "1rem" }}
         >
+          <Tab eventKey="basic" title="Basic settings" key="basic">
+            <BasicSettings />
+          </Tab>
+          <Tab eventKey="advanced" title="Advanced settings" key="advanced">
+            <AdvancedSettings />
+          </Tab>
           {selectedProperties.map((property) => (
             <Tab
               eventKey={property.id}
@@ -131,3 +137,21 @@ const ParametersConfiguration = ({
 };
 
 export default ParametersConfiguration;
+
+const BasicSettings = () => {
+  return (
+    <div>
+      <p>Configure basic settings for the calculation.</p>
+      {/* Add your basic settings form here */}
+    </div>
+  );
+};
+
+const AdvancedSettings = () => {
+  return (
+    <div>
+      <p>Configure advanced settings for the calculation.</p>
+      {/* Add your advanced settings form here */}
+    </div>
+  );
+};
