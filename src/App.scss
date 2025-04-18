@@ -24,6 +24,15 @@
   }
 }
 
+// RJSF overrides
+
 .form-group.field {
   margin-bottom: 0.5rem;
 }
+
+.checkbox label {
+  display: flex;
+  gap: 5px;
+}
+
+// end RJSF overrides

@@ -6,6 +6,8 @@ import { Button, Spinner, Tab, Tabs } from "react-bootstrap";
 import { RJSFSchema, UiSchema } from "@rjsf/utils";
 import { Property } from "./PropertySelection";
 
+import styles from "./ParametersConfiguration.module.scss";
+
 interface ParametersConfigurationProps {
   selectedProperties: Property[];
   parameters: any;
@@ -94,7 +96,7 @@ const ParametersConfiguration = ({
           defaultActiveKey={selectedProperties[0].id}
           id="controlled-tab-example"
           className="mb-3"
-          style={{ marginTop: "20px" }}
+          style={{ marginTop: "1rem" }}
         >
           {selectedProperties.map((property) => (
             <Tab
@@ -103,7 +105,7 @@ const ParametersConfiguration = ({
               key={property.id}
             >
               <Form
-                className={`${property.id}-form`}
+                className={styles["input-panel"]}
                 schema={localFormsData[property.id].schema}
                 uiSchema={localFormsData[property.id].ui}
                 formData={localFormsData[property.id]?.data}
@@ -116,12 +118,8 @@ const ParametersConfiguration = ({
           ))}
         </Tabs>
       )}
-      <div style={{ marginTop: "20px" }}>
-        <Button
-          variant="secondary"
-          onClick={onBack}
-          style={{ marginRight: "10px" }}
-        >
+      <div className={styles["input-panel-controls"]}>
+        <Button variant="secondary" onClick={onBack}>
           Back
         </Button>
         <Button variant="primary" onClick={handleNext}>
