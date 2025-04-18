@@ -3,6 +3,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useEffect, useState } from "react";
 import { Button, Spinner, Tab, Tabs } from "react-bootstrap";
 
+import { RJSFSchema, UiSchema } from "@rjsf/utils";
 import { Property } from "./PropertySelection";
 
 interface ParametersConfigurationProps {
@@ -13,6 +14,19 @@ interface ParametersConfigurationProps {
   onBack: () => void;
 }
 
+interface InputSchema {
+  schema: RJSFSchema;
+  ui: UiSchema;
+}
+
+interface WorkflowInputs {
+  [key: string]: {
+    schema: RJSFSchema;
+    ui: UiSchema;
+    data?: any;
+  };
+}
+
 const ParametersConfiguration = ({
   selectedProperties,
   parameters,
@@ -20,7 +34,7 @@ const ParametersConfiguration = ({
   onConfirm,
   onBack,
 }: ParametersConfigurationProps) => {
-  const [localFormsData, setLocalFormsData] = useState<any>({});
+  const [localFormsData, setLocalFormsData] = useState<WorkflowInputs>({});
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -33,7 +47,7 @@ const ParametersConfiguration = ({
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
-          const data = await response.json();
+          const data: InputSchema = await response.json();
           // console.log("Populating input schema for:", selectedProperties);
           // console.log(data);
           schemas[property.id] = data;
@@ -85,12 +99,13 @@ const ParametersConfiguration = ({
           {selectedProperties.map((property) => (
             <Tab
               eventKey={property.id}
-              title={localFormsData[property.id]?.title || property.id}
+              title={localFormsData[property.id]?.schema.title || property.id}
               key={property.id}
             >
               <Form
-                schema={localFormsData[property.id]}
-                formData={localFormsData[property.id]?.formData}
+                schema={localFormsData[property.id].schema}
+                uiSchema={localFormsData[property.id].ui}
+                formData={localFormsData[property.id]?.data}
                 onChange={(e) => handleFormChange(property.id, e.formData)}
                 validator={validator}
                 showErrorList={false}
