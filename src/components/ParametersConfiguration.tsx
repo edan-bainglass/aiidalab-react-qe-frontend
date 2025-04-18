@@ -19,12 +19,12 @@ interface InputSchema {
   ui: UiSchema;
 }
 
+interface InputModel extends InputSchema {
+  data: any;
+}
+
 interface WorkflowInputs {
-  [key: string]: {
-    schema: RJSFSchema;
-    ui: UiSchema;
-    data?: any;
-  };
+  [key: string]: InputModel;
 }
 
 const ParametersConfiguration = ({
@@ -103,6 +103,7 @@ const ParametersConfiguration = ({
               key={property.id}
             >
               <Form
+                className={`${property.id}-form`}
                 schema={localFormsData[property.id].schema}
                 uiSchema={localFormsData[property.id].ui}
                 formData={localFormsData[property.id]?.data}
