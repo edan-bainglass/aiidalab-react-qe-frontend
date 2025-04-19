@@ -10,51 +10,30 @@ import {
   Tabs,
 } from "react-bootstrap";
 
-import { getDefaultFormState } from "@rjsf/utils";
+import { getDefaultFormState, RegistryWidgetsType } from "@rjsf/utils";
+import { SwitchWidget, ToggleRadioWidget } from "../common/components";
 import { InputSchema } from "../interfaces";
 
-// Input schema for each panel
+const widgets: RegistryWidgetsType = {
+  RadioWidget: ToggleRadioWidget,
+  CheckboxWidget: SwitchWidget,
+};
 
 // Built-in basic panels
 const basicSettingsSchema: InputSchema = {
   schema: {
     type: "object",
-    definitions: {
-      relaxationTypes: {
-        enum: [
-          {
-            name: "Structure as is",
-            value: "none",
-          },
-          {
-            name: "Positions only",
-            value: "positions",
-          },
-          {
-            name: "Full geometry",
-            value: "positions-cell",
-          },
-        ],
-      },
-    },
     properties: {
       relax: {
         title: "Relaxation level",
-        $ref: "#/definitions/relaxationTypes",
+        enum: ["none", "positions", "positions-cell"],
+        default: "none",
       },
-      electronicType: {
+      electronic_type: {
         type: "string",
         title: "Electronic Type",
         enum: ["Metallic", "Insulator"],
         default: "Metallic",
-      },
-      spinType: {
-        type: "boolean",
-        title: "Magnetism",
-      },
-      spinOrbit: {
-        type: "boolean",
-        title: "Spin Orbit Coupling",
       },
       protocol: {
         type: "string",
@@ -62,18 +41,26 @@ const basicSettingsSchema: InputSchema = {
         enum: ["Fast", "Balanced", "Stringent"],
         default: "Fast",
       },
+      spin_type: {
+        type: "boolean",
+        title: "Magnetism",
+      },
+      spin_orbit: {
+        type: "boolean",
+        title: "Spin Orbit Coupling",
+      },
     },
   },
   ui: {
     relax: {
-      "ui:widget": "RadioWidget",
+      "ui:widget": "radio",
       "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
     },
-    electronicType: {
-      "ui:widget": "RadioWidget",
+    electronic_type: {
+      "ui:widget": "radio",
     },
     protocol: {
-      "ui:widget": "RadioWidget",
+      "ui:widget": "radio",
     },
   },
 };
@@ -158,8 +145,14 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
       },
     },
     ui: {
+      functional: {
+        "ui:widget": "radio",
+      },
+      family: {
+        "ui:widget": "radio",
+      },
       stringency: {
-        "ui:widget": "RadioWidget",
+        "ui:widget": "radio",
       },
     },
   },
@@ -250,6 +243,7 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
           ...basicSettingsSchema.ui,
           "ui:submitButtonOptions": { norender: true },
         }}
+        widgets={widgets}
         formData={parameters["basic"]}
         onChange={(e) => onFormChange("basic", e.formData)}
         validator={validator}
@@ -340,6 +334,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
             "ui:submitButtonOptions": { norender: true },
             "ui:options": { title: "" },
           }}
+          widgets={widgets}
           formData={parameters[activeKey]}
           onChange={(e) => onFormChange(activeKey, e.formData)}
           validator={validator}
