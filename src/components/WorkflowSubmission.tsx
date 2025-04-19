@@ -1,6 +1,8 @@
 import Form from "@rjsf/core";
 import validator from "@rjsf/validator-ajv8";
+import { useEffect, useRef } from "react";
 import { Accordion, Button } from "react-bootstrap";
+import { WEAS } from "weas";
 
 import { InputSchema, WorkflowInputs } from "../interfaces";
 
@@ -27,11 +29,26 @@ interface WorkflowSubmissionProps {
   onBack: () => void;
 }
 
+let weasViewer: InstanceType<typeof WEAS> | null = null;
+
 const WorkflowSubmission: React.FC<WorkflowSubmissionProps> = ({
   inputs,
   onConfirm,
   onBack,
 }) => {
+  const viewerContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!weasViewer && viewerContainerRef.current) {
+      weasViewer = new WEAS({ domElement: viewerContainerRef.current });
+      if (inputs.structure) {
+        weasViewer.avr.atoms = inputs.structure;
+        weasViewer.avr.modelStyle = 1;
+        weasViewer.render();
+      }
+    }
+  }, []);
+
   return (
     <div>
       <h2>Step 5: Submit the workflow</h2>
@@ -44,9 +61,7 @@ const WorkflowSubmission: React.FC<WorkflowSubmissionProps> = ({
         <Accordion>
           <Accordion.Item eventKey="0">
             <Accordion.Header>Structure</Accordion.Header>
-            <Accordion.Body>
-              <pre>{JSON.stringify(inputs.structure, null, 2)}</pre>
-            </Accordion.Body>
+            <Accordion.Body ref={viewerContainerRef}></Accordion.Body>
           </Accordion.Item>
           <Accordion.Item eventKey="1">
             <Accordion.Header>Properties</Accordion.Header>
