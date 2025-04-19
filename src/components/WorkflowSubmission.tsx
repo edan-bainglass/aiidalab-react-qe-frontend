@@ -89,7 +89,10 @@ const WorkflowSubmission: React.FC<WorkflowSubmissionProps> = ({
       </p>
       <Form
         schema={workflowSchema.schema}
-        uiSchema={workflowSchema.ui}
+        uiSchema={{
+          ...workflowSchema.ui,
+          "ui:submitButtonOptions": { norender: true },
+        }}
         validator={validator}
       />
       <div className="input-panel-controls">
