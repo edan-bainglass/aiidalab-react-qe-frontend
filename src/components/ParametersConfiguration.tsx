@@ -1,4 +1,4 @@
-import Form from "@rjsf/core";
+import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 import React, { useEffect, useState } from "react";
 import {
@@ -338,6 +338,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           uiSchema={{
             ...current.ui,
             "ui:submitButtonOptions": { norender: true },
+            "ui:options": { title: "" },
           }}
           formData={parameters[activeKey]}
           onChange={(e) => onFormChange(activeKey, e.formData)}

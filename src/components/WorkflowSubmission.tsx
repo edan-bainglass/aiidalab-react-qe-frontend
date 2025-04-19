@@ -1,4 +1,4 @@
-import Form from "@rjsf/core";
+import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect, useRef } from "react";
 import { Accordion, Button } from "react-bootstrap";
