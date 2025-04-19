@@ -1,42 +1,21 @@
 import Form from "@rjsf/core";
 import validator from "@rjsf/validator-ajv8";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
+  Dropdown,
+  DropdownButton,
   Spinner,
   Tab,
   Tabs,
-  Dropdown,
-  DropdownButton,
 } from "react-bootstrap";
 
-import { RJSFSchema, UiSchema } from "@rjsf/utils";
-import { Property } from "./PropertySelection";
+import { InputSchema } from "../interfaces";
 
-import styles from "./ParametersConfiguration.module.scss";
+// Input schema for each panel
 
-interface ParametersConfigurationProps {
-  selectedProperties: Property[];
-  parameters: any;
-  setParameters: (params: any) => void;
-  onConfirm: () => void;
-  onBack: () => void;
-}
-
-interface InputSchema {
-  schema: RJSFSchema;
-  ui: UiSchema;
-}
-
-interface InputModel extends InputSchema {
-  data?: any;
-}
-
-interface WorkflowInputs {
-  [key: string]: InputModel;
-}
-
-const builtInSchemas: WorkflowInputs = {
+// Built-in advanced panels
+const builtInSchemas: Record<string, InputSchema> = {
   convergence: {
     schema: {
       type: "object",
@@ -85,9 +64,7 @@ const builtInSchemas: WorkflowInputs = {
         },
       },
     },
-    ui: {
-      initialMagnetization: { "ui:placeholder": "e.g. 0.5" },
-    },
+    ui: { initialMagnetization: { "ui:placeholder": "e.g. 0.5" } },
   },
   hubbardU: {
     schema: {
@@ -98,9 +75,7 @@ const builtInSchemas: WorkflowInputs = {
         UValue: { type: "number", title: "U Value (eV)", default: 4.0 },
       },
     },
-    ui: {
-      UValue: { "ui:placeholder": "e.g. 4.0" },
-    },
+    ui: { UValue: { "ui:placeholder": "e.g. 4.0" } },
   },
   pseudopotentials: {
     schema: {
@@ -110,35 +85,30 @@ const builtInSchemas: WorkflowInputs = {
         type: { type: "string", title: "Type", enum: ["PAW", "USPP", "NCPP"] },
       },
     },
-    ui: {
-      type: { "ui:widget": "select" },
-    },
+    ui: { type: { "ui:widget": "select" } },
   },
 };
 
-const ParametersConfiguration = ({
+interface ParametersConfigurationProps {
+  selectedProperties: string[];
+  parameters: any;
+  onChange: (panelKey: string, formData: any) => void;
+  onConfirm: () => void;
+  onBack: () => void;
+}
+
+const ParametersConfiguration: React.FC<ParametersConfigurationProps> = ({
   selectedProperties,
   parameters,
-  setParameters,
+  onChange,
   onConfirm,
   onBack,
-}: ParametersConfigurationProps) => {
-  const handleFormChange = (propKey: string, formData: any) => {
-    setParameters((prev: any) => ({
-      ...prev,
-      [propKey]: formData,
-    }));
+}) => {
+  const handleFormChange = (panelKey: string, formData: any) => {
+    onChange(panelKey, formData);
   };
 
   const handleNext = () => {
-    const allParameters = Object.keys(builtInSchemas).reduce(
-      (acc, key) => ({
-        ...acc,
-        [key]: parameters[key] || builtInSchemas[key].data,
-      }),
-      {}
-    );
-    setParameters(allParameters);
     onConfirm();
   };
 
@@ -150,20 +120,20 @@ const ParametersConfiguration = ({
         id="parameters-tabs"
         className="mb-3"
         style={{ marginTop: "1rem" }}
+        unmountOnExit={false}
       >
-        <Tab eventKey="basic" title="Basic settings" key="basic">
+        <Tab eventKey="basic" title="Basic settings">
           <BasicSettings />
         </Tab>
-
-        <Tab eventKey="advanced" title="Advanced settings" key="advanced">
+        <Tab eventKey="advanced" title="Advanced settings">
           <AdvancedSettings
             selectedProperties={selectedProperties}
+            parameters={parameters}
             onFormChange={handleFormChange}
           />
         </Tab>
       </Tabs>
-
-      <div className={styles["input-panel-controls"]}>
+      <div className="input-panel-controls">
         <Button variant="secondary" onClick={onBack}>
           Back
         </Button>
@@ -175,54 +145,54 @@ const ParametersConfiguration = ({
   );
 };
 
-const BasicSettings = () => {
-  return (
-    <div>
-      <p>Configure basic settings for the calculation.</p>
-      {/* Add your basic settings form here */}
-    </div>
-  );
-};
+const BasicSettings: React.FC = () => (
+  <div>
+    <p>Configure basic settings for the calculation.</p>
+    {/* TODO: implement basic settings form */}
+  </div>
+);
 
 interface AdvancedSettingsProps {
-  selectedProperties: Property[];
-  onFormChange: (propKey: string, formData: any) => void;
+  selectedProperties: string[];
+  parameters: Record<string, any>;
+  onFormChange: (panelKey: string, formData: any) => void;
 }
 
-const AdvancedSettings = ({
+const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   selectedProperties,
+  parameters,
   onFormChange,
-}: AdvancedSettingsProps) => {
-  const [loadingPlugins, setLoadingPlugins] = useState<boolean>(true);
+}) => {
+  const [loading, setLoading] = useState(true);
   const builtInKeys = Object.keys(builtInSchemas);
-  const pluginKeys = selectedProperties.map((p) => p.id);
-  const [schemasMap, setSchemasMap] = useState(builtInSchemas);
+  const pluginKeys = selectedProperties;
+  const [schemasMap, setSchemasMap] =
+    useState<Record<string, InputSchema>>(builtInSchemas);
   const [activeKey, setActiveKey] = useState<string>(builtInKeys[0]);
 
   useEffect(() => {
-    const fetchPluginSchemas = async () => {
+    async function loadPluginSchemas() {
       try {
-        const fetched: WorkflowInputs = {};
-        for (const property of selectedProperties) {
-          const response = await fetch(`/api/plugins/${property.id}/input`);
-          if (!response.ok) throw new Error("Failed to fetch plugin schema");
-          const data: InputSchema = await response.json();
-          fetched[property.id] = data;
+        const fetched: Record<string, InputSchema> = {};
+        for (const key of pluginKeys) {
+          const res = await fetch(`/api/plugins/${key}/input`);
+          if (!res.ok) throw new Error("Failed to load schema");
+          fetched[key] = await res.json();
         }
         setSchemasMap((prev) => ({ ...prev, ...fetched }));
-      } catch (error) {
-        console.error("Error fetching plugin schemas:", error);
+      } catch (err) {
+        console.error(err);
       } finally {
-        setLoadingPlugins(false);
+        setLoading(false);
       }
-    };
-    if (pluginKeys.length > 0) fetchPluginSchemas();
-    else setLoadingPlugins(false);
-  }, [selectedProperties]);
+    }
+    if (pluginKeys.length) loadPluginSchemas();
+    else setLoading(false);
+  }, [pluginKeys]);
 
-  if (loadingPlugins) {
+  if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
+      <div className="text-center mt-4">
         <Spinner animation="border" />
         <p>Loading advanced parameters...</p>
       </div>
@@ -248,13 +218,13 @@ const AdvancedSettings = ({
 
       {current && (
         <Form
-          className={styles["input-panel"]}
+          className="mb-3"
           schema={current.schema}
           uiSchema={{
             ...current.ui,
             "ui:submitButtonOptions": { norender: true },
           }}
-          formData={current.data}
+          formData={parameters[activeKey]}
           onChange={(e) => onFormChange(activeKey, e.formData)}
           validator={validator}
           showErrorList={false}

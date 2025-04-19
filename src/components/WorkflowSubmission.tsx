@@ -1,34 +1,94 @@
-import { Button } from "react-bootstrap";
+import Form from "@rjsf/core";
+import validator from "@rjsf/validator-ajv8";
+import { Accordion, Button } from "react-bootstrap";
 
-const WorkflowSubmission = ({
-  onConfirm,
-  onBack,
-}: {
+import { InputSchema, WorkflowInputs } from "../interfaces";
+
+const workflowSchema: InputSchema = {
+  schema: {
+    type: "object",
+    properties: {
+      label: { type: "string", title: "Label" },
+      description: { type: "string", title: "Description" },
+    },
+  },
+  ui: {
+    label: { "ui:placeholder": "e.g. My Workflow" },
+    description: {
+      "ui:placeholder": "e.g. This workflow does...",
+      "ui:widget": "textarea",
+    },
+  },
+};
+
+interface WorkflowSubmissionProps {
+  inputs: WorkflowInputs;
   onConfirm: () => void;
   onBack: () => void;
+}
+
+const WorkflowSubmission: React.FC<WorkflowSubmissionProps> = ({
+  inputs,
+  onConfirm,
+  onBack,
 }) => {
   return (
     <div>
       <h2>Step 5: Submit the workflow</h2>
+      <p>Please review the selected workflow inputs.</p>
       <div
         style={{
-          border: "1px dashed #ccc",
-          padding: "20px",
-          marginBottom: "20px",
+          marginBottom: "15px",
         }}
       >
-        Placeholder for Preview and Submission details.
+        <Accordion>
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>Structure</Accordion.Header>
+            <Accordion.Body>
+              <pre>{JSON.stringify(inputs.structure, null, 2)}</pre>
+            </Accordion.Body>
+          </Accordion.Item>
+          <Accordion.Item eventKey="1">
+            <Accordion.Header>Properties</Accordion.Header>
+            <Accordion.Body>
+              <pre>{JSON.stringify(inputs.properties, null, 2)}</pre>
+            </Accordion.Body>
+          </Accordion.Item>
+          <Accordion.Item eventKey="2">
+            <Accordion.Header>Parameters</Accordion.Header>
+            <Accordion.Body>
+              <pre>{JSON.stringify(inputs.parameters, null, 2)}</pre>
+            </Accordion.Body>
+          </Accordion.Item>
+          <Accordion.Item eventKey="3">
+            <Accordion.Header>Resources</Accordion.Header>
+            <Accordion.Body>
+              <pre>{JSON.stringify(inputs.resources, null, 2)}</pre>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
       </div>
-      <Button
-        variant="secondary"
-        onClick={onBack}
-        style={{ marginRight: "10px" }}
-      >
-        Back
-      </Button>
-      <Button variant="primary" onClick={onConfirm}>
-        Submit Workflow
-      </Button>
+      <p>
+        <b>Note:</b> You can go back to edit any of the previous steps if
+        needed.
+      </p>
+      <Form
+        schema={workflowSchema.schema}
+        uiSchema={workflowSchema.ui}
+        validator={validator}
+      />
+      <div className="input-panel-controls">
+        <Button
+          variant="secondary"
+          onClick={onBack}
+          style={{ marginRight: "10px" }}
+        >
+          Back
+        </Button>
+        <Button variant="primary" onClick={onConfirm}>
+          Submit Workflow
+        </Button>
+      </div>
     </div>
   );
 };

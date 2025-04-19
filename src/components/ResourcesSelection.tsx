@@ -1,11 +1,19 @@
 import { Button } from "react-bootstrap";
 
-const ResourcesSelection = ({
-  onConfirm,
-  onBack,
-}: {
+import { ResourcesType } from "../interfaces";
+
+interface ResourcesSelectionProps {
+  resources?: ResourcesType | null;
+  onChange: (resources: ResourcesType) => void;
   onConfirm: () => void;
   onBack: () => void;
+}
+
+const ResourcesSelection: React.FC<ResourcesSelectionProps> = ({
+  resources,
+  onChange,
+  onConfirm,
+  onBack,
 }) => {
   return (
     <div>
@@ -19,16 +27,18 @@ const ResourcesSelection = ({
       >
         Placeholder for Resources Selection
       </div>
-      <Button
-        variant="secondary"
-        onClick={onBack}
-        style={{ marginRight: "10px" }}
-      >
-        Back
-      </Button>
-      <Button variant="primary" onClick={onConfirm}>
-        Confirm Resources
-      </Button>
+      <div className="input-panel-controls">
+        <Button
+          variant="secondary"
+          onClick={onBack}
+          style={{ marginRight: "10px" }}
+        >
+          Back
+        </Button>
+        <Button variant="primary" onClick={onConfirm}>
+          Confirm Resources
+        </Button>
+      </div>
     </div>
   );
 };

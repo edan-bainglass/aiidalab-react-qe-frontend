@@ -1,83 +1,51 @@
-import { useEffect, useState } from "react";
-import { Button, Form, Spinner } from "react-bootstrap";
+import React from "react";
+import { Button, Form } from "react-bootstrap";
+import { Property } from "../interfaces";
 
-export interface Property {
-  id: string;
-  label: string;
-  selected?: boolean;
+interface PropertySelectionProps {
+  available: Property[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  onConfirm: () => void;
+  onBack: () => void;
 }
 
-const PropertySelector = ({
+const PropertySelection: React.FC<PropertySelectionProps> = ({
+  available,
+  selected,
+  onChange,
   onConfirm,
   onBack,
-}: {
-  onConfirm: (selected: Property[]) => void;
-  onBack: () => void;
 }) => {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const response = await fetch("/api/plugins");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const fetchedProperties = await response.json();
-        setProperties(
-          fetchedProperties.map((prop: Property) => ({
-            ...prop,
-            selected: false,
-          }))
-        );
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching properties:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, []);
-
-  const toggleSelection = (key: string) => {
-    setProperties((prev) =>
-      prev.map((prop) =>
-        prop.id === key ? { ...prop, selected: !prop.selected } : prop
-      )
-    );
+  const handleToggle = (id: string) => {
+    if (selected.includes(id)) {
+      onChange(selected.filter((s) => s !== id));
+    } else {
+      onChange([...selected, id]);
+    }
   };
-
-  const handleNext = () =>
-    onConfirm(properties.filter((prop) => prop.selected));
 
   return (
     <div>
-      <h2>Step 2: Select proprties to compute</h2>
-      {loading ? (
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <Spinner animation="border" />
-          <p>Loading properties...</p>
-        </div>
-      ) : properties.length === 0 ? (
+      <h2>Step 2: Select properties to compute</h2>
+      {available.length === 0 ? (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
           <p>No properties available</p>
         </div>
       ) : (
         <Form>
-          {properties.map((prop) => (
+          {available.map((prop) => (
             <Form.Check
               key={prop.id}
               type="checkbox"
               label={prop.label}
-              checked={prop.selected}
-              onChange={() => toggleSelection(prop.id)}
+              checked={selected.includes(prop.id)}
+              onChange={() => handleToggle(prop.id)}
             />
           ))}
         </Form>
       )}
-      <div style={{ marginTop: "20px" }}>
+      <div className="input-panel-controls">
         <Button
           variant="secondary"
           onClick={onBack}
@@ -85,7 +53,7 @@ const PropertySelector = ({
         >
           Back
         </Button>
-        <Button variant="primary" onClick={handleNext}>
+        <Button variant="primary" onClick={onConfirm}>
           Confirm Selections
         </Button>
       </div>
@@ -93,4 +61,4 @@ const PropertySelector = ({
   );
 };
 
-export default PropertySelector;
+export default PropertySelection;
