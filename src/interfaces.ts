@@ -22,7 +22,7 @@ export interface Property {
 
 export interface InputSchema {
   schema: RJSFSchema;
-  ui: UiSchema;
+  ui?: UiSchema;
 }
 
 export interface WorkflowInputs {

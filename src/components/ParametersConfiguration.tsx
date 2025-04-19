@@ -10,12 +10,76 @@ import {
   Tabs,
 } from "react-bootstrap";
 
+import { getDefaultFormState } from "@rjsf/utils";
 import { InputSchema } from "../interfaces";
 
 // Input schema for each panel
 
+// Built-in basic panels
+const basicSettingsSchema: InputSchema = {
+  schema: {
+    type: "object",
+    definitions: {
+      relaxationTypes: {
+        enum: [
+          {
+            name: "Structure as is",
+            value: "none",
+          },
+          {
+            name: "Positions only",
+            value: "positions",
+          },
+          {
+            name: "Full geometry",
+            value: "positions-cell",
+          },
+        ],
+      },
+    },
+    properties: {
+      relax: {
+        title: "Relaxation level",
+        $ref: "#/definitions/relaxationTypes",
+      },
+      electronicType: {
+        type: "string",
+        title: "Electronic Type",
+        enum: ["Metallic", "Insulator"],
+        default: "Metallic",
+      },
+      spinType: {
+        type: "boolean",
+        title: "Magnetism",
+      },
+      spinOrbit: {
+        type: "boolean",
+        title: "Spin Orbit Coupling",
+      },
+      protocol: {
+        type: "string",
+        title: "Protocol",
+        enum: ["Fast", "Balanced", "Stringent"],
+        default: "Fast",
+      },
+    },
+  },
+  ui: {
+    relax: {
+      "ui:widget": "RadioWidget",
+      "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
+    },
+    electronicType: {
+      "ui:widget": "RadioWidget",
+    },
+    protocol: {
+      "ui:widget": "RadioWidget",
+    },
+  },
+};
+
 // Built-in advanced panels
-const builtInSchemas: Record<string, InputSchema> = {
+const advancedSettingsSchema: Record<string, InputSchema> = {
   convergence: {
     schema: {
       type: "object",
@@ -29,10 +93,6 @@ const builtInSchemas: Record<string, InputSchema> = {
         maxSteps: { type: "integer", title: "Max Steps", default: 100 },
       },
     },
-    ui: {
-      energyTolerance: { "ui:placeholder": "e.g. 1e-5" },
-      maxSteps: { "ui:placeholder": "e.g. 100" },
-    },
   },
   smearing: {
     schema: {
@@ -43,13 +103,10 @@ const builtInSchemas: Record<string, InputSchema> = {
           type: "string",
           title: "Method",
           enum: ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
+          default: "Gaussian",
         },
         width: { type: "number", title: "Width (eV)", default: 0.05 },
       },
-    },
-    ui: {
-      method: { "ui:widget": "select" },
-      width: { "ui:placeholder": "e.g. 0.05" },
     },
   },
   magnetization: {
@@ -64,7 +121,6 @@ const builtInSchemas: Record<string, InputSchema> = {
         },
       },
     },
-    ui: { initialMagnetization: { "ui:placeholder": "e.g. 0.5" } },
   },
   hubbardU: {
     schema: {
@@ -72,20 +128,40 @@ const builtInSchemas: Record<string, InputSchema> = {
       title: "Hubbard U",
       properties: {
         useHubbard: { type: "boolean", title: "Enable U" },
-        UValue: { type: "number", title: "U Value (eV)", default: 4.0 },
+        U: { type: "number", title: "U (eV)", default: 4.0 },
       },
     },
-    ui: { UValue: { "ui:placeholder": "e.g. 4.0" } },
   },
   pseudopotentials: {
     schema: {
       type: "object",
       title: "Pseudopotentials",
       properties: {
-        type: { type: "string", title: "Type", enum: ["PAW", "USPP", "NCPP"] },
+        functional: {
+          type: "string",
+          title: "Functional",
+          enum: ["PBE", "PBEsol"],
+          default: "PBEsol",
+        },
+        family: {
+          type: "string",
+          title: "Family",
+          enum: ["SSSP", "PseudoDojo"],
+          default: "SSSP",
+        },
+        stringency: {
+          type: "string",
+          title: "Stringency",
+          enum: ["standard", "stringent"],
+          default: "standard",
+        },
       },
     },
-    ui: { type: { "ui:widget": "select" } },
+    ui: {
+      stringency: {
+        "ui:widget": "RadioWidget",
+      },
+    },
   },
 };
 
@@ -123,7 +199,10 @@ const ParametersConfiguration: React.FC<ParametersConfigurationProps> = ({
         unmountOnExit={false}
       >
         <Tab eventKey="basic" title="Basic settings">
-          <BasicSettings />
+          <BasicSettings
+            parameters={parameters}
+            onFormChange={handleFormChange}
+          />
         </Tab>
         <Tab eventKey="advanced" title="Advanced settings">
           <AdvancedSettings
@@ -145,17 +224,44 @@ const ParametersConfiguration: React.FC<ParametersConfigurationProps> = ({
   );
 };
 
-const BasicSettings: React.FC = () => (
-  <div>
-    <p>Configure basic settings for the calculation.</p>
-    {/* TODO: implement basic settings form */}
-  </div>
-);
-
-interface AdvancedSettingsProps {
-  selectedProperties: string[];
+interface BasicSettingsProps {
   parameters: Record<string, any>;
   onFormChange: (panelKey: string, formData: any) => void;
+}
+
+const BasicSettings: React.FC<BasicSettingsProps> = ({
+  parameters,
+  onFormChange,
+}) => {
+  useEffect(() => {
+    const key = "basic";
+    const schema = basicSettingsSchema.schema;
+    if (parameters[key] === undefined) {
+      const defaults = getDefaultFormState(validator, schema, {}, schema);
+      onFormChange(key, defaults);
+    }
+  }, []);
+
+  return (
+    <div>
+      <Form
+        schema={basicSettingsSchema.schema}
+        uiSchema={{
+          ...basicSettingsSchema.ui,
+          "ui:submitButtonOptions": { norender: true },
+        }}
+        formData={parameters["basic"]}
+        onChange={(e) => onFormChange("basic", e.formData)}
+        validator={validator}
+        showErrorList={false}
+        liveValidate
+      ></Form>
+    </div>
+  );
+};
+
+interface AdvancedSettingsProps extends BasicSettingsProps {
+  selectedProperties: string[];
 }
 
 const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
@@ -164,10 +270,11 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   onFormChange,
 }) => {
   const [loading, setLoading] = useState(true);
-  const builtInKeys = Object.keys(builtInSchemas);
+  const builtInKeys = Object.keys(advancedSettingsSchema);
   const pluginKeys = selectedProperties;
-  const [schemasMap, setSchemasMap] =
-    useState<Record<string, InputSchema>>(builtInSchemas);
+  const [schemasMap, setSchemasMap] = useState<Record<string, InputSchema>>(
+    advancedSettingsSchema
+  );
   const [activeKey, setActiveKey] = useState<string>(builtInKeys[0]);
 
   useEffect(() => {
@@ -190,6 +297,15 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
     else setLoading(false);
   }, [pluginKeys]);
 
+  useEffect(() => {
+    Object.entries(advancedSettingsSchema).forEach(([key, { schema }]) => {
+      if (parameters[key] === undefined) {
+        const defaults = getDefaultFormState(validator, schema, {}, schema);
+        onFormChange(key, defaults);
+      }
+    });
+  }, []);
+
   if (loading) {
     return (
       <div className="text-center mt-4">
@@ -204,7 +320,6 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
 
   return (
     <div>
-      <p>Configure advanced calculation parameters.</p>
       <DropdownButton
         title={current?.schema.title || activeKey}
         className="mb-3"
