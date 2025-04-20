@@ -1,22 +1,24 @@
-import React, { useReducer, useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { Breadcrumb, Col, Container, Row } from "react-bootstrap";
 
-import StructureSelection from "./components/StructureSelection";
-import PropertySelection from "./components/PropertySelection";
 import ParametersConfiguration from "./components/ParametersConfiguration";
+import PropertySelection from "./components/PropertySelection";
 import ResourcesSelection from "./components/ResourcesSelection";
-import WorkflowSubmission from "./components/WorkflowSubmission";
+import StructureSelection from "./components/StructureSelection";
 import WorkflowResults from "./components/WorkflowResults";
+import WorkflowSubmission from "./components/WorkflowSubmission";
 
-import { WizardState, WizardAction, Property } from "./interfaces";
+import ParametersReview from "./components/ParametersReview";
+import { Property, WizardAction, WizardState } from "./interfaces";
 
 const steps = [
   { id: 1, label: "Structure" },
   { id: 2, label: "Properties" },
   { id: 3, label: "Parameters" },
   { id: 4, label: "Resources" },
-  { id: 5, label: "Submit" },
-  { id: 6, label: "Results" },
+  { id: 5, label: "Review" },
+  { id: 6, label: "Submit" },
+  { id: 7, label: "Results" },
 ];
 
 const initialState: WizardState = {
@@ -76,7 +78,7 @@ const Wizard: React.FC = () => {
       if (!res.ok) throw new Error("Failed to submit workflow");
       const data = await res.json();
       dispatch({ type: "SET_RESULTS", payload: data });
-      setCurrentStep(6); // Move to results step
+      setCurrentStep(7); // Move to results step
     } catch (err) {
       console.error(err);
     }
@@ -147,18 +149,22 @@ const Wizard: React.FC = () => {
         );
       case 5:
         return (
-          <WorkflowSubmission
+          <ParametersReview
             inputs={{
               structure: state.structure,
               properties: state.selectedProperties,
               parameters: state.parameters,
               resources: state.resources,
             }}
-            onConfirm={handleSubmission}
+            onConfirm={goNext}
             onBack={goPrev}
           />
         );
       case 6:
+        return (
+          <WorkflowSubmission onConfirm={handleSubmission} onBack={goPrev} />
+        );
+      case 7:
         return <WorkflowResults results={state.results} onBack={goPrev} />;
       default:
         return <div>Unknown Step</div>;
