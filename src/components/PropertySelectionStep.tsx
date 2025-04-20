@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Form } from "react-bootstrap";
 import { Property } from "../interfaces";
 
-interface PropertySelectionProps {
+interface PropertySelectionStepProps {
   available: Property[];
   selected: string[];
   onChange: (selected: string[]) => void;
@@ -10,7 +10,7 @@ interface PropertySelectionProps {
   onBack: () => void;
 }
 
-const PropertySelection: React.FC<PropertySelectionProps> = ({
+const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
   available,
   selected,
   onChange,
@@ -61,4 +61,4 @@ const PropertySelection: React.FC<PropertySelectionProps> = ({
   );
 };
 
-export default PropertySelection;
+export default PropertySelectionStep;

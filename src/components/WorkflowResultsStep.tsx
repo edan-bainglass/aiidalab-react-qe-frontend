@@ -2,12 +2,12 @@ import { Button } from "react-bootstrap";
 
 import { ResultsType } from "../interfaces";
 
-interface WorkflowResultsProps {
+interface WorkflowResultsStepProps {
   results?: ResultsType | null;
   onBack: () => void;
 }
 
-const WorkflowResults: React.FC<WorkflowResultsProps> = ({
+const WorkflowResultsStep: React.FC<WorkflowResultsStepProps> = ({
   results,
   onBack,
 }) => {
@@ -30,4 +30,4 @@ const WorkflowResults: React.FC<WorkflowResultsProps> = ({
   );
 };
 
-export default WorkflowResults;
+export default WorkflowResultsStep;

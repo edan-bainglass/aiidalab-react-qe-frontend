@@ -4,7 +4,7 @@ import { WEAS } from "weas";
 
 import { WorkflowInputs } from "../interfaces";
 
-interface ParametersReviewProps {
+interface InputsReviewStepProps {
   inputs: WorkflowInputs;
   onConfirm: () => void;
   onBack: () => void;
@@ -12,7 +12,7 @@ interface ParametersReviewProps {
 
 let weasViewer: InstanceType<typeof WEAS> | null = null;
 
-const ParametersReview: React.FC<ParametersReviewProps> = ({
+const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
   inputs,
   onConfirm,
   onBack,
@@ -32,7 +32,7 @@ const ParametersReview: React.FC<ParametersReviewProps> = ({
 
   return (
     <div>
-      <h2>Step 5: Review workflow parameters</h2>
+      <h2>Step 5: Review workflow inputs</h2>
       <div
         style={{
           marginBottom: "15px",
@@ -83,4 +83,4 @@ const ParametersReview: React.FC<ParametersReviewProps> = ({
   );
 };
 
-export default ParametersReview;
+export default InputsReviewStep;

@@ -2,14 +2,14 @@ import { Button } from "react-bootstrap";
 
 import { ResourcesType } from "../interfaces";
 
-interface ResourcesSelectionProps {
+interface ResourceSelectionStepProps {
   resources?: ResourcesType | null;
   onChange: (resources: ResourcesType) => void;
   onConfirm: () => void;
   onBack: () => void;
 }
 
-const ResourcesSelection: React.FC<ResourcesSelectionProps> = ({
+const ResourceSelectionStep: React.FC<ResourceSelectionStepProps> = ({
   resources,
   onChange,
   onConfirm,
@@ -43,4 +43,4 @@ const ResourcesSelection: React.FC<ResourcesSelectionProps> = ({
   );
 };
 
-export default ResourcesSelection;
+export default ResourceSelectionStep;

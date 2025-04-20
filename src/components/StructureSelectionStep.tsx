@@ -4,7 +4,7 @@ import { Atoms, WEAS } from "weas";
 
 import { StructureType } from "../interfaces";
 
-interface StructureSelectorProps {
+interface StructureSelectionStepProps {
   structure?: StructureType | null;
   onChange: (structure: StructureType) => void;
   onConfirm: () => void;
@@ -12,7 +12,7 @@ interface StructureSelectorProps {
 
 let weasViewer: InstanceType<typeof WEAS> | null = null;
 
-const StructureSelector: React.FC<StructureSelectorProps> = ({
+const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
   structure,
   onChange,
   onConfirm,
@@ -70,4 +70,4 @@ const StructureSelector: React.FC<StructureSelectorProps> = ({
   );
 };
 
-export default StructureSelector;
+export default StructureSelectionStep;

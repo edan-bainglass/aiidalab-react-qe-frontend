@@ -1,14 +1,14 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { Breadcrumb, Col, Container, Row } from "react-bootstrap";
 
-import ParametersConfiguration from "./components/ParametersConfiguration";
-import PropertySelection from "./components/PropertySelection";
-import ResourcesSelection from "./components/ResourcesSelection";
-import StructureSelection from "./components/StructureSelection";
-import WorkflowResults from "./components/WorkflowResults";
-import WorkflowSubmission from "./components/WorkflowSubmission";
+import InputsReviewStep from "./components/InputsReviewStep";
+import ParameterSettingsStep from "./components/ParameterSettingsStep";
+import PropertySelectionStep from "./components/PropertySelectionStep";
+import ResourceSelectionStep from "./components/ResourceSelectionStep";
+import StructureSelectionStep from "./components/StructureSelectionStep";
+import WorkflowResultsStep from "./components/WorkflowResultsStep";
+import WorkflowSubmissionStep from "./components/WorkflowSubmissionStep";
 
-import ParametersReview from "./components/ParametersReview";
 import { Property, WizardAction, WizardState } from "./interfaces";
 
 const steps = [
@@ -108,7 +108,7 @@ const Wizard: React.FC = () => {
     switch (currentStep) {
       case 1:
         return (
-          <StructureSelection
+          <StructureSelectionStep
             structure={state.structure}
             onChange={(s) => dispatch({ type: "SET_STRUCTURE", payload: s })}
             onConfirm={goNext}
@@ -116,7 +116,7 @@ const Wizard: React.FC = () => {
         );
       case 2:
         return (
-          <PropertySelection
+          <PropertySelectionStep
             available={state.availableProperties}
             selected={state.selectedProperties}
             onChange={(sel) =>
@@ -128,7 +128,7 @@ const Wizard: React.FC = () => {
         );
       case 3:
         return (
-          <ParametersConfiguration
+          <ParameterSettingsStep
             selectedProperties={state.selectedProperties}
             parameters={state.parameters}
             onChange={(panelKey, data) =>
@@ -140,7 +140,7 @@ const Wizard: React.FC = () => {
         );
       case 4:
         return (
-          <ResourcesSelection
+          <ResourceSelectionStep
             resources={state.resources}
             onChange={(r) => dispatch({ type: "SET_RESOURCES", payload: r })}
             onConfirm={goNext}
@@ -149,7 +149,7 @@ const Wizard: React.FC = () => {
         );
       case 5:
         return (
-          <ParametersReview
+          <InputsReviewStep
             inputs={{
               structure: state.structure,
               properties: state.selectedProperties,
@@ -162,10 +162,13 @@ const Wizard: React.FC = () => {
         );
       case 6:
         return (
-          <WorkflowSubmission onConfirm={handleSubmission} onBack={goPrev} />
+          <WorkflowSubmissionStep
+            onConfirm={handleSubmission}
+            onBack={goPrev}
+          />
         );
       case 7:
-        return <WorkflowResults results={state.results} onBack={goPrev} />;
+        return <WorkflowResultsStep results={state.results} onBack={goPrev} />;
       default:
         return <div>Unknown Step</div>;
     }

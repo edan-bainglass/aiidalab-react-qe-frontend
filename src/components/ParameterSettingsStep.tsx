@@ -180,7 +180,7 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
   },
 };
 
-interface ParametersConfigurationProps {
+interface ParameterSettingsStepProps {
   selectedProperties: string[];
   parameters: any;
   onChange: (panelKey: string, formData: any) => void;
@@ -188,7 +188,7 @@ interface ParametersConfigurationProps {
   onBack: () => void;
 }
 
-const ParametersConfiguration: React.FC<ParametersConfigurationProps> = ({
+const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   selectedProperties,
   parameters,
   onChange,
@@ -368,4 +368,4 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   );
 };
 
-export default ParametersConfiguration;
+export default ParameterSettingsStep;

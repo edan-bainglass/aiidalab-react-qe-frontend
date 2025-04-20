@@ -21,12 +21,12 @@ const workflowSchema: InputSchema = {
   },
 };
 
-interface WorkflowSubmissionProps {
+interface WorkflowSubmissionStepProps {
   onConfirm: () => void;
   onBack: () => void;
 }
 
-const WorkflowSubmission: React.FC<WorkflowSubmissionProps> = ({
+const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
   onConfirm,
   onBack,
 }) => {
@@ -57,4 +57,4 @@ const WorkflowSubmission: React.FC<WorkflowSubmissionProps> = ({
   );
 };
 
-export default WorkflowSubmission;
+export default WorkflowSubmissionStep;
