@@ -31,7 +31,7 @@ const basicSettingsSchema: InputSchema = {
       },
       electronic_type: {
         type: "string",
-        title: "Electronic Type",
+        title: "Electronic type",
         enum: ["Metallic", "Insulator"],
         default: "Metallic",
       },
@@ -47,7 +47,7 @@ const basicSettingsSchema: InputSchema = {
       },
       spin_orbit: {
         type: "boolean",
-        title: "Spin Orbit Coupling",
+        title: "Spin orbit coupling",
       },
     },
   },
@@ -74,7 +74,7 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
       properties: {
         energyTolerance: {
           type: "number",
-          title: "Energy Tolerance",
+          title: "Energy tolerance",
           default: 1e-5,
         },
         maxSteps: { type: "integer", title: "Max Steps", default: 100 },
@@ -103,7 +103,7 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
       properties: {
         initialMagnetization: {
           type: "number",
-          title: "Initial Magnetization",
+          title: "Initial magnetization",
           default: 0.5,
         },
       },
@@ -112,10 +112,32 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
   hubbardU: {
     schema: {
       type: "object",
-      title: "Hubbard U",
+      title: "HubbardU",
       properties: {
-        useHubbard: { type: "boolean", title: "Enable U" },
-        U: { type: "number", title: "U (eV)", default: 4.0 },
+        use_hubbard: {
+          default: false,
+          title: "Enable U",
+          type: "boolean",
+        },
+      },
+      required: ["use_hubbard"],
+      if: {
+        properties: {
+          use_hubbard: {
+            const: true,
+          },
+        },
+      },
+      then: {
+        properties: {
+          U: {
+            default: 4.0,
+            minimum: 0,
+            title: "U (eV)",
+            type: "number",
+          },
+        },
+        required: ["U"],
       },
     },
   },
