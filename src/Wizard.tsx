@@ -1,13 +1,15 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { Breadcrumb, Col, Container, Row } from "react-bootstrap";
 
-import InputsReviewStep from "./components/InputsReviewStep";
-import ParameterSettingsStep from "./components/ParameterSettingsStep";
-import PropertySelectionStep from "./components/PropertySelectionStep";
-import ResourceSelectionStep from "./components/ResourceSelectionStep";
-import StructureSelectionStep from "./components/StructureSelectionStep";
-import WorkflowResultsStep from "./components/WorkflowResultsStep";
-import WorkflowSubmissionStep from "./components/WorkflowSubmissionStep";
+import {
+  InputsReviewStep,
+  ParameterSettingsStep,
+  PropertySelectionStep,
+  ResourceSelectionStep,
+  StructureSelectionStep,
+  WorkflowResultsStep,
+  WorkflowSubmissionStep,
+} from "./components";
 
 import { Property, WizardAction, WizardState } from "./interfaces";
 
