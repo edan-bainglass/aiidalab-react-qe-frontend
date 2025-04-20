@@ -29,6 +29,7 @@ const initialState: WizardState = {
   selectedProperties: [],
   parameters: {},
   resources: null,
+  metadata: {},
   results: null,
 };
 
@@ -50,6 +51,8 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       };
     case "SET_RESOURCES":
       return { ...state, resources: action.payload };
+    case "SET_METADATA":
+      return { ...state, metadata: { ...state.metadata, ...action.payload } };
     case "SET_RESULTS":
       return { ...state, results: action.payload };
     case "LOAD_WORKFLOW":
@@ -75,6 +78,7 @@ const Wizard: React.FC = () => {
           properties: state.selectedProperties,
           parameters: state.parameters,
           resources: state.resources,
+          metadata: state.metadata,
         }),
       });
       if (!res.ok) throw new Error("Failed to submit workflow");
@@ -167,6 +171,8 @@ const Wizard: React.FC = () => {
       case 6:
         return (
           <WorkflowSubmissionStep
+            metadata={state.metadata}
+            onChange={(m) => dispatch({ type: "SET_METADATA", payload: m })}
             controls={
               <StepNavControls
                 prev={goPrev}

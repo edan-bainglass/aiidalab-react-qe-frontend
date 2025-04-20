@@ -40,6 +40,7 @@ export interface WizardState {
   /** parameters keyed by built-in or plugin panel key */
   parameters: Record<string, any>;
   resources: ResourcesType | null;
+  metadata: Record<string, string>;
   results: ResultsType | null;
 }
 
@@ -51,4 +52,5 @@ export type WizardAction =
   | { type: "SET_PARAMETERS"; payload: { panelKey: string; data: any } }
   | { type: "SET_RESOURCES"; payload: ResourcesType }
   | { type: "SET_RESULTS"; payload: ResultsType }
+  | { type: "SET_METADATA"; payload: Record<string, string> }
   | { type: "LOAD_WORKFLOW"; payload: WizardState };

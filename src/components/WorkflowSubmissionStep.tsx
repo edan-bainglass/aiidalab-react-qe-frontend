@@ -21,10 +21,14 @@ const workflowSchema: InputSchema = {
 };
 
 interface WorkflowSubmissionStepProps {
+  metadata: Record<string, string>;
+  onChange: (metadata: Record<string, string>) => void;
   controls: React.ReactNode;
 }
 
 const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
+  metadata,
+  onChange,
   controls,
 }) => {
   return (
@@ -37,6 +41,8 @@ const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
           ...workflowSchema.ui,
           "ui:submitButtonOptions": { norender: true },
         }}
+        formData={metadata}
+        onChange={(e) => onChange(e.formData)}
         validator={validator}
       />
     </div>
