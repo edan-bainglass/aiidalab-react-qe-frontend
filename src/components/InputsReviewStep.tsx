@@ -76,7 +76,7 @@ const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
           Back
         </Button>
         <Button variant="primary" onClick={onConfirm}>
-          Submit Workflow
+          Confirm inputs
         </Button>
       </div>
     </div>
