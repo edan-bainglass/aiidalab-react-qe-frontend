@@ -1,21 +1,19 @@
 import React from "react";
-import { Button, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { Property } from "../interfaces";
 
 interface PropertySelectionStepProps {
   available: Property[];
   selected: string[];
   onChange: (selected: string[]) => void;
-  onConfirm: () => void;
-  onBack: () => void;
+  controls: React.ReactNode;
 }
 
 const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
   available,
   selected,
   onChange,
-  onConfirm,
-  onBack,
+  controls,
 }) => {
   const handleToggle = (id: string) => {
     if (selected.includes(id)) {
@@ -28,6 +26,7 @@ const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
   return (
     <div>
       <h2>Step 2: Select properties to compute</h2>
+      {controls}
       {available.length === 0 ? (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
           <p>No properties available</p>
@@ -45,18 +44,6 @@ const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
           ))}
         </Form>
       )}
-      <div className="input-panel-controls">
-        <Button
-          variant="secondary"
-          onClick={onBack}
-          style={{ marginRight: "10px" }}
-        >
-          Back
-        </Button>
-        <Button variant="primary" onClick={onConfirm}>
-          Confirm Selections
-        </Button>
-      </div>
     </div>
   );
 };

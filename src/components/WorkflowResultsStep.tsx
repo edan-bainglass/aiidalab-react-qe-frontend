@@ -1,19 +1,18 @@
-import { Button } from "react-bootstrap";
-
 import { ResultsType } from "../interfaces";
 
 interface WorkflowResultsStepProps {
   results?: ResultsType | null;
-  onBack: () => void;
+  controls: React.ReactNode;
 }
 
 const WorkflowResultsStep: React.FC<WorkflowResultsStepProps> = ({
   results,
-  onBack,
+  controls,
 }) => {
   return (
     <div>
       <h2>Step 6: Monitor and analyze results</h2>
+      {controls}
       <div
         style={{
           border: "1px dashed #ccc",
@@ -23,9 +22,6 @@ const WorkflowResultsStep: React.FC<WorkflowResultsStepProps> = ({
       >
         Placeholder for Monitoring and Results Analysis.
       </div>
-      <Button variant="secondary" onClick={onBack}>
-        Back
-      </Button>
     </div>
   );
 };

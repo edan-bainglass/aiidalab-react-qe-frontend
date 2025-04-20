@@ -1,6 +1,5 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
-import { Button } from "react-bootstrap";
 
 import { InputSchema } from "../interfaces";
 
@@ -22,17 +21,16 @@ const workflowSchema: InputSchema = {
 };
 
 interface WorkflowSubmissionStepProps {
-  onConfirm: () => void;
-  onBack: () => void;
+  controls: React.ReactNode;
 }
 
 const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
-  onConfirm,
-  onBack,
+  controls,
 }) => {
   return (
     <div>
       <h2>Step 5: Submit the workflow</h2>
+      {controls}
       <Form
         schema={workflowSchema.schema}
         uiSchema={{
@@ -41,18 +39,6 @@ const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
         }}
         validator={validator}
       />
-      <div className="input-panel-controls">
-        <Button
-          variant="secondary"
-          onClick={onBack}
-          style={{ marginRight: "10px" }}
-        >
-          Back
-        </Button>
-        <Button variant="primary" onClick={onConfirm}>
-          Submit Workflow
-        </Button>
-      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useState } from "react";
-import { Breadcrumb, Col, Container, Row } from "react-bootstrap";
+import { Breadcrumb, Button, Col, Container, Row } from "react-bootstrap";
 
 import {
   InputsReviewStep,
@@ -113,7 +113,7 @@ const Wizard: React.FC = () => {
           <StructureSelectionStep
             structure={state.structure}
             onChange={(s) => dispatch({ type: "SET_STRUCTURE", payload: s })}
-            onConfirm={goNext}
+            controls={<StepNavControls next={goNext} />}
           />
         );
       case 2:
@@ -124,8 +124,7 @@ const Wizard: React.FC = () => {
             onChange={(sel) =>
               dispatch({ type: "SET_SELECTED_PROPERTIES", payload: sel })
             }
-            onConfirm={goNext}
-            onBack={goPrev}
+            controls={<StepNavControls prev={goPrev} next={goNext} />}
           />
         );
       case 3:
@@ -136,8 +135,7 @@ const Wizard: React.FC = () => {
             onChange={(panelKey, data) =>
               dispatch({ type: "SET_PARAMETERS", payload: { panelKey, data } })
             }
-            onConfirm={goNext}
-            onBack={goPrev}
+            controls={<StepNavControls prev={goPrev} next={goNext} />}
           />
         );
       case 4:
@@ -145,8 +143,7 @@ const Wizard: React.FC = () => {
           <ResourceSelectionStep
             resources={state.resources}
             onChange={(r) => dispatch({ type: "SET_RESOURCES", payload: r })}
-            onConfirm={goNext}
-            onBack={goPrev}
+            controls={<StepNavControls prev={goPrev} next={goNext} />}
           />
         );
       case 5:
@@ -158,19 +155,34 @@ const Wizard: React.FC = () => {
               parameters: state.parameters,
               resources: state.resources,
             }}
-            onConfirm={goNext}
-            onBack={goPrev}
+            controls={
+              <StepNavControls
+                prev={goPrev}
+                next={goNext}
+                nextLabel={"Confirm"}
+              />
+            }
           />
         );
       case 6:
         return (
           <WorkflowSubmissionStep
-            onConfirm={handleSubmission}
-            onBack={goPrev}
+            controls={
+              <StepNavControls
+                prev={goPrev}
+                next={handleSubmission}
+                nextLabel={"Submit"}
+              />
+            }
           />
         );
       case 7:
-        return <WorkflowResultsStep results={state.results} onBack={goPrev} />;
+        return (
+          <WorkflowResultsStep
+            results={state.results}
+            controls={<StepNavControls prev={goPrev} />}
+          />
+        );
       default:
         return <div>Unknown Step</div>;
     }
@@ -201,3 +213,32 @@ const Wizard: React.FC = () => {
 };
 
 export default Wizard;
+
+interface StepNavControlsProps {
+  prev?: () => void;
+  next?: () => void;
+  backLabel?: string;
+  nextLabel?: string;
+}
+
+const StepNavControls: React.FC<StepNavControlsProps> = ({
+  prev,
+  next,
+  backLabel = "Back",
+  nextLabel = "Next",
+}) => (
+  <Row className="my-2">
+    <Col>
+      {prev && (
+        <Button variant="secondary" onClick={prev}>
+          {backLabel}
+        </Button>
+      )}
+      {next && (
+        <Button variant="primary" onClick={next} className="float-end">
+          {nextLabel}
+        </Button>
+      )}
+    </Col>
+  </Row>
+);

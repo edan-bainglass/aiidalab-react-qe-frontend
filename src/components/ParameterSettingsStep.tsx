@@ -1,14 +1,7 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Dropdown,
-  DropdownButton,
-  Spinner,
-  Tab,
-  Tabs,
-} from "react-bootstrap";
+import { Dropdown, DropdownButton, Spinner, Tab, Tabs } from "react-bootstrap";
 
 import { getDefaultFormState, RegistryWidgetsType } from "@rjsf/utils";
 import { SwitchWidget, ToggleRadioWidget } from "../common/components";
@@ -184,28 +177,23 @@ interface ParameterSettingsStepProps {
   selectedProperties: string[];
   parameters: any;
   onChange: (panelKey: string, formData: any) => void;
-  onConfirm: () => void;
-  onBack: () => void;
+  controls: React.ReactNode;
 }
 
 const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   selectedProperties,
   parameters,
   onChange,
-  onConfirm,
-  onBack,
+  controls,
 }) => {
   const handleFormChange = (panelKey: string, formData: any) => {
     onChange(panelKey, formData);
   };
 
-  const handleNext = () => {
-    onConfirm();
-  };
-
   return (
     <div>
       <h2>Step 3: Set calculation parameters</h2>
+      {controls}
       <Tabs
         defaultActiveKey="basic"
         id="parameters-tabs"
@@ -227,14 +215,6 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
           />
         </Tab>
       </Tabs>
-      <div className="input-panel-controls">
-        <Button variant="secondary" onClick={onBack}>
-          Back
-        </Button>
-        <Button variant="primary" onClick={handleNext}>
-          Confirm Parameters
-        </Button>
-      </div>
     </div>
   );
 };

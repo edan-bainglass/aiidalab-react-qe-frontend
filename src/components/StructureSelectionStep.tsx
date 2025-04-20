@@ -7,7 +7,7 @@ import { StructureType } from "../interfaces";
 interface StructureSelectionStepProps {
   structure?: StructureType | null;
   onChange: (structure: StructureType) => void;
-  onConfirm: () => void;
+  controls: React.ReactNode;
 }
 
 let weasViewer: InstanceType<typeof WEAS> | null = null;
@@ -15,7 +15,7 @@ let weasViewer: InstanceType<typeof WEAS> | null = null;
 const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
   structure,
   onChange,
-  onConfirm,
+  controls,
 }) => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
@@ -53,19 +53,14 @@ const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
   return (
     <div className="structure-selection-step">
       <h2>Step 1: Select a structure</h2>
-      <Button onClick={handleSelection} className="mb-2">
-        Load structure
-      </Button>
+      {controls}
       <div
         ref={viewerContainerRef}
         style={{ width: "100%", height: "400px", border: "1px solid #ccc" }}
       />
-
-      <div className="input-panel-controls">
-        <Button variant="primary" onClick={onConfirm}>
-          Next
-        </Button>
-      </div>
+      <Button onClick={handleSelection} className="mt-2">
+        Load structure
+      </Button>
     </div>
   );
 };

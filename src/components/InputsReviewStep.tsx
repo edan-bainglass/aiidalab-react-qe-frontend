@@ -1,21 +1,19 @@
 import { useEffect, useRef } from "react";
-import { Accordion, Button } from "react-bootstrap";
+import { Accordion } from "react-bootstrap";
 import { WEAS } from "weas";
 
 import { WorkflowInputs } from "../interfaces";
 
 interface InputsReviewStepProps {
   inputs: WorkflowInputs;
-  onConfirm: () => void;
-  onBack: () => void;
+  controls: React.ReactNode;
 }
 
 let weasViewer: InstanceType<typeof WEAS> | null = null;
 
 const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
   inputs,
-  onConfirm,
-  onBack,
+  controls,
 }) => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +31,7 @@ const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
   return (
     <div>
       <h2>Step 5: Review workflow inputs</h2>
+      {controls}
       <div
         style={{
           marginBottom: "15px",
@@ -67,18 +66,6 @@ const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
         <b>Note:</b> You can go back to edit any of the previous steps if
         needed.
       </p>
-      <div className="input-panel-controls">
-        <Button
-          variant="secondary"
-          onClick={onBack}
-          style={{ marginRight: "10px" }}
-        >
-          Back
-        </Button>
-        <Button variant="primary" onClick={onConfirm}>
-          Confirm inputs
-        </Button>
-      </div>
     </div>
   );
 };
