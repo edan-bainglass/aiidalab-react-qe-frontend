@@ -236,12 +236,12 @@ const StepNavControls: React.FC<StepNavControlsProps> = ({
   <Row className="my-2">
     <Col>
       {prev && (
-        <Button variant="secondary" onClick={prev}>
+        <Button variant="secondary" onClick={prev} className="me-2">
           {backLabel}
         </Button>
       )}
       {next && (
-        <Button variant="primary" onClick={next} className="float-end">
+        <Button variant="primary" onClick={next}>
           {nextLabel}
         </Button>
       )}
