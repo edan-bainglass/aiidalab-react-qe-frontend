@@ -63,7 +63,9 @@ const basicSettingsSchema: InputSchema = {
   },
 };
 
-const advancedSettingsSchema: Record<string, InputSchema> = {
+type SchemaMap = Record<string, InputSchema>;
+
+const advancedSettingsSchema: SchemaMap = {
   convergence: {
     schema: {
       type: "object",
@@ -161,21 +163,17 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
           enum: ["standard", "stringent"],
           default: "standard",
         },
-      },
-      structureDependentProperties: [
-        {
-          pseudopotentials: {
-            type: "array",
-            title: "Pseudopotentials",
-            dependency: "species",
-            items: {
-              type: "string",
-              format: "data-url",
-              titleTemplate: "{{species}}",
-            },
+        pseudopotentials: {
+          type: "array",
+          title: "Pseudopotentials",
+          items: {
+            type: "string",
+            format: "data-url",
+            generatedFrom: "structure.species",
+            pattern: "{{species}}",
           },
         },
-      ],
+      },
     },
     ui: {
       functional: {
@@ -319,14 +317,14 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   const [loading, setLoading] = useState(true);
   const builtInKeys = Object.keys(advancedSettingsSchema);
   const pluginKeys = selectedProperties;
-  const [schemasMap, setSchemasMap] = useState<Record<string, InputSchema>>(
+  const [schemasMap, setSchemasMap] = useState<SchemaMap>(
     advancedSettingsSchema
   );
 
   useEffect(() => {
     async function loadPluginSchemas() {
       try {
-        const fetched: Record<string, InputSchema> = {};
+        const fetched: SchemaMap = {};
         for (const key of pluginKeys) {
           const res = await fetch(`/api/plugins/${key}/input`);
           if (!res.ok) throw new Error("Failed to load schema");
@@ -380,7 +378,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
     );
   };
 
-  const { schema, ui } = expandStructureDependentProperties(current, structure);
+  const { schema, ui } = processDependencies(current, structure);
 
   return (
     <div>
@@ -395,7 +393,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
             "ui:options": { title: "" },
           }}
           widgets={widgets}
-          formData={parameters[activePanel]}
+          formData={patchFormData(parameters[activePanel], schema)}
           onChange={(e) => onFormChange(activePanel, e.formData)}
           validator={validator}
           showErrorList={false}
@@ -408,7 +406,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
 
 export default ParameterSettingsStep;
 
-const expandStructureDependentProperties = (
+const processDependencies = (
   input: InputSchema,
   structure: StructureType
 ): InputSchema => {
@@ -420,63 +418,62 @@ const expandStructureDependentProperties = (
   };
   const ui: UiSchema = { ...origUi };
 
-  const sdp = (schema as any).structureDependentProperties as
-    | Array<Record<string, any>>
-    | undefined;
-  delete (schema as any).structureDependentProperties;
+  for (const [fieldKey, fieldDef] of Object.entries(schema.properties || {})) {
+    const isArray = fieldDef?.type === "array";
+    const items = (fieldDef as any)?.items;
 
-  if (!sdp) {
-    return { schema, ui };
+    if (!isArray || !items || typeof items !== "object") continue;
+
+    const generatedFrom = items.generatedFrom;
+    if (!generatedFrom) continue;
+
+    if (generatedFrom !== "structure.species") {
+      console.warn(`Unsupported generatedFrom source: ${generatedFrom}`);
+      continue;
+    }
+
+    const speciesKeys = Object.keys(structure.species || {});
+
+    const itemSchemas = speciesKeys.map((symbol, i) => {
+      const title = items.pattern
+        .replace(/{{\s*species\s*}}/g, symbol)
+        .replace(/{{\s*i\s*}}/g, String(i + 1));
+
+      const newItem: any = {
+        type: items.type,
+        title,
+        default: items.default,
+      };
+
+      if (items.format) newItem.format = items.format;
+      if (items.default !== undefined) newItem.default = items.default;
+
+      return newItem;
+    });
+
+    schema.properties![fieldKey] = {
+      ...fieldDef,
+      items: itemSchemas,
+    };
   }
 
-  sdp.forEach((declaration) => {
-    for (const [key, def] of Object.entries(declaration)) {
-      const {
-        title: arrayTitle,
-        dependency,
-        items: itemDef,
-      } = def as {
-        title?: string;
-        dependency: "species" | string;
-        items: {
-          type: string;
-          title?: string;
-          format?: string;
-          titleTemplate?: string;
-        };
-      };
-
-      let keys: string[] = [];
-      if (dependency === "species") {
-        keys = Object.keys(structure.species);
-      } else {
-        console.warn("Unknown dependency type:", dependency);
-        continue;
-      }
-
-      const itemSchemas = keys.map((symbol) => {
-        const t = (itemDef.titleTemplate || "{{species}}").replace(
-          /{{\s*species\s*}}/g,
-          symbol
-        );
-
-        const schemaPiece: any = {
-          type: itemDef.type,
-          title: t,
-        };
-        if (itemDef.format) {
-          schemaPiece.format = itemDef.format;
-        }
-        return schemaPiece;
-      });
-
-      schema.properties![key] = {
-        type: "array",
-        title: arrayTitle,
-        items: itemSchemas,
-      };
-    }
-  });
-
   return { schema, ui };
+};
+
+const patchFormData = (data: any, schema: RJSFSchema) => {
+  if (!schema?.properties) return data;
+  const copy = { ...data };
+
+  for (const [fieldKey, fieldDef] of Object.entries(schema.properties)) {
+    if (
+      fieldDef?.type === "array" &&
+      Array.isArray(fieldDef.items) &&
+      (!Array.isArray(copy[fieldKey]) ||
+        copy[fieldKey].length !== fieldDef.items.length)
+    ) {
+      copy[fieldKey] = Array(fieldDef.items.length).fill(undefined);
+    }
+  }
+
+  return copy;
 };
