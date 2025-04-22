@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { Button } from "react-bootstrap";
+import React, { useEffect, useRef, useState } from "react";
+import { Form } from "react-bootstrap";
 import { Atoms, WEAS } from "weas";
 
 import { StructureType } from "../interfaces";
@@ -12,23 +12,44 @@ interface StructureSelectionStepProps {
 
 let weasViewer: InstanceType<typeof WEAS> | null = null;
 
+let availableStructures: Record<string, StructureType> = {
+  H2O: {
+    symbols: ["O", "H", "H"],
+    positions: [
+      [2.0, 2.76, 2.5],
+      [2.0, 3.53, 2.0],
+      [2.0, 2.0, 2.0],
+    ],
+    cell: [5, 5, 5],
+  },
+  NaCl: {
+    symbols: ["Na", "Cl"],
+    positions: [
+      [0.0, 0.0, 0.0],
+      [2.0, 2.0, 2.0],
+    ],
+    cell: [5, 5, 5],
+  },
+};
+
 const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
   structure,
   onChange,
   controls,
 }) => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<string>(structure?.label || "");
 
-  const handleSelection = () => {
-    const atoms = new Atoms({
-      symbols: ["O", "H", "H"],
-      positions: [
-        [2.0, 2.76, 2.5],
-        [2.0, 3.53, 2.0],
-        [2.0, 2.0, 2.0],
-      ],
-      cell: [5, 5, 5],
-    });
+  const handleSelection = (selected: string) => {
+    setSelected(selected);
+
+    if (!(selected && availableStructures[selected])) {
+      onChange(null);
+      return;
+    }
+
+    const atoms = new Atoms(availableStructures[selected]);
+    atoms.label = selected;
 
     onChange(atoms);
 
@@ -58,9 +79,18 @@ const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
         ref={viewerContainerRef}
         style={{ width: "100%", height: "400px", border: "1px solid #ccc" }}
       />
-      <Button onClick={handleSelection} className="mt-2">
-        Load structure
-      </Button>
+      <Form.Select
+        value={selected}
+        onChange={(e) => handleSelection(e.target.value)}
+        className="mt-2"
+      >
+        <option value="">Select a structure</option>
+        {Object.keys(availableStructures).map((key) => (
+          <option key={key} value={key}>
+            {key}
+          </option>
+        ))}
+      </Form.Select>
     </div>
   );
 };

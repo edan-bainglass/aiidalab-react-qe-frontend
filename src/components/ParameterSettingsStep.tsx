@@ -3,9 +3,15 @@ import validator from "@rjsf/validator-ajv8";
 import React, { useEffect, useState } from "react";
 import { Dropdown, DropdownButton, Spinner, Tab, Tabs } from "react-bootstrap";
 
-import { getDefaultFormState, RegistryWidgetsType } from "@rjsf/utils";
+import {
+  getDefaultFormState,
+  RegistryWidgetsType,
+  RJSFSchema,
+  UiSchema,
+} from "@rjsf/utils";
+
 import { SwitchWidget, ToggleRadioWidget } from "../common/components";
-import { InputSchema } from "../interfaces";
+import { InputSchema, StructureType } from "../interfaces";
 
 const widgets: RegistryWidgetsType = {
   RadioWidget: ToggleRadioWidget,
@@ -158,6 +164,20 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
           default: "standard",
         },
       },
+      structureDependentProperties: [
+        {
+          pseudopotentials: {
+            type: "array",
+            title: "Pseudopotentials",
+            dependency: "species",
+            items: {
+              type: "string",
+              format: "data-url",
+              titleTemplate: "{{species}}",
+            },
+          },
+        },
+      ],
     },
     ui: {
       functional: {
@@ -169,11 +189,23 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
       stringency: {
         "ui:widget": "radio",
       },
+      pseudopotentials: {
+        "ui:options": {
+          classNames: "mt-2",
+        },
+        items: {
+          "ui:hideError": true,
+          "ui:options": {
+            accept: ".UPF",
+          },
+        },
+      },
     },
   },
 };
 
 interface ParameterSettingsStepProps {
+  structure: StructureType;
   selectedProperties: string[];
   parameters: any;
   onChange: (panelKey: string, formData: any) => void;
@@ -181,6 +213,7 @@ interface ParameterSettingsStepProps {
 }
 
 const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
+  structure,
   selectedProperties,
   parameters,
   onChange,
@@ -203,12 +236,14 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
       >
         <Tab eventKey="basic" title="Basic settings">
           <BasicSettings
+            structure={structure}
             parameters={parameters}
             onFormChange={handleFormChange}
           />
         </Tab>
         <Tab eventKey="advanced" title="Advanced settings">
           <AdvancedSettings
+            structure={structure}
             selectedProperties={selectedProperties}
             parameters={parameters}
             onFormChange={handleFormChange}
@@ -220,11 +255,13 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
 };
 
 interface BasicSettingsProps {
+  structure: StructureType;
   parameters: Record<string, any>;
   onFormChange: (panelKey: string, formData: any) => void;
 }
 
 const BasicSettings: React.FC<BasicSettingsProps> = ({
+  structure,
   parameters,
   onFormChange,
 }) => {
@@ -261,6 +298,7 @@ interface AdvancedSettingsProps extends BasicSettingsProps {
 }
 
 const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
+  structure,
   selectedProperties,
   parameters,
   onFormChange,
@@ -314,8 +352,8 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   const dropdownKeys = [...builtInKeys, ...pluginKeys];
   const current = schemasMap[activeKey];
 
-  return (
-    <div>
+  const CategorySelector = () => {
+    return (
       <DropdownButton
         title={current?.schema.title || activeKey}
         className="mb-3"
@@ -326,13 +364,20 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           </Dropdown.Item>
         ))}
       </DropdownButton>
+    );
+  };
+
+  const { schema, ui } = expandStructureDependentProperties(current, structure);
+
+  return (
+    <div>
+      {<CategorySelector />}
 
       {current && (
         <Form
-          className="mb-3"
-          schema={current.schema}
+          schema={schema}
           uiSchema={{
-            ...current.ui,
+            ...ui,
             "ui:submitButtonOptions": { norender: true },
             "ui:options": { title: "" },
           }}
@@ -349,3 +394,76 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
 };
 
 export default ParameterSettingsStep;
+
+const expandStructureDependentProperties = (
+  input: InputSchema,
+  structure: StructureType
+): InputSchema => {
+  const { schema: origSchema, ui: origUi } = input;
+
+  const schema: RJSFSchema = {
+    ...origSchema,
+    properties: { ...(origSchema.properties || {}) },
+  };
+  const ui: UiSchema = { ...origUi };
+
+  const sdp = (schema as any).structureDependentProperties as
+    | Array<Record<string, any>>
+    | undefined;
+  delete (schema as any).structureDependentProperties;
+
+  if (!sdp) {
+    return { schema, ui };
+  }
+
+  sdp.forEach((declaration) => {
+    for (const [key, def] of Object.entries(declaration)) {
+      const {
+        title: arrayTitle,
+        dependency,
+        items: itemDef,
+      } = def as {
+        title?: string;
+        dependency: "species" | string;
+        items: {
+          type: string;
+          title?: string;
+          format?: string;
+          titleTemplate?: string;
+        };
+      };
+
+      let keys: string[] = [];
+      if (dependency === "species") {
+        keys = Object.keys(structure.species);
+      } else {
+        console.warn("Unknown dependency type:", dependency);
+        continue;
+      }
+
+      const itemSchemas = keys.map((symbol) => {
+        const t = (itemDef.titleTemplate || "{{species}}").replace(
+          /{{\s*species\s*}}/g,
+          symbol
+        );
+
+        const schemaPiece: any = {
+          type: itemDef.type,
+          title: t,
+        };
+        if (itemDef.format) {
+          schemaPiece.format = itemDef.format;
+        }
+        return schemaPiece;
+      });
+
+      schema.properties![key] = {
+        type: "array",
+        title: arrayTitle,
+        items: itemSchemas,
+      };
+    }
+  });
+
+  return { schema, ui };
+};

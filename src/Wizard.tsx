@@ -134,6 +134,7 @@ const Wizard: React.FC = () => {
       case 3:
         return (
           <ParameterSettingsStep
+            structure={state.structure}
             selectedProperties={state.selectedProperties}
             parameters={state.parameters}
             onChange={(panelKey, data) =>
