@@ -61,7 +61,7 @@ const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
   };
 
   useEffect(() => {
-    if (!weasViewer && viewerContainerRef.current) {
+    if (viewerContainerRef.current) {
       weasViewer = new WEAS({ domElement: viewerContainerRef.current });
       if (structure) {
         weasViewer.avr.atoms = structure;
@@ -77,8 +77,13 @@ const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
       {controls}
       <div
         ref={viewerContainerRef}
-        style={{ width: "100%", height: "400px", border: "1px solid #ccc" }}
-      />
+        style={{
+          width: "100%",
+          height: "400px",
+          border: "1px solid #ccc",
+          position: "relative",
+        }}
+      ></div>
       <Form.Select
         value={selected}
         onChange={(e) => handleSelection(e.target.value)}

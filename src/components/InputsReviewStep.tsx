@@ -40,7 +40,10 @@ const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
         <Accordion>
           <Accordion.Item eventKey="0">
             <Accordion.Header>Structure</Accordion.Header>
-            <Accordion.Body ref={viewerContainerRef}></Accordion.Body>
+            <Accordion.Body
+              ref={viewerContainerRef}
+              style={{ position: "relative" }}
+            ></Accordion.Body>
           </Accordion.Item>
           <Accordion.Item eventKey="1">
             <Accordion.Header>Properties</Accordion.Header>
