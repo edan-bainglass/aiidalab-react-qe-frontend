@@ -10,11 +10,11 @@ import {
   UiSchema,
 } from "@rjsf/utils";
 
-import { SwitchWidget, ToggleRadioWidget } from "../common/components";
+import { SwitchWidget, ToggleGroupWidget } from "../common/components";
 import { InputSchema, StructureType } from "../interfaces";
 
 const widgets: RegistryWidgetsType = {
-  RadioWidget: ToggleRadioWidget,
+  toggleGroup: ToggleGroupWidget,
   CheckboxWidget: SwitchWidget,
 };
 
@@ -52,14 +52,14 @@ const basicSettingsSchema: InputSchema = {
   },
   ui: {
     relax: {
-      "ui:widget": "radio",
+      "ui:widget": "toggleGroup",
       "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
     },
     electronic_type: {
-      "ui:widget": "radio",
+      "ui:widget": "toggleGroup",
     },
     protocol: {
-      "ui:widget": "radio",
+      "ui:widget": "toggleGroup",
     },
   },
 };
@@ -181,13 +181,13 @@ const advancedSettingsSchema: Record<string, InputSchema> = {
     },
     ui: {
       functional: {
-        "ui:widget": "radio",
+        "ui:widget": "toggleGroup",
       },
       family: {
-        "ui:widget": "radio",
+        "ui:widget": "toggleGroup",
       },
       stringency: {
-        "ui:widget": "radio",
+        "ui:widget": "toggleGroup",
       },
       pseudopotentials: {
         "ui:options": {

@@ -1,7 +1,7 @@
 import { WidgetProps } from "@rjsf/utils";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 
-const ToggleRadioWidget: React.FC<WidgetProps> = (props) => {
+const ToggleGroupWidget: React.FC<WidgetProps> = (props) => {
   return (
     <ToggleButtonGroup
       type="radio"
@@ -24,4 +24,4 @@ const ToggleRadioWidget: React.FC<WidgetProps> = (props) => {
   );
 };
 
-export default ToggleRadioWidget;
+export default ToggleGroupWidget;
