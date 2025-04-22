@@ -27,6 +27,7 @@ const initialState: WizardState = {
   structure: null,
   availableProperties: [],
   selectedProperties: [],
+  activeParametersPanel: "basic",
   parameters: {},
   resources: null,
   metadata: {},
@@ -41,6 +42,8 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, structure: action.payload };
     case "SET_SELECTED_PROPERTIES":
       return { ...state, selectedProperties: action.payload };
+    case "SET_PARAMETERS_PANEL":
+      return { ...state, activeParametersPanel: action.payload };
     case "SET_PARAMETERS":
       return {
         ...state,
@@ -66,6 +69,13 @@ const Wizard: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(1);
 
+  const setParametersPanel = (location: string) => {
+    dispatch({
+      type: "SET_PARAMETERS_PANEL",
+      payload: location,
+    });
+  };
+
   const handleSubmission = async () => {
     try {
       const res = await fetch("/api/submit", {
@@ -90,7 +100,6 @@ const Wizard: React.FC = () => {
     }
   };
 
-  // Fetch available plugin properties once
   useEffect(() => {
     async function loadProperties() {
       try {
@@ -141,6 +150,8 @@ const Wizard: React.FC = () => {
               dispatch({ type: "SET_PARAMETERS", payload: { panelKey, data } })
             }
             controls={<StepNavControls prev={goPrev} next={goNext} />}
+            panel={state.activeParametersPanel}
+            onPanelChange={setParametersPanel}
           />
         );
       case 4:

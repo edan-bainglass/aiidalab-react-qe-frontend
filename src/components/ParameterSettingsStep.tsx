@@ -18,7 +18,6 @@ const widgets: RegistryWidgetsType = {
   CheckboxWidget: SwitchWidget,
 };
 
-// Built-in basic panels
 const basicSettingsSchema: InputSchema = {
   schema: {
     type: "object",
@@ -64,7 +63,6 @@ const basicSettingsSchema: InputSchema = {
   },
 };
 
-// Built-in advanced panels
 const advancedSettingsSchema: Record<string, InputSchema> = {
   convergence: {
     schema: {
@@ -210,6 +208,8 @@ interface ParameterSettingsStepProps {
   parameters: any;
   onChange: (panelKey: string, formData: any) => void;
   controls: React.ReactNode;
+  panel: string;
+  onPanelChange: (panel: string) => void;
 }
 
 const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
@@ -218,21 +218,28 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   parameters,
   onChange,
   controls,
+  panel,
+  onPanelChange: setPanel,
 }) => {
   const handleFormChange = (panelKey: string, formData: any) => {
     onChange(panelKey, formData);
   };
+
+  const tabKey = panel.startsWith("advanced") ? "advanced" : "basic";
+  const panelKey = panel.split(".")[1] || "convergence";
 
   return (
     <div>
       <h2>Step 3: Set calculation parameters</h2>
       {controls}
       <Tabs
-        defaultActiveKey="basic"
         id="parameters-tabs"
         className="mb-3"
         style={{ marginTop: "1rem" }}
-        unmountOnExit={false}
+        activeKey={tabKey}
+        onSelect={(key) =>
+          setPanel(key == "basic" ? "basic" : `advanced.${panelKey}`)
+        }
       >
         <Tab eventKey="basic" title="Basic settings">
           <BasicSettings
@@ -247,6 +254,8 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             selectedProperties={selectedProperties}
             parameters={parameters}
             onFormChange={handleFormChange}
+            activePanel={panelKey}
+            onPanelChange={(p) => setPanel(`advanced.${p}`)}
           />
         </Tab>
       </Tabs>
@@ -295,6 +304,8 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
 
 interface AdvancedSettingsProps extends BasicSettingsProps {
   selectedProperties: string[];
+  activePanel: string;
+  onPanelChange: (panelKey: string) => void;
 }
 
 const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
@@ -302,6 +313,8 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   selectedProperties,
   parameters,
   onFormChange,
+  activePanel,
+  onPanelChange: setPanel,
 }) => {
   const [loading, setLoading] = useState(true);
   const builtInKeys = Object.keys(advancedSettingsSchema);
@@ -309,7 +322,6 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   const [schemasMap, setSchemasMap] = useState<Record<string, InputSchema>>(
     advancedSettingsSchema
   );
-  const [activeKey, setActiveKey] = useState<string>(builtInKeys[0]);
 
   useEffect(() => {
     async function loadPluginSchemas() {
@@ -350,16 +362,17 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   }
 
   const dropdownKeys = [...builtInKeys, ...pluginKeys];
-  const current = schemasMap[activeKey];
+  const current = schemasMap[activePanel];
 
   const CategorySelector = () => {
     return (
       <DropdownButton
-        title={current?.schema.title || activeKey}
+        title={current?.schema.title || activePanel}
         className="mb-3"
+        onSelect={(key) => setPanel(key || "")}
       >
         {dropdownKeys.map((key) => (
-          <Dropdown.Item key={key} onClick={() => setActiveKey(key)}>
+          <Dropdown.Item key={key} eventKey={key}>
             {schemasMap[key]?.schema.title || key}
           </Dropdown.Item>
         ))}
@@ -382,8 +395,8 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
             "ui:options": { title: "" },
           }}
           widgets={widgets}
-          formData={parameters[activeKey]}
-          onChange={(e) => onFormChange(activeKey, e.formData)}
+          formData={parameters[activePanel]}
+          onChange={(e) => onFormChange(activePanel, e.formData)}
           validator={validator}
           showErrorList={false}
           liveValidate
