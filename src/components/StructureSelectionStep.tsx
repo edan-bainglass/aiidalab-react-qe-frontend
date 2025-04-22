@@ -38,11 +38,20 @@ const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
   controls,
 }) => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
-  const [selected, setSelected] = useState<string>(structure?.label || "");
+  const [selected, setSelected] = useState<string>(structure?.label || "H2O");
 
-  const handleSelection = (selected: string) => {
-    setSelected(selected);
+  useEffect(() => {
+    if (viewerContainerRef.current) {
+      weasViewer = new WEAS({ domElement: viewerContainerRef.current });
+      if (structure) {
+        weasViewer.avr.atoms = structure;
+        weasViewer.avr.modelStyle = 1;
+        weasViewer.render();
+      }
+    }
+  }, []);
 
+  useEffect(() => {
     if (!(selected && availableStructures[selected])) {
       onChange(null);
       return;
@@ -58,18 +67,7 @@ const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
       weasViewer.avr.modelStyle = 1;
       weasViewer.render();
     }
-  };
-
-  useEffect(() => {
-    if (viewerContainerRef.current) {
-      weasViewer = new WEAS({ domElement: viewerContainerRef.current });
-      if (structure) {
-        weasViewer.avr.atoms = structure;
-        weasViewer.avr.modelStyle = 1;
-        weasViewer.render();
-      }
-    }
-  }, []);
+  }, [selected]);
 
   return (
     <div className="structure-selection-step">
@@ -86,7 +84,7 @@ const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
       ></div>
       <Form.Select
         value={selected}
-        onChange={(e) => handleSelection(e.target.value)}
+        onChange={(e) => setSelected(e.target.value)}
         className="mt-2"
       >
         <option value="">Select a structure</option>
