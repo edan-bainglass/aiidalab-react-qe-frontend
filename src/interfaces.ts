@@ -38,6 +38,7 @@ export interface WizardState {
   availableProperties: Property[];
   selectedProperties: string[];
   activeParametersPanel: string;
+  activeAdvancedPanel: string;
   parameters: Record<string, any>;
   resources: ResourcesType | null;
   metadata: Record<string, string>;
@@ -50,6 +51,7 @@ export type WizardAction =
   | { type: "SET_STRUCTURE"; payload: StructureType }
   | { type: "SET_SELECTED_PROPERTIES"; payload: string[] }
   | { type: "SET_PARAMETERS_PANEL"; payload: string }
+  | { type: "SET_ADVANCED_PANEL"; payload: string }
   | { type: "SET_PARAMETERS"; payload: { panelKey: string; data: any } }
   | { type: "SET_RESOURCES"; payload: ResourcesType }
   | { type: "SET_RESULTS"; payload: ResultsType }

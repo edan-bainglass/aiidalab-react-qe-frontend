@@ -28,6 +28,7 @@ const initialState: WizardState = {
   availableProperties: [],
   selectedProperties: [],
   activeParametersPanel: "basic",
+  activeAdvancedPanel: "convergence",
   parameters: {},
   resources: null,
   metadata: {},
@@ -44,6 +45,8 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, selectedProperties: action.payload };
     case "SET_PARAMETERS_PANEL":
       return { ...state, activeParametersPanel: action.payload };
+    case "SET_ADVANCED_PANEL":
+      return { ...state, activeAdvancedPanel: action.payload };
     case "SET_PARAMETERS":
       return {
         ...state,
@@ -72,6 +75,13 @@ const Wizard: React.FC = () => {
   const setParametersPanel = (location: string) => {
     dispatch({
       type: "SET_PARAMETERS_PANEL",
+      payload: location,
+    });
+  };
+
+  const setAdvancedPanel = (location: string) => {
+    dispatch({
+      type: "SET_ADVANCED_PANEL",
       payload: location,
     });
   };
@@ -151,7 +161,16 @@ const Wizard: React.FC = () => {
             }
             controls={<StepNavControls prev={goPrev} next={goNext} />}
             panel={state.activeParametersPanel}
-            onPanelChange={setParametersPanel}
+            onPanelChange={(panel) =>
+              dispatch({
+                type: "SET_PARAMETERS_PANEL",
+                payload: panel,
+              })
+            }
+            advancedPanel={state.activeAdvancedPanel}
+            onAdvancedPanelChange={(panel) =>
+              dispatch({ type: "SET_ADVANCED_PANEL", payload: panel })
+            }
           />
         );
       case 4:

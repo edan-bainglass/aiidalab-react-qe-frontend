@@ -208,6 +208,8 @@ interface ParameterSettingsStepProps {
   controls: React.ReactNode;
   panel: string;
   onPanelChange: (panel: string) => void;
+  advancedPanel: string;
+  onAdvancedPanelChange: (panel: string) => void;
 }
 
 const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
@@ -218,13 +220,12 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   controls,
   panel,
   onPanelChange: setPanel,
+  advancedPanel,
+  onAdvancedPanelChange: setAdvancedPanel,
 }) => {
   const handleFormChange = (panelKey: string, formData: any) => {
     onChange(panelKey, formData);
   };
-
-  const tabKey = panel.startsWith("advanced") ? "advanced" : "basic";
-  const panelKey = panel.split(".")[1] || "convergence";
 
   return (
     <div>
@@ -234,10 +235,8 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
         id="parameters-tabs"
         className="mb-3"
         style={{ marginTop: "1rem" }}
-        activeKey={tabKey}
-        onSelect={(key) =>
-          setPanel(key == "basic" ? "basic" : `advanced.${panelKey}`)
-        }
+        activeKey={panel}
+        onSelect={(key) => setPanel(key || "basic")}
       >
         <Tab eventKey="basic" title="Basic settings">
           <BasicSettings
@@ -252,8 +251,8 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             selectedProperties={selectedProperties}
             parameters={parameters}
             onFormChange={handleFormChange}
-            activePanel={panelKey}
-            onPanelChange={(p) => setPanel(`advanced.${p}`)}
+            activePanel={advancedPanel}
+            onPanelChange={(panel) => setAdvancedPanel(panel)}
           />
         </Tab>
       </Tabs>
