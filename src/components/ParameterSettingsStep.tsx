@@ -133,23 +133,19 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   onPanelChange: setPanel,
 }) => {
   const [loading, setLoading] = useState(true);
-  const builtInKeys = Object.keys(advancedSettingsSchema);
-  const pluginKeys = selectedProperties;
-  const [
-    advancedSettingsSchemaWithPlugins,
-    setadvancedSettingsSchemaWithPlugins,
-  ] = useState<SchemaMap>(advancedSettingsSchema);
+  const [advancedSettingsSchemas, setAdvancedSettingsSchemas] =
+    useState<SchemaMap>(advancedSettingsSchema);
 
   useEffect(() => {
     async function loadPluginSchemas() {
       try {
         const fetched: SchemaMap = {};
-        for (const key of pluginKeys) {
-          const res = await fetch(`/api/plugins/${key}/input`);
+        for (const property of selectedProperties) {
+          const res = await fetch(`/api/plugins/${property}/input`);
           if (!res.ok) throw new Error("Failed to load schema");
-          fetched[key] = await res.json();
+          fetched[property] = await res.json();
         }
-        setadvancedSettingsSchemaWithPlugins((prev) => ({
+        setAdvancedSettingsSchemas((prev) => ({
           ...prev,
           ...fetched,
         }));
@@ -159,9 +155,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
         setLoading(false);
       }
     }
-    if (pluginKeys.length) loadPluginSchemas();
+    if (selectedProperties.length) loadPluginSchemas();
     else setLoading(false);
-  }, [pluginKeys]);
+  }, [selectedProperties]);
 
   useEffect(() => {
     Object.entries(advancedSettingsSchema).forEach(([key, { schema }]) => {
@@ -181,19 +177,27 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
     );
   }
 
-  const dropdownKeys = [...builtInKeys, ...pluginKeys];
-  const current = advancedSettingsSchemaWithPlugins[activePanel];
+  const categories = [
+    ...Object.keys(advancedSettingsSchema),
+    ...selectedProperties,
+  ];
+
+  const currentKey = advancedSettingsSchemas[activePanel]
+    ? activePanel
+    : "convergence";
+
+  const current = advancedSettingsSchemas[currentKey];
 
   const CategorySelector = () => {
     return (
       <DropdownButton
-        title={current?.schema.title || activePanel}
+        title={current?.schema.title || currentKey}
         className="mb-3"
         onSelect={(key) => setPanel(key || "")}
       >
-        {dropdownKeys.map((key) => (
+        {categories.map((key) => (
           <Dropdown.Item key={key} eventKey={key}>
-            {advancedSettingsSchemaWithPlugins[key]?.schema.title || key}
+            {advancedSettingsSchemas[key]?.schema.title || key}
           </Dropdown.Item>
         ))}
       </DropdownButton>
@@ -212,12 +216,12 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           uiSchema={{
             ...ui,
             "ui:submitButtonOptions": { norender: true },
-            "ui:options": { title: "", classNames: `${activePanel}-panel` },
+            "ui:options": { title: "", classNames: `${currentKey}-panel` },
           }}
           widgets={widgets}
           formData={patchDataIn(schema, parameters)}
           onChange={(e) =>
-            onFormChange(activePanel, patchDataOut(schema, e.formData))
+            onFormChange(currentKey, patchDataOut(schema, e.formData))
           }
           validator={validator}
           showErrorList={false}
