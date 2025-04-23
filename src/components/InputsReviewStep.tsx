@@ -18,7 +18,7 @@ const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!weasViewer && viewerContainerRef.current) {
+    if (viewerContainerRef.current) {
       weasViewer = new WEAS({ domElement: viewerContainerRef.current });
       if (inputs.structure) {
         weasViewer.avr.atoms = inputs.structure;

@@ -180,9 +180,10 @@ export const advancedSettingsSchema: SchemaMap = {
       then: {
         properties: {
           U: {
-            minimum: 0,
-            title: "U (eV)",
             type: "number",
+            title: "U (eV)",
+            minimum: 0,
+            default: 0,
           },
         },
       },
