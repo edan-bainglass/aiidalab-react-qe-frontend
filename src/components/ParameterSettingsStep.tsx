@@ -3,201 +3,20 @@ import validator from "@rjsf/validator-ajv8";
 import React, { useEffect, useState } from "react";
 import { Dropdown, DropdownButton, Spinner, Tab, Tabs } from "react-bootstrap";
 
-import {
-  getDefaultFormState,
-  RegistryWidgetsType,
-  RJSFSchema,
-  UiSchema,
-} from "@rjsf/utils";
+import { getDefaultFormState, RegistryWidgetsType } from "@rjsf/utils";
 
 import { SwitchWidget, ToggleGroupWidget } from "../common/components";
-import { InputSchema, StructureType } from "../interfaces";
+import { StructureType } from "../interfaces";
+import {
+  advancedSettingsSchema,
+  basicSettingsSchema,
+  SchemaMap,
+} from "../schemas";
+import { patchFormData, processDependencies } from "../utils";
 
 const widgets: RegistryWidgetsType = {
   toggleGroup: ToggleGroupWidget,
   CheckboxWidget: SwitchWidget,
-};
-
-const basicSettingsSchema: InputSchema = {
-  schema: {
-    type: "object",
-    properties: {
-      relax: {
-        title: "Relaxation level",
-        enum: ["none", "positions", "positions-cell"],
-        default: "none",
-      },
-      electronic_type: {
-        type: "string",
-        title: "Electronic type",
-        enum: ["Metallic", "Insulator"],
-        default: "Metallic",
-      },
-      protocol: {
-        type: "string",
-        title: "Protocol",
-        enum: ["Fast", "Balanced", "Stringent"],
-        default: "Fast",
-      },
-      spin_type: {
-        type: "boolean",
-        title: "Magnetism",
-      },
-      spin_orbit: {
-        type: "boolean",
-        title: "Spin orbit coupling",
-      },
-    },
-  },
-  ui: {
-    relax: {
-      "ui:widget": "toggleGroup",
-      "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
-    },
-    electronic_type: {
-      "ui:widget": "toggleGroup",
-    },
-    protocol: {
-      "ui:widget": "toggleGroup",
-    },
-  },
-};
-
-type SchemaMap = Record<string, InputSchema>;
-
-const advancedSettingsSchema: SchemaMap = {
-  convergence: {
-    schema: {
-      type: "object",
-      title: "Convergence",
-      properties: {
-        energyTolerance: {
-          type: "number",
-          title: "Energy tolerance",
-          default: 1e-5,
-        },
-        maxSteps: { type: "integer", title: "Max Steps", default: 100 },
-      },
-    },
-  },
-  smearing: {
-    schema: {
-      type: "object",
-      title: "Smearing",
-      properties: {
-        method: {
-          type: "string",
-          title: "Method",
-          enum: ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
-          default: "Gaussian",
-        },
-        width: { type: "number", title: "Width (eV)", default: 0.05 },
-      },
-    },
-  },
-  magnetization: {
-    schema: {
-      type: "object",
-      title: "Magnetization",
-      properties: {
-        initialMagnetization: {
-          type: "number",
-          title: "Initial magnetization",
-          default: 0.5,
-        },
-      },
-    },
-  },
-  hubbardU: {
-    schema: {
-      type: "object",
-      title: "HubbardU",
-      properties: {
-        use_hubbard: {
-          default: false,
-          title: "Enable U",
-          type: "boolean",
-        },
-      },
-      required: ["use_hubbard"],
-      if: {
-        properties: {
-          use_hubbard: {
-            const: true,
-          },
-        },
-      },
-      then: {
-        properties: {
-          U: {
-            default: 4.0,
-            minimum: 0,
-            title: "U (eV)",
-            type: "number",
-          },
-        },
-        required: ["U"],
-      },
-    },
-  },
-  pseudopotentials: {
-    schema: {
-      type: "object",
-      title: "Pseudopotentials",
-      properties: {
-        functional: {
-          type: "string",
-          title: "Functional",
-          enum: ["PBE", "PBEsol"],
-          default: "PBEsol",
-        },
-        family: {
-          type: "string",
-          title: "Family",
-          enum: ["SSSP", "PseudoDojo"],
-          default: "SSSP",
-        },
-        stringency: {
-          type: "string",
-          title: "Stringency",
-          enum: ["standard", "stringent"],
-          default: "standard",
-        },
-        pseudopotentials: {
-          type: "array",
-          title: "Pseudopotentials",
-          items: {
-            type: "string",
-            format: "data-url",
-            generatedFrom: "structure.species",
-            pattern: "{{species}}",
-          },
-        },
-      },
-    },
-    ui: {
-      functional: {
-        "ui:widget": "toggleGroup",
-      },
-      family: {
-        "ui:widget": "toggleGroup",
-      },
-      stringency: {
-        "ui:widget": "toggleGroup",
-      },
-      pseudopotentials: {
-        "ui:options": {
-          classNames: "mt-2",
-        },
-        items: {
-          "ui:hideError": true,
-          "ui:options": {
-            accept: ".UPF",
-          },
-        },
-      },
-    },
-  },
 };
 
 interface ParameterSettingsStepProps {
@@ -316,9 +135,10 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   const [loading, setLoading] = useState(true);
   const builtInKeys = Object.keys(advancedSettingsSchema);
   const pluginKeys = selectedProperties;
-  const [schemasMap, setSchemasMap] = useState<SchemaMap>(
-    advancedSettingsSchema
-  );
+  const [
+    advancedSettingsSchemaWithPlugins,
+    setadvancedSettingsSchemaWithPlugins,
+  ] = useState<SchemaMap>(advancedSettingsSchema);
 
   useEffect(() => {
     async function loadPluginSchemas() {
@@ -329,7 +149,10 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           if (!res.ok) throw new Error("Failed to load schema");
           fetched[key] = await res.json();
         }
-        setSchemasMap((prev) => ({ ...prev, ...fetched }));
+        setadvancedSettingsSchemaWithPlugins((prev) => ({
+          ...prev,
+          ...fetched,
+        }));
       } catch (err) {
         console.error(err);
       } finally {
@@ -359,7 +182,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   }
 
   const dropdownKeys = [...builtInKeys, ...pluginKeys];
-  const current = schemasMap[activePanel];
+  const current = advancedSettingsSchemaWithPlugins[activePanel];
 
   const CategorySelector = () => {
     return (
@@ -370,7 +193,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
       >
         {dropdownKeys.map((key) => (
           <Dropdown.Item key={key} eventKey={key}>
-            {schemasMap[key]?.schema.title || key}
+            {advancedSettingsSchemaWithPlugins[key]?.schema.title || key}
           </Dropdown.Item>
         ))}
       </DropdownButton>
@@ -404,75 +227,3 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
 };
 
 export default ParameterSettingsStep;
-
-const processDependencies = (
-  input: InputSchema,
-  structure: StructureType
-): InputSchema => {
-  const { schema: origSchema, ui: origUi } = input;
-
-  const schema: RJSFSchema = {
-    ...origSchema,
-    properties: { ...(origSchema.properties || {}) },
-  };
-  const ui: UiSchema = { ...origUi };
-
-  for (const [fieldKey, fieldDef] of Object.entries(schema.properties || {})) {
-    const isArray = fieldDef?.type === "array";
-    const items = (fieldDef as any)?.items;
-
-    if (!isArray || !items || typeof items !== "object") continue;
-
-    const generatedFrom = items.generatedFrom;
-    if (!generatedFrom) continue;
-
-    if (generatedFrom !== "structure.species") {
-      console.warn(`Unsupported generatedFrom source: ${generatedFrom}`);
-      continue;
-    }
-
-    const speciesKeys = Object.keys(structure.species || {});
-
-    const itemSchemas = speciesKeys.map((symbol, i) => {
-      const title = items.pattern
-        .replace(/{{\s*species\s*}}/g, symbol)
-        .replace(/{{\s*i\s*}}/g, String(i + 1));
-
-      const newItem: any = {
-        type: items.type,
-        title,
-        default: items.default,
-      };
-
-      if (items.format) newItem.format = items.format;
-      if (items.default !== undefined) newItem.default = items.default;
-
-      return newItem;
-    });
-
-    schema.properties![fieldKey] = {
-      ...fieldDef,
-      items: itemSchemas,
-    };
-  }
-
-  return { schema, ui };
-};
-
-const patchFormData = (data: any, schema: RJSFSchema) => {
-  if (!schema?.properties) return data;
-  const copy = { ...data };
-
-  for (const [fieldKey, fieldDef] of Object.entries(schema.properties)) {
-    if (
-      fieldDef?.type === "array" &&
-      Array.isArray(fieldDef.items) &&
-      (!Array.isArray(copy[fieldKey]) ||
-        copy[fieldKey].length !== fieldDef.items.length)
-    ) {
-      copy[fieldKey] = Array(fieldDef.items.length).fill(undefined);
-    }
-  }
-
-  return copy;
-};
