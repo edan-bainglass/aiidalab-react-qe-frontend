@@ -12,7 +12,7 @@ import {
   basicSettingsSchema,
   SchemaMap,
 } from "../schemas";
-import { patchFormData, processDependencies } from "../utils";
+import { patchDataIn, patchDataOut, patchSchema } from "../utils";
 
 const widgets: RegistryWidgetsType = {
   toggleGroup: ToggleGroupWidget,
@@ -200,7 +200,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
     );
   };
 
-  const { schema, ui } = processDependencies(current, structure);
+  const { schema, ui } = patchSchema(current, structure);
 
   return (
     <div>
@@ -212,11 +212,13 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           uiSchema={{
             ...ui,
             "ui:submitButtonOptions": { norender: true },
-            "ui:options": { title: "" },
+            "ui:options": { title: "", classNames: `${activePanel}-panel` },
           }}
           widgets={widgets}
-          formData={patchFormData(parameters[activePanel], schema)}
-          onChange={(e) => onFormChange(activePanel, e.formData)}
+          formData={patchDataIn(schema, parameters)}
+          onChange={(e) =>
+            onFormChange(activePanel, patchDataOut(schema, e.formData))
+          }
           validator={validator}
           showErrorList={false}
           liveValidate

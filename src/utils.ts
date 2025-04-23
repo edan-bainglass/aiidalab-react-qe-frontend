@@ -1,67 +1,11 @@
-import get from "lodash/get";
-import cloneDeep from "lodash/cloneDeep";
 import type { RJSFSchema, UiSchema } from "@rjsf/utils";
 
-// your existing types
-interface InputSchema {
-  schema: RJSFSchema;
-  ui: UiSchema;
-}
-interface StructureType {
-  species?: Record<string, any>;
-  sites?: Array<{ symbol: string }>;
-}
+import { InputSchema, StructureType } from "./interfaces";
 
 /**
- * 1) Injects any cross-form dependencies declared under `schema.dependsOn`
- *    into schema.properties as hidden fields with default values.
+ * Preprocess schema w.r.t dependencies
  */
-export function injectDependsOn(
-  input: InputSchema,
-  values: Record<string, any>
-): InputSchema {
-  const { schema: origSchema, ui: origUi } = input;
-  const schema = cloneDeep(origSchema);
-  const ui: UiSchema = { ...origUi };
-
-  // grab & remove our custom key
-  const deps = (schema as any).dependsOn as string[] | undefined;
-  delete (schema as any).dependsOn;
-
-  if (deps && schema.properties) {
-    schema.properties = { ...schema.properties };
-
-    deps.forEach((path) => {
-      const val = get(values, path);
-      const key = path.split(".").pop()!;
-
-      // ensure property exists and set its default
-      const prop = schema.properties![key] || {};
-      schema.properties![key] = {
-        ...prop,
-        type:
-          prop.type ||
-          (typeof val === "boolean"
-            ? "boolean"
-            : typeof val === "number"
-            ? "number"
-            : "string"),
-        default: val,
-      };
-
-      // hide it in the UI
-      ui[key] = { ...(ui[key] || {}), "ui:widget": "hidden" };
-    });
-  }
-
-  return { schema, ui };
-}
-
-/**
- * 2) Handles structure‑driven fields (`generatedFrom: "structure.species"`)
- *    after injecting any cross‑panel dependencies.
- */
-export const processDependencies = (
+export const patchSchema = (
   input: InputSchema,
   structure: StructureType
 ): InputSchema => {
@@ -74,7 +18,7 @@ export const processDependencies = (
   const ui: UiSchema = { ...origUi };
 
   for (const [fieldKey, fieldDef] of Object.entries(schema.properties || {})) {
-    const isArray = fieldDef?.type === "array";
+    const isArray = typeof fieldDef === "object" && fieldDef?.type === "array";
     const items = (fieldDef as any)?.items;
 
     if (!isArray || !items || typeof items !== "object") continue;
@@ -115,20 +59,38 @@ export const processDependencies = (
   return { schema, ui };
 };
 
-export const patchFormData = (data: any, schema: RJSFSchema) => {
-  if (!schema?.properties) return data;
-  const copy = { ...data };
+/**
+ * Preprocess data w.r.t dependencies
+ */
+export const patchDataIn = (
+  schema: RJSFSchema,
+  data: Record<string, any>
+): Record<string, any> => {
+  const copy = {} as typeof data;
 
-  for (const [fieldKey, fieldDef] of Object.entries(schema.properties)) {
-    if (
-      fieldDef?.type === "array" &&
-      Array.isArray(fieldDef.items) &&
-      (!Array.isArray(copy[fieldKey]) ||
-        copy[fieldKey].length !== fieldDef.items.length)
-    ) {
-      copy[fieldKey] = Array(fieldDef.items.length).fill(undefined);
+  const dependencies = schema.dependsOn;
+  for (const dependency of dependencies || []) {
+    if (dependency === "basic.protocol") {
+      const [panel, dep] = dependency.split(".");
+      copy[dep] = data[panel][dep];
     }
   }
 
   return copy;
+};
+
+/**
+ * Postprocess data w.r.t dependencies
+ */
+export const patchDataOut = (
+  schema: RJSFSchema,
+  data: Record<string, any>
+): Record<string, any> => {
+  const dependencies = schema.dependsOn;
+  for (const dependency of dependencies || []) {
+    if (dependency === "basic.protocol") {
+      delete data["protocol"];
+    }
+  }
+  return data;
 };

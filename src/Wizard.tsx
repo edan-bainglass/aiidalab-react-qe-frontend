@@ -72,20 +72,6 @@ const Wizard: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(1);
 
-  const setParametersPanel = (location: string) => {
-    dispatch({
-      type: "SET_PARAMETERS_PANEL",
-      payload: location,
-    });
-  };
-
-  const setAdvancedPanel = (location: string) => {
-    dispatch({
-      type: "SET_ADVANCED_PANEL",
-      payload: location,
-    });
-  };
-
   const handleSubmission = async () => {
     try {
       const res = await fetch("/api/submit", {

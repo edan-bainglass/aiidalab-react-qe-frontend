@@ -48,122 +48,86 @@ export const basicSettingsSchema: InputSchema = {
 export type SchemaMap = Record<string, InputSchema>;
 
 export const advancedSettingsSchema: SchemaMap = {
-  // convergence: {
-  //   schema: {
-  //     type: "object",
-  //     title: "Convergence",
-  //     properties: {
-  //       protocol: {
-  //         type: "string",
-  //         title: "Protocol",
-  //         enum: ["Fast", "Balanced", "Stringent"],
-  //         default: "Fast",
-  //       },
-  //     },
-  //     if: {
-  //       properties: {
-  //         protocol: {
-  //           const: "Fast",
-  //         },
-  //       },
-  //     },
-  //     then: {
-  //       properties: {
-  //         scfConvEng: {
-  //           type: "number",
-  //           title: "SCF energy (Ry/atom)",
-  //           default: 4e-10,
-  //         },
-  //         ionicConvEng: {
-  //           type: "number",
-  //           title: "Ionic energy (Ry/atom)",
-  //           default: 0.0001,
-  //         },
-  //         ionicConvForce: {
-  //           type: "number",
-  //           title: "Ionic force (Ry/Bohr)",
-  //           default: 0.001,
-  //         },
-  //       },
-  //     },
-  //     else: {
-  //       if: {
-  //         properties: {
-  //           protocol: {
-  //             const: "Balanced",
-  //           },
-  //         },
-  //       },
-  //       then: {
-  //         properties: {
-  //           scfConvEng: {
-  //             type: "number",
-  //             title: "SCF energy (Ry/atom)",
-  //             default: 2e-10,
-  //           },
-  //           ionicConvEng: {
-  //             type: "number",
-  //             title: "Ionic energy (Ry/atom)",
-  //             default: 0.00001,
-  //           },
-  //           ionicConvForce: {
-  //             type: "number",
-  //             title: "Ionic force (Ry/Bohr)",
-  //             default: 0.0001,
-  //           },
-  //         },
-  //       },
-  //       else: {
-  //         if: {
-  //           properties: {
-  //             protocol: {
-  //               const: "Stringent",
-  //             },
-  //           },
-  //         },
-  //         then: {
-  //           properties: {
-  //             scfConvEng: {
-  //               type: "number",
-  //               title: "SCF energy (Ry/atom)",
-  //               default: 1e-10,
-  //             },
-  //             ionicConvEng: {
-  //               type: "number",
-  //               title: "Ionic energy (Ry/atom)",
-  //               default: 0.000005,
-  //             },
-  //             ionicConvForce: {
-  //               type: "number",
-  //               title: "Ionic force (Ry/Bohr)",
-  //               default: 0.00005,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // },
   convergence: {
     schema: {
       type: "object",
       title: "Convergence",
-      properties: {
-        scfConvEng: {
-          type: "number",
-          title: "SCF energy (Ry/atom)",
-          default: 4e-10,
+      dependsOn: ["basic.protocol"],
+      oneOf: [
+        {
+          type: "object",
+          properties: {
+            protocol: {
+              const: "Fast",
+            },
+            scfConvEng: {
+              type: "number",
+              title: "SCF energy (Ry/atom)",
+              default: 4e-10,
+            },
+            ionicConvEng: {
+              type: "number",
+              title: "Ionic energy (Ry/atom)",
+              default: 0.0001,
+            },
+            ionicConvForce: {
+              type: "number",
+              title: "Ionic force (Ry/Bohr)",
+              default: 0.001,
+            },
+          },
         },
-        ionicConvEng: {
-          type: "number",
-          title: "Ionic energy (Ry/atom)",
-          default: 0.0001,
+        {
+          type: "object",
+          properties: {
+            protocol: {
+              const: "Balanced",
+            },
+            scfConvEng: {
+              type: "number",
+              title: "SCF energy (Ry/atom)",
+              default: 2e-10,
+            },
+            ionicConvEng: {
+              type: "number",
+              title: "Ionic energy (Ry/atom)",
+              default: 0.00001,
+            },
+            ionicConvForce: {
+              type: "number",
+              title: "Ionic force (Ry/Bohr)",
+              default: 0.0001,
+            },
+          },
         },
-        ionicConvForce: {
-          type: "number",
-          title: "Ionic force (Ry/Bohr)",
-          default: 0.001,
+        {
+          type: "object",
+          properties: {
+            protocol: {
+              const: "Stringent",
+            },
+            scfConvEng: {
+              type: "number",
+              title: "SCF energy (Ry/atom)",
+              default: 1e-10,
+            },
+            ionicConvEng: {
+              type: "number",
+              title: "Ionic energy (Ry/atom)",
+              default: 0.000005,
+            },
+            ionicConvForce: {
+              type: "number",
+              title: "Ionic force (Ry/Bohr)",
+              default: 0.00005,
+            },
+          },
         },
+      ],
+    },
+    ui: {
+      protocol: {
+        "ui:widget": "hidden",
       },
     },
   },
@@ -249,7 +213,7 @@ export const advancedSettingsSchema: SchemaMap = {
             format: "data-url",
             generatedFrom: "structure.species",
             template: "{{species}}",
-          },
+          } as any,
         },
       },
       if: {
