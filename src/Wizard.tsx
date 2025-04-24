@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useReducer, useState } from "react";
 import { Breadcrumb, Button, Col, Container, Row } from "react-bootstrap";
 
 import {
@@ -10,8 +10,8 @@ import {
   WorkflowResultsStep,
   WorkflowSubmissionStep,
 } from "./components";
-
-import { Property, WizardAction, WizardState } from "./interfaces";
+import { WizardAction, WizardState } from "./interfaces";
+import { parametersSchema } from "./schemas";
 
 const steps = [
   { id: 1, label: "Structure" },
@@ -25,10 +25,10 @@ const steps = [
 
 const initialState: WizardState = {
   structure: null,
-  availableProperties: [],
-  selectedProperties: [],
+  properties: {},
   activeParametersPanel: "basic",
   activeAdvancedPanel: "convergence",
+  parametersSchema: parametersSchema,
   parameters: {},
   resources: null,
   metadata: {},
@@ -37,16 +37,22 @@ const initialState: WizardState = {
 
 function reducer(state: WizardState, action: WizardAction): WizardState {
   switch (action.type) {
-    case "SET_AVAILABLE_PROPERTIES":
-      return { ...state, availableProperties: action.payload };
     case "SET_STRUCTURE":
       return { ...state, structure: action.payload };
-    case "SET_SELECTED_PROPERTIES":
-      return { ...state, selectedProperties: action.payload };
+    case "SET_PROPERTIES":
+      return { ...state, properties: action.payload };
     case "SET_PARAMETERS_PANEL":
       return { ...state, activeParametersPanel: action.payload };
     case "SET_ADVANCED_PANEL":
       return { ...state, activeAdvancedPanel: action.payload };
+    case "SET_PARAMETERS_SCHEMA":
+      return {
+        ...state,
+        parametersSchema: {
+          ...state.parametersSchema,
+          ...action.payload,
+        },
+      };
     case "SET_PARAMETERS":
       return {
         ...state,
@@ -81,7 +87,9 @@ const Wizard: React.FC = () => {
         },
         body: JSON.stringify({
           structure: state.structure,
-          properties: state.selectedProperties,
+          properties: Object.keys(state.properties).filter(
+            (key) => state.properties[key].active
+          ),
           parameters: state.parameters,
           resources: state.resources,
           metadata: state.metadata,
@@ -95,20 +103,6 @@ const Wizard: React.FC = () => {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    async function loadProperties() {
-      try {
-        const res = await fetch("/api/plugins");
-        if (!res.ok) throw new Error("Failed to load plugins");
-        const data: Property[] = await res.json();
-        dispatch({ type: "SET_AVAILABLE_PROPERTIES", payload: data });
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    loadProperties();
-  }, []);
 
   const goNext = () =>
     setCurrentStep((prev) => Math.min(prev + 1, steps.length));
@@ -128,10 +122,9 @@ const Wizard: React.FC = () => {
       case 2:
         return (
           <PropertySelectionStep
-            available={state.availableProperties}
-            selected={state.selectedProperties}
-            onChange={(sel) =>
-              dispatch({ type: "SET_SELECTED_PROPERTIES", payload: sel })
+            properties={state.properties}
+            onChange={(selected) =>
+              dispatch({ type: "SET_PROPERTIES", payload: selected })
             }
             controls={<StepNavControls prev={goPrev} next={goNext} />}
           />
@@ -140,7 +133,14 @@ const Wizard: React.FC = () => {
         return (
           <ParameterSettingsStep
             structure={state.structure}
-            selectedProperties={state.selectedProperties}
+            properties={state.properties}
+            parametersSchema={state.parametersSchema}
+            onParametersSchemaChange={(schema) =>
+              dispatch({
+                type: "SET_PARAMETERS_SCHEMA",
+                payload: schema,
+              })
+            }
             parameters={state.parameters}
             onChange={(panelKey, data) =>
               dispatch({ type: "SET_PARAMETERS", payload: { panelKey, data } })
@@ -172,7 +172,9 @@ const Wizard: React.FC = () => {
           <InputsReviewStep
             inputs={{
               structure: state.structure,
-              properties: state.selectedProperties,
+              properties: Object.keys(state.properties).filter(
+                (key) => state.properties[key].active
+              ),
               parameters: state.parameters,
               resources: state.resources,
             }}

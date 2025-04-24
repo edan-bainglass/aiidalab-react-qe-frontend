@@ -1,54 +1,53 @@
-import { InputSchema } from "./interfaces";
+import { SchemaMap } from "./interfaces";
 
-export const basicSettingsSchema: InputSchema = {
-  schema: {
-    type: "object",
-    properties: {
+export const parametersSchema: SchemaMap = {
+  basic: {
+    active: true,
+    schema: {
+      type: "object",
+      properties: {
+        relax: {
+          title: "Relaxation level",
+          enum: ["none", "positions", "positions-cell"],
+          default: "none",
+        },
+        electronic_type: {
+          type: "string",
+          title: "Electronic type",
+          enum: ["Metallic", "Insulator"],
+          default: "Metallic",
+        },
+        protocol: {
+          type: "string",
+          title: "Protocol",
+          enum: ["Fast", "Balanced", "Stringent"],
+          default: "Fast",
+        },
+        spin_type: {
+          type: "boolean",
+          title: "Magnetism",
+        },
+        spin_orbit: {
+          type: "boolean",
+          title: "Spin orbit coupling",
+        },
+      },
+    },
+    ui: {
       relax: {
-        title: "Relaxation level",
-        enum: ["none", "positions", "positions-cell"],
-        default: "none",
+        "ui:widget": "toggleGroup",
+        "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
       },
       electronic_type: {
-        type: "string",
-        title: "Electronic type",
-        enum: ["Metallic", "Insulator"],
-        default: "Metallic",
+        "ui:widget": "toggleGroup",
       },
       protocol: {
-        type: "string",
-        title: "Protocol",
-        enum: ["Fast", "Balanced", "Stringent"],
-        default: "Fast",
-      },
-      spin_type: {
-        type: "boolean",
-        title: "Magnetism",
-      },
-      spin_orbit: {
-        type: "boolean",
-        title: "Spin orbit coupling",
+        "ui:widget": "toggleGroup",
       },
     },
   },
-  ui: {
-    relax: {
-      "ui:widget": "toggleGroup",
-      "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
-    },
-    electronic_type: {
-      "ui:widget": "toggleGroup",
-    },
-    protocol: {
-      "ui:widget": "toggleGroup",
-    },
-  },
-};
-
-export type SchemaMap = Record<string, InputSchema>;
-
-export const advancedSettingsSchema: SchemaMap = {
   convergence: {
+    active: true,
     schema: {
       type: "object",
       title: "Convergence",
@@ -132,6 +131,7 @@ export const advancedSettingsSchema: SchemaMap = {
     },
   },
   smearing: {
+    active: true,
     schema: {
       type: "object",
       title: "Smearing",
@@ -147,6 +147,7 @@ export const advancedSettingsSchema: SchemaMap = {
     },
   },
   magnetization: {
+    active: true,
     schema: {
       type: "object",
       title: "Magnetization",
@@ -159,6 +160,7 @@ export const advancedSettingsSchema: SchemaMap = {
     },
   },
   hubbardU: {
+    active: true,
     schema: {
       type: "object",
       title: "Hubbard U",
@@ -190,6 +192,7 @@ export const advancedSettingsSchema: SchemaMap = {
     },
   },
   pseudopotentials: {
+    active: true,
     schema: {
       type: "object",
       title: "Pseudopotentials",

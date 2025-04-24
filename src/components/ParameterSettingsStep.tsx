@@ -6,12 +6,12 @@ import { Dropdown, DropdownButton, Spinner, Tab, Tabs } from "react-bootstrap";
 import { getDefaultFormState, RegistryWidgetsType } from "@rjsf/utils";
 
 import { SwitchWidget, ToggleGroupWidget } from "../common/components";
-import { StructureType } from "../interfaces";
 import {
-  advancedSettingsSchema,
-  basicSettingsSchema,
+  InputSchema,
+  PropertyMap,
   SchemaMap,
-} from "../schemas";
+  StructureType,
+} from "../interfaces";
 import { patchDataIn, patchDataOut, patchSchema } from "../utils";
 
 const widgets: RegistryWidgetsType = {
@@ -21,7 +21,9 @@ const widgets: RegistryWidgetsType = {
 
 interface ParameterSettingsStepProps {
   structure: StructureType;
-  selectedProperties: string[];
+  properties: PropertyMap;
+  parametersSchema: SchemaMap;
+  onParametersSchemaChange: (schema: SchemaMap) => void;
   parameters: any;
   onChange: (panelKey: string, formData: any) => void;
   controls: React.ReactNode;
@@ -33,7 +35,9 @@ interface ParameterSettingsStepProps {
 
 const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   structure,
-  selectedProperties,
+  properties,
+  parametersSchema,
+  onParametersSchemaChange,
   parameters,
   onChange,
   controls,
@@ -45,6 +49,8 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   const handleFormChange = (panelKey: string, formData: any) => {
     onChange(panelKey, formData);
   };
+
+  const { basic: basicSchema, ...advancedSchema } = parametersSchema;
 
   return (
     <div>
@@ -60,6 +66,7 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
         <Tab eventKey="basic" title="Basic settings">
           <BasicSettings
             structure={structure}
+            basicSchema={basicSchema}
             parameters={parameters}
             onFormChange={handleFormChange}
           />
@@ -67,7 +74,9 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
         <Tab eventKey="advanced" title="Advanced settings">
           <AdvancedSettings
             structure={structure}
-            selectedProperties={selectedProperties}
+            properties={properties}
+            advancedSchema={advancedSchema}
+            onAdvancedSchemaChange={onParametersSchemaChange}
             parameters={parameters}
             onFormChange={handleFormChange}
             activePanel={advancedPanel}
@@ -79,20 +88,25 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   );
 };
 
-interface BasicSettingsProps {
+interface SettingsPanelProps {
   structure: StructureType;
   parameters: Record<string, any>;
   onFormChange: (panelKey: string, formData: any) => void;
 }
 
+interface BasicSettingsProps extends SettingsPanelProps {
+  basicSchema: InputSchema;
+}
+
 const BasicSettings: React.FC<BasicSettingsProps> = ({
   structure,
+  basicSchema,
   parameters,
   onFormChange,
 }) => {
   useEffect(() => {
     const key = "basic";
-    const schema = basicSettingsSchema.schema;
+    const schema = basicSchema.schema;
     if (parameters[key] === undefined) {
       const defaults = getDefaultFormState(validator, schema, {}, schema);
       onFormChange(key, defaults);
@@ -102,9 +116,9 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
   return (
     <div>
       <Form
-        schema={basicSettingsSchema.schema}
+        schema={basicSchema.schema}
         uiSchema={{
-          ...basicSettingsSchema.ui,
+          ...basicSchema.ui,
           "ui:submitButtonOptions": { norender: true },
         }}
         widgets={widgets}
@@ -118,49 +132,53 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
   );
 };
 
-interface AdvancedSettingsProps extends BasicSettingsProps {
-  selectedProperties: string[];
+interface AdvancedSettingsProps extends SettingsPanelProps {
+  advancedSchema: SchemaMap;
+  onAdvancedSchemaChange: (schema: SchemaMap) => void;
+  properties: PropertyMap;
   activePanel: string;
   onPanelChange: (panelKey: string) => void;
 }
 
 const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
   structure,
-  selectedProperties,
+  properties,
+  advancedSchema,
+  onAdvancedSchemaChange,
   parameters,
   onFormChange,
   activePanel,
   onPanelChange: setPanel,
 }) => {
   const [loading, setLoading] = useState(true);
-  const [advancedSettingsSchemas, setAdvancedSettingsSchemas] =
-    useState<SchemaMap>(advancedSettingsSchema);
 
   useEffect(() => {
     async function loadPluginSchemas() {
       try {
         const fetched: SchemaMap = {};
-        for (const property of selectedProperties) {
-          const res = await fetch(`/api/plugins/${property}/input`);
+        for (const [key, property] of Object.entries(properties)) {
+          if (advancedSchema[key]) continue;
+          if (!property.active) continue;
+          const res = await fetch(`/api/plugins/${key}/input`);
           if (!res.ok) throw new Error("Failed to load schema");
-          fetched[property] = await res.json();
+          fetched[key] = { ...(await res.json()), active: true };
         }
-        setAdvancedSettingsSchemas((prev) => ({
-          ...prev,
+        const mergedSchemas = {
+          ...advancedSchema,
           ...fetched,
-        }));
+        };
+        onAdvancedSchemaChange(mergedSchemas);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
-    if (selectedProperties.length) loadPluginSchemas();
-    else setLoading(false);
-  }, [selectedProperties]);
+    Object.keys(properties).length && loadPluginSchemas();
+  }, [properties]);
 
   useEffect(() => {
-    Object.entries(advancedSettingsSchema).forEach(([key, { schema }]) => {
+    Object.entries(advancedSchema).forEach(([key, { schema }]) => {
       if (parameters[key] === undefined) {
         const defaults = getDefaultFormState(validator, schema, {}, schema);
         onFormChange(key, defaults);
@@ -177,51 +195,50 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
     );
   }
 
-  const categories = [
-    ...Object.keys(advancedSettingsSchema),
-    ...selectedProperties,
-  ];
+  const panelKeys = Object.keys(advancedSchema).filter(
+    (key) => !properties[key] || properties[key]?.active
+  );
 
-  const currentKey = advancedSettingsSchemas[activePanel]
+  const currentPanelKey = panelKeys.includes(activePanel)
     ? activePanel
     : "convergence";
 
-  const current = advancedSettingsSchemas[currentKey];
+  const currentSchema = advancedSchema[currentPanelKey];
 
   const CategorySelector = () => {
     return (
       <DropdownButton
-        title={current?.schema.title || currentKey}
+        title={currentSchema?.schema.title || currentPanelKey}
         className="mb-3"
         onSelect={(key) => setPanel(key || "")}
       >
-        {categories.map((key) => (
+        {panelKeys.map((key) => (
           <Dropdown.Item key={key} eventKey={key}>
-            {advancedSettingsSchemas[key]?.schema.title || key}
+            {advancedSchema[key]?.schema.title || key}
           </Dropdown.Item>
         ))}
       </DropdownButton>
     );
   };
 
-  const { schema, ui } = patchSchema(current, structure);
+  const { schema, ui } = patchSchema(currentSchema, structure);
 
   return (
     <div>
       {<CategorySelector />}
 
-      {current && (
+      {currentSchema && (
         <Form
           schema={schema}
           uiSchema={{
             ...ui,
             "ui:submitButtonOptions": { norender: true },
-            "ui:options": { title: "", classNames: `${currentKey}-panel` },
+            "ui:options": { title: "", classNames: `${currentPanelKey}-panel` },
           }}
           widgets={widgets}
           formData={patchDataIn(schema, parameters)}
           onChange={(e) =>
-            onFormChange(currentKey, patchDataOut(schema, e.formData))
+            onFormChange(currentPanelKey, patchDataOut(schema, e.formData))
           }
           validator={validator}
           showErrorList={false}
