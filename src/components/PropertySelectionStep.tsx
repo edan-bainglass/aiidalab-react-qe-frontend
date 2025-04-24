@@ -38,8 +38,6 @@ const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
     !hasProperties && loadProperties();
   }, []);
 
-  console.log(loading);
-
   return (
     <div>
       <h2>Step 2: Select properties to compute</h2>

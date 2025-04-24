@@ -21,6 +21,14 @@ export interface InputSchema {
   ui?: UiSchema;
 }
 
+export type SchemaMap = Record<string, InputSchema>;
+
+export interface ParameterSchemas {
+  basic: InputSchema;
+  advanced: SchemaMap;
+  plugins: SchemaMap;
+}
+
 export interface WorkflowInputs {
   structure: StructureType;
   properties: string[];
@@ -28,14 +36,13 @@ export interface WorkflowInputs {
   resources: ResourcesType;
 }
 
-export type SchemaMap = Record<string, InputSchema>;
-
 export interface WizardState {
   structure: StructureType | null;
   properties: PropertyMap;
   activeParametersPanel: string;
   activeAdvancedPanel: string;
-  parametersSchema: SchemaMap;
+  activePluginPanel: string;
+  parameterSchemas: ParameterSchemas;
   parameters: Record<string, any>;
   resources: ResourcesType | null;
   metadata: Record<string, string>;
@@ -47,7 +54,8 @@ export type WizardAction =
   | { type: "SET_PROPERTIES"; payload: PropertyMap }
   | { type: "SET_PARAMETERS_PANEL"; payload: string }
   | { type: "SET_ADVANCED_PANEL"; payload: string }
-  | { type: "SET_PARAMETERS_SCHEMA"; payload: SchemaMap }
+  | { type: "SET_PLUGIN_PANEL"; payload: string }
+  | { type: "UPDATE_PLUGIN_SCHEMAS"; payload: SchemaMap }
   | { type: "SET_PARAMETERS"; payload: { panelKey: string; data: any } }
   | { type: "SET_RESOURCES"; payload: ResourcesType }
   | { type: "SET_RESULTS"; payload: ResultsType }

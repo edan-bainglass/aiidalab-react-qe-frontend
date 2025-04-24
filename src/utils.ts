@@ -70,7 +70,7 @@ export const patchDataIn = (
 
   const dependencies = schema.dependsOn;
   for (const dependency of dependencies || []) {
-    if (dependency === "basic.protocol") {
+    if (dependency === "basic.protocol" && "basic" in data) {
       const [panel, dep] = dependency.split(".");
       copy[dep] = data[panel][dep];
     }

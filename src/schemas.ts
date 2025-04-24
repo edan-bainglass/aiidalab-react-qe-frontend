@@ -1,8 +1,7 @@
-import { SchemaMap } from "./interfaces";
+import { ParameterSchemas } from "./interfaces";
 
-export const parametersSchema: SchemaMap = {
+export const parameterSchemas: ParameterSchemas = {
   basic: {
-    active: true,
     schema: {
       type: "object",
       properties: {
@@ -46,202 +45,180 @@ export const parametersSchema: SchemaMap = {
       },
     },
   },
-  convergence: {
-    active: true,
-    schema: {
-      type: "object",
-      title: "Convergence",
-      dependsOn: ["basic.protocol"],
-      oneOf: [
-        {
-          type: "object",
-          properties: {
-            protocol: {
-              const: "Fast",
-            },
-            scfConvEng: {
-              type: "number",
-              title: "SCF energy (Ry/atom)",
-              default: 4e-10,
-            },
-            ionicConvEng: {
-              type: "number",
-              title: "Ionic energy (Ry/atom)",
-              default: 0.0001,
-            },
-            ionicConvForce: {
-              type: "number",
-              title: "Ionic force (Ry/Bohr)",
-              default: 0.001,
-            },
-          },
-        },
-        {
-          type: "object",
-          properties: {
-            protocol: {
-              const: "Balanced",
-            },
-            scfConvEng: {
-              type: "number",
-              title: "SCF energy (Ry/atom)",
-              default: 2e-10,
-            },
-            ionicConvEng: {
-              type: "number",
-              title: "Ionic energy (Ry/atom)",
-              default: 0.00001,
-            },
-            ionicConvForce: {
-              type: "number",
-              title: "Ionic force (Ry/Bohr)",
-              default: 0.0001,
+  advanced: {
+    convergence: {
+      schema: {
+        type: "object",
+        title: "Convergence",
+        dependsOn: ["basic.protocol"],
+        oneOf: [
+          {
+            type: "object",
+            properties: {
+              protocol: {
+                const: "Fast",
+              },
+              scfConvEng: {
+                type: "number",
+                title: "SCF energy (Ry/atom)",
+                default: 4e-10,
+              },
+              ionicConvEng: {
+                type: "number",
+                title: "Ionic energy (Ry/atom)",
+                default: 0.0001,
+              },
+              ionicConvForce: {
+                type: "number",
+                title: "Ionic force (Ry/Bohr)",
+                default: 0.001,
+              },
             },
           },
-        },
-        {
-          type: "object",
-          properties: {
-            protocol: {
-              const: "Stringent",
-            },
-            scfConvEng: {
-              type: "number",
-              title: "SCF energy (Ry/atom)",
-              default: 1e-10,
-            },
-            ionicConvEng: {
-              type: "number",
-              title: "Ionic energy (Ry/atom)",
-              default: 0.000005,
-            },
-            ionicConvForce: {
-              type: "number",
-              title: "Ionic force (Ry/Bohr)",
-              default: 0.00005,
+          {
+            type: "object",
+            properties: {
+              protocol: {
+                const: "Balanced",
+              },
+              scfConvEng: {
+                type: "number",
+                title: "SCF energy (Ry/atom)",
+                default: 2e-10,
+              },
+              ionicConvEng: {
+                type: "number",
+                title: "Ionic energy (Ry/atom)",
+                default: 0.00001,
+              },
+              ionicConvForce: {
+                type: "number",
+                title: "Ionic force (Ry/Bohr)",
+                default: 0.0001,
+              },
             },
           },
-        },
-      ],
-    },
-    ui: {
-      protocol: {
-        "ui:widget": "hidden",
+          {
+            type: "object",
+            properties: {
+              protocol: {
+                const: "Stringent",
+              },
+              scfConvEng: {
+                type: "number",
+                title: "SCF energy (Ry/atom)",
+                default: 1e-10,
+              },
+              ionicConvEng: {
+                type: "number",
+                title: "Ionic energy (Ry/atom)",
+                default: 0.000005,
+              },
+              ionicConvForce: {
+                type: "number",
+                title: "Ionic force (Ry/Bohr)",
+                default: 0.00005,
+              },
+            },
+          },
+        ],
       },
-    },
-  },
-  smearing: {
-    active: true,
-    schema: {
-      type: "object",
-      title: "Smearing",
-      properties: {
-        method: {
-          type: "string",
-          title: "Method",
-          enum: ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
-          default: "Gaussian",
-        },
-        width: { type: "number", title: "Width (eV)", default: 0.05 },
-      },
-    },
-  },
-  magnetization: {
-    active: true,
-    schema: {
-      type: "object",
-      title: "Magnetization",
-      properties: {
-        initialMagnetization: {
-          type: "number",
-          title: "Initial magnetization",
+      ui: {
+        protocol: {
+          "ui:widget": "hidden",
         },
       },
     },
-  },
-  hubbardU: {
-    active: true,
-    schema: {
-      type: "object",
-      title: "Hubbard U",
-      properties: {
-        use_hubbard: {
-          default: false,
-          title: "Enable U",
-          type: "boolean",
+    smearing: {
+      schema: {
+        type: "object",
+        title: "Smearing",
+        properties: {
+          method: {
+            type: "string",
+            title: "Method",
+            enum: ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
+            default: "Gaussian",
+          },
+          width: { type: "number", title: "Width (eV)", default: 0.05 },
         },
       },
-      required: ["use_hubbard"],
-      if: {
+    },
+    magnetization: {
+      schema: {
+        type: "object",
+        title: "Magnetization",
+        properties: {
+          initialMagnetization: {
+            type: "number",
+            title: "Initial magnetization",
+          },
+        },
+      },
+    },
+    hubbardU: {
+      schema: {
+        type: "object",
+        title: "Hubbard U",
         properties: {
           use_hubbard: {
-            const: true,
+            default: false,
+            title: "Enable U",
+            type: "boolean",
           },
         },
-      },
-      then: {
-        properties: {
-          U: {
-            type: "number",
-            title: "U (eV)",
-            minimum: 0,
-            default: 0,
+        required: ["use_hubbard"],
+        if: {
+          properties: {
+            use_hubbard: {
+              const: true,
+            },
+          },
+        },
+        then: {
+          properties: {
+            U: {
+              type: "number",
+              title: "U (eV)",
+              minimum: 0,
+              default: 0,
+            },
           },
         },
       },
     },
-  },
-  pseudopotentials: {
-    active: true,
-    schema: {
-      type: "object",
-      title: "Pseudopotentials",
-      properties: {
-        functional: {
-          type: "string",
-          title: "Functional",
-          enum: ["PBE", "PBEsol"],
-          default: "PBEsol",
-        },
-        family: {
-          type: "string",
-          title: "Family",
-          enum: ["SSSP", "PseudoDojo"],
-          default: "SSSP",
-        },
-        pseudopotentials: {
-          type: "array",
-          title: "Pseudopotentials",
-          items: {
-            type: "string",
-            format: "data-url",
-            generatedFrom: "structure.species",
-            template: "{{species}}",
-          } as any,
-        },
-      },
-      if: {
+    pseudopotentials: {
+      schema: {
+        type: "object",
+        title: "Pseudopotentials",
         properties: {
+          functional: {
+            type: "string",
+            title: "Functional",
+            enum: ["PBE", "PBEsol"],
+            default: "PBEsol",
+          },
           family: {
-            const: "SSSP",
-          },
-        },
-      },
-      then: {
-        properties: {
-          accuracy: {
             type: "string",
-            title: "Accuracy",
-            enum: ["Efficiency", "Precision"],
-            default: "Efficiency",
+            title: "Family",
+            enum: ["SSSP", "PseudoDojo"],
+            default: "SSSP",
+          },
+          pseudopotentials: {
+            type: "array",
+            title: "Pseudopotentials",
+            items: {
+              type: "string",
+              format: "data-url",
+              generatedFrom: "structure.species",
+              template: "{{species}}",
+            } as any,
           },
         },
-      },
-      else: {
         if: {
           properties: {
             family: {
-              const: "PseudoDojo",
+              const: "SSSP",
             },
           },
         },
@@ -250,35 +227,55 @@ export const parametersSchema: SchemaMap = {
             accuracy: {
               type: "string",
               title: "Accuracy",
-              enum: ["Standard", "Stringent"],
-              default: "Standard",
+              enum: ["Efficiency", "Precision"],
+              default: "Efficiency",
+            },
+          },
+        },
+        else: {
+          if: {
+            properties: {
+              family: {
+                const: "PseudoDojo",
+              },
+            },
+          },
+          then: {
+            properties: {
+              accuracy: {
+                type: "string",
+                title: "Accuracy",
+                enum: ["Standard", "Stringent"],
+                default: "Standard",
+              },
             },
           },
         },
       },
-    },
-    ui: {
-      functional: {
-        "ui:widget": "toggleGroup",
-      },
-      family: {
-        "ui:widget": "toggleGroup",
-      },
-      accuracy: {
-        "ui:widget": "toggleGroup",
-      },
-      pseudopotentials: {
-        "ui:options": {
-          classNames: "mt-2",
+      ui: {
+        functional: {
+          "ui:widget": "toggleGroup",
         },
-        items: {
-          "ui:hideError": true,
+        family: {
+          "ui:widget": "toggleGroup",
+        },
+        accuracy: {
+          "ui:widget": "toggleGroup",
+        },
+        pseudopotentials: {
           "ui:options": {
-            accept: ".UPF",
+            classNames: "mt-2",
+          },
+          items: {
+            "ui:hideError": true,
+            "ui:options": {
+              accept: ".UPF",
+            },
           },
         },
+        "ui:order": ["functional", "family", "accuracy", "pseudopotentials"],
       },
-      "ui:order": ["functional", "family", "accuracy", "pseudopotentials"],
     },
   },
+  plugins: {},
 };

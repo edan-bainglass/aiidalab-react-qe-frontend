@@ -11,7 +11,7 @@ import {
   WorkflowSubmissionStep,
 } from "./components";
 import { WizardAction, WizardState } from "./interfaces";
-import { parametersSchema } from "./schemas";
+import { parameterSchemas } from "./schemas";
 
 const steps = [
   { id: 1, label: "Structure" },
@@ -28,7 +28,8 @@ const initialState: WizardState = {
   properties: {},
   activeParametersPanel: "basic",
   activeAdvancedPanel: "convergence",
-  parametersSchema: parametersSchema,
+  activePluginPanel: "",
+  parameterSchemas: parameterSchemas,
   parameters: {},
   resources: null,
   metadata: {},
@@ -45,12 +46,17 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, activeParametersPanel: action.payload };
     case "SET_ADVANCED_PANEL":
       return { ...state, activeAdvancedPanel: action.payload };
-    case "SET_PARAMETERS_SCHEMA":
+    case "SET_PLUGIN_PANEL":
+      return { ...state, activePluginPanel: action.payload };
+    case "UPDATE_PLUGIN_SCHEMAS":
       return {
         ...state,
-        parametersSchema: {
-          ...state.parametersSchema,
-          ...action.payload,
+        parameterSchemas: {
+          ...state.parameterSchemas,
+          plugins: {
+            ...state.parameterSchemas.plugins,
+            ...action.payload,
+          },
         },
       };
     case "SET_PARAMETERS":
@@ -134,13 +140,7 @@ const Wizard: React.FC = () => {
           <ParameterSettingsStep
             structure={state.structure}
             properties={state.properties}
-            parametersSchema={state.parametersSchema}
-            onParametersSchemaChange={(schema) =>
-              dispatch({
-                type: "SET_PARAMETERS_SCHEMA",
-                payload: schema,
-              })
-            }
+            parametersSchema={state.parameterSchemas}
             parameters={state.parameters}
             onChange={(panelKey, data) =>
               dispatch({ type: "SET_PARAMETERS", payload: { panelKey, data } })
@@ -156,6 +156,16 @@ const Wizard: React.FC = () => {
             advancedPanel={state.activeAdvancedPanel}
             onAdvancedPanelChange={(panel) =>
               dispatch({ type: "SET_ADVANCED_PANEL", payload: panel })
+            }
+            pluginPanel={state.activePluginPanel}
+            onPluginPanelChange={(panel) =>
+              dispatch({ type: "SET_PLUGIN_PANEL", payload: panel })
+            }
+            onPluginSchemasChange={(schema) =>
+              dispatch({
+                type: "UPDATE_PLUGIN_SCHEMAS",
+                payload: schema,
+              })
             }
           />
         );
