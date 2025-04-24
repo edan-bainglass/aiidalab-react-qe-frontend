@@ -65,7 +65,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
     return (
       <div className="text-center mt-4">
         <Spinner animation="border" />
-        <p>Loading plugin parameters...</p>
+        <p>Fetching plugin settings panels...</p>
       </div>
     );
   }
