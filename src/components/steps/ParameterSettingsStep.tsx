@@ -6,7 +6,7 @@ import {
   PropertyMap,
   SchemaMap,
   StructureType,
-} from "../../interfaces";
+} from "@interfaces";
 import {
   AdvancedSettingsPanel,
   BasicSettingsPanel,

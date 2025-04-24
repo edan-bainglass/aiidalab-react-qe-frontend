@@ -1,7 +1,7 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 
-import { InputSchema } from "../../interfaces";
+import { InputSchema } from "@interfaces";
 
 const workflowSchema: InputSchema = {
   schema: {

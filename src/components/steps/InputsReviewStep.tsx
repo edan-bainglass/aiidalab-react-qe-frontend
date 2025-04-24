@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Accordion } from "react-bootstrap";
 import { WEAS } from "weas";
 
-import { WorkflowInputs } from "../../interfaces";
+import { WorkflowInputs } from "@interfaces";
 
 interface InputsReviewStepProps {
   inputs: WorkflowInputs;

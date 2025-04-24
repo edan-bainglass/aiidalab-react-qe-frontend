@@ -1,6 +1,8 @@
 import React, { useReducer, useState } from "react";
 import { Breadcrumb, Button, Col, Container, Row } from "react-bootstrap";
 
+import { WizardAction, WizardState } from "@interfaces";
+import { parameterSchemas } from "@schemas";
 import {
   InputsReviewStep,
   ParameterSettingsStep,
@@ -9,9 +11,7 @@ import {
   StructureSelectionStep,
   WorkflowResultsStep,
   WorkflowSubmissionStep,
-} from "./components/steps";
-import { WizardAction, WizardState } from "./interfaces";
-import { parameterSchemas } from "./schemas";
+} from "@steps";
 
 const steps = [
   { id: 1, label: "Structure" },

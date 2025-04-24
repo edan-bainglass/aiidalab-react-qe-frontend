@@ -1,4 +1,4 @@
-import { ResultsType } from "../../interfaces";
+import { ResultsType } from "@interfaces";
 
 interface WorkflowResultsStepProps {
   results?: ResultsType | null;

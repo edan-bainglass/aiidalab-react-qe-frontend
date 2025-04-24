@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Form } from "react-bootstrap";
 import { Atoms, WEAS } from "weas";
 
-import { StructureType } from "../../interfaces";
+import { StructureType } from "@interfaces";
 
 interface StructureSelectionStepProps {
   structure?: StructureType | null;

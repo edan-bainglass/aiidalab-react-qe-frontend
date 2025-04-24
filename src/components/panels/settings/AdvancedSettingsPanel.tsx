@@ -1,12 +1,13 @@
 import Form from "@rjsf/react-bootstrap";
 import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
+import { useEffect } from "react";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 
-import { useEffect } from "react";
-import { SwitchWidget, ToggleGroupWidget } from "../../../common/components";
-import { SchemaMap } from "../../../interfaces";
-import { patchDataIn, patchDataOut, patchSchema } from "../../../utils";
+import { SwitchWidget, ToggleGroupWidget } from "@common/components";
+import { SchemaMap } from "@interfaces";
+import { patchDataIn, patchDataOut, patchSchema } from "@utils";
+
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 
 interface AdvancedSettingsProps

@@ -1,4 +1,4 @@
-import { StructureType } from "../../../interfaces";
+import { StructureType } from "@interfaces";
 
 export interface SettingsPanelProps {
   structure: StructureType;

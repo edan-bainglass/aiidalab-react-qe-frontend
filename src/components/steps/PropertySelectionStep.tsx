@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Spinner } from "react-bootstrap";
 
-import { PropertyMap } from "../../interfaces";
+import { PropertyMap } from "@interfaces";
 
 interface PropertySelectionStepProps {
   properties: PropertyMap;

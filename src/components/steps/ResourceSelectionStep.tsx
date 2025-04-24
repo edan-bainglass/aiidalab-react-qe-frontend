@@ -1,4 +1,4 @@
-import { ResourcesType } from "../../interfaces";
+import { ResourcesType } from "@interfaces";
 
 interface ResourceSelectionStepProps {
   resources?: ResourcesType | null;

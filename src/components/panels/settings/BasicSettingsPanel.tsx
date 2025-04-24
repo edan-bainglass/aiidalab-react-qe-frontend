@@ -3,8 +3,9 @@ import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
 
-import { SwitchWidget, ToggleGroupWidget } from "../../../common/components";
-import { InputSchema } from "../../../interfaces";
+import { SwitchWidget, ToggleGroupWidget } from "@common/components";
+import { InputSchema } from "@interfaces";
+
 import { SettingsPanelProps } from "./SettingsPanelProps";
 
 interface BasicSettingsProps extends SettingsPanelProps {

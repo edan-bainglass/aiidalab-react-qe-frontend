@@ -6,6 +6,17 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "baseUrl": "src",
+    "paths": {
+      "@assets": ["assets"],
+      "@common/*": ["common/*"],
+      "@interfaces": ["common/interfaces"],
+      "@utils": ["common/utils"],
+      "@schemas": ["common/schemas"],
+      "@components/*": ["components/*"],
+      "@steps": ["components/steps"],
+      "@panels/*": ["components/panels/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
