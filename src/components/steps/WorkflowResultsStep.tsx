@@ -1,11 +1,11 @@
-import { ResultsType } from "../interfaces";
+import { ResultsType } from "../../interfaces";
 
 interface WorkflowResultsStepProps {
   results?: ResultsType | null;
   controls: React.ReactNode;
 }
 
-const WorkflowResultsStep: React.FC<WorkflowResultsStepProps> = ({
+export const WorkflowResultsStep: React.FC<WorkflowResultsStepProps> = ({
   results,
   controls,
 }) => {
@@ -25,5 +25,3 @@ const WorkflowResultsStep: React.FC<WorkflowResultsStepProps> = ({
     </div>
   );
 };
-
-export default WorkflowResultsStep;

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Accordion } from "react-bootstrap";
 import { WEAS } from "weas";
 
-import { WorkflowInputs } from "../interfaces";
+import { WorkflowInputs } from "../../interfaces";
 
 interface InputsReviewStepProps {
   inputs: WorkflowInputs;
@@ -11,7 +11,7 @@ interface InputsReviewStepProps {
 
 let weasViewer: InstanceType<typeof WEAS> | null = null;
 
-const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
+export const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
   inputs,
   controls,
 }) => {
@@ -72,5 +72,3 @@ const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
     </div>
   );
 };
-
-export default InputsReviewStep;

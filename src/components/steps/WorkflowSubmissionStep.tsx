@@ -1,7 +1,7 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 
-import { InputSchema } from "../interfaces";
+import { InputSchema } from "../../interfaces";
 
 const workflowSchema: InputSchema = {
   schema: {
@@ -26,7 +26,7 @@ interface WorkflowSubmissionStepProps {
   controls: React.ReactNode;
 }
 
-const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
+export const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
   metadata,
   onChange,
   controls,
@@ -48,5 +48,3 @@ const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
     </div>
   );
 };
-
-export default WorkflowSubmissionStep;

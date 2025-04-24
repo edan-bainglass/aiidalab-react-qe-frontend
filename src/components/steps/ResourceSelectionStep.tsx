@@ -1,4 +1,4 @@
-import { ResourcesType } from "../interfaces";
+import { ResourcesType } from "../../interfaces";
 
 interface ResourceSelectionStepProps {
   resources?: ResourcesType | null;
@@ -6,7 +6,7 @@ interface ResourceSelectionStepProps {
   controls: React.ReactNode;
 }
 
-const ResourceSelectionStep: React.FC<ResourceSelectionStepProps> = ({
+export const ResourceSelectionStep: React.FC<ResourceSelectionStepProps> = ({
   resources,
   onChange,
   controls,
@@ -27,5 +27,3 @@ const ResourceSelectionStep: React.FC<ResourceSelectionStepProps> = ({
     </div>
   );
 };
-
-export default ResourceSelectionStep;

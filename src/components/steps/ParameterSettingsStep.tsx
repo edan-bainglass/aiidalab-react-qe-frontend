@@ -6,12 +6,12 @@ import {
   PropertyMap,
   SchemaMap,
   StructureType,
-} from "../interfaces";
+} from "../../interfaces";
 import {
   AdvancedSettingsPanel,
   BasicSettingsPanel,
   PluginSettingsPanel,
-} from "./panels/settings";
+} from "../panels/settings";
 
 interface ParameterSettingsStepProps {
   structure: StructureType;
@@ -29,7 +29,7 @@ interface ParameterSettingsStepProps {
   onPluginSchemasChange: (schema: SchemaMap) => void;
 }
 
-const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
+export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   structure,
   properties,
   parametersSchema,
@@ -93,5 +93,3 @@ const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
     </div>
   );
 };
-
-export default ParameterSettingsStep;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Spinner } from "react-bootstrap";
 
-import { PropertyMap } from "../interfaces";
+import { PropertyMap } from "../../interfaces";
 
 interface PropertySelectionStepProps {
   properties: PropertyMap;
@@ -9,7 +9,7 @@ interface PropertySelectionStepProps {
   controls: React.ReactNode;
 }
 
-const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
+export const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
   properties,
   onChange,
   controls,
@@ -67,5 +67,3 @@ const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
     </div>
   );
 };
-
-export default PropertySelectionStep;

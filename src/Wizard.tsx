@@ -9,7 +9,7 @@ import {
   StructureSelectionStep,
   WorkflowResultsStep,
   WorkflowSubmissionStep,
-} from "./components";
+} from "./components/steps";
 import { WizardAction, WizardState } from "./interfaces";
 import { parameterSchemas } from "./schemas";
 
