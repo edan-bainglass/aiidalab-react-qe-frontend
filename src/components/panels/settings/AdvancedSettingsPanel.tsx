@@ -48,7 +48,7 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
     );
   };
 
-  const { schema, ui } = patchSchema(currentSchema, structure);
+  const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
   useEffect(() => {
     Object.entries(advancedSchema).forEach(([key, { schema }]) => {
@@ -74,9 +74,12 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
             toggleGroup: ToggleGroupWidget,
             CheckboxWidget: SwitchWidget,
           }}
-          formData={patchDataIn(schema, parameters)}
+          formData={patchDataIn(parameters, dependencies)}
           onChange={(e) =>
-            onFormChange(currentPanelKey, patchDataOut(schema, e.formData))
+            onFormChange(
+              currentPanelKey,
+              patchDataOut(e.formData, dependencies)
+            )
           }
           validator={validator}
           showErrorList={false}

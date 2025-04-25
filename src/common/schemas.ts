@@ -50,7 +50,6 @@ export const parameterSchemas: ParameterSchemas = {
       schema: {
         type: "object",
         title: "Convergence",
-        dependsOn: ["basic.protocol"],
         oneOf: [
           {
             type: "object",
@@ -128,6 +127,7 @@ export const parameterSchemas: ParameterSchemas = {
           "ui:widget": "hidden",
         },
       },
+      dependencies: ["basic.protocol"],
     },
     smearing: {
       schema: {

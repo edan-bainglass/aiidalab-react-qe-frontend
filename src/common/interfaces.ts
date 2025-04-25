@@ -24,6 +24,7 @@ export interface PropertyMap {
 export interface InputSchema {
   schema: RJSFSchema;
   ui?: UiSchema;
+  dependencies?: string[];
 }
 
 export type SchemaMap = Record<string, InputSchema>;

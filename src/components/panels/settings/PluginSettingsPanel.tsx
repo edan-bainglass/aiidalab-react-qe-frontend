@@ -105,7 +105,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
     );
   };
 
-  const { schema, ui } = patchSchema(currentSchema, structure);
+  const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
   return (
     <div>
@@ -123,9 +123,12 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
             toggleGroup: ToggleGroupWidget,
             CheckboxWidget: SwitchWidget,
           }}
-          formData={patchDataIn(schema, parameters)}
+          formData={patchDataIn(parameters, dependencies)}
           onChange={(e) =>
-            onFormChange(currentPanelKey, patchDataOut(schema, e.formData))
+            onFormChange(
+              currentPanelKey,
+              patchDataOut(e.formData, dependencies)
+            )
           }
           validator={validator}
           showErrorList={false}

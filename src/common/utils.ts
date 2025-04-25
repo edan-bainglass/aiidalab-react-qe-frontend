@@ -14,7 +14,7 @@ export const patchSchema = (
     return input;
   }
 
-  const { schema: origSchema, ui: origUi } = input;
+  const { schema: origSchema, ui: origUi, dependencies } = input;
 
   const schema: RJSFSchema = {
     ...origSchema,
@@ -61,23 +61,31 @@ export const patchSchema = (
     };
   }
 
-  return { schema, ui };
+  return { schema, ui, dependencies };
 };
 
 /**
  * Preprocess data w.r.t dependencies
  */
 export const patchDataIn = (
-  schema: RJSFSchema,
-  data: Record<string, any>
+  data: Record<string, any>,
+  dependencies?: string[]
 ): Record<string, any> => {
   const copy = {} as typeof data;
 
-  const dependencies = schema.dependsOn;
   for (const dependency of dependencies || []) {
-    if (dependency === "basic.protocol" && "basic" in data) {
-      const [panel, dep] = dependency.split(".");
-      copy[dep] = data[panel][dep];
+    switch (dependency) {
+      case "basic.protocol":
+        if (data["basic"]?.protocol) {
+          const [panel, dep] = dependency.split(".");
+          copy[dep] = data[panel][dep];
+        }
+        break;
+      default:
+        console.warn(
+          `Unsupported dependency ${dependency} encountered on patching`
+        );
+        break;
     }
   }
 
@@ -88,13 +96,19 @@ export const patchDataIn = (
  * Postprocess data w.r.t dependencies
  */
 export const patchDataOut = (
-  schema: RJSFSchema,
-  data: Record<string, any>
+  data: Record<string, any>,
+  dependencies?: string[]
 ): Record<string, any> => {
-  const dependencies = schema.dependsOn;
   for (const dependency of dependencies || []) {
-    if (dependency === "basic.protocol") {
-      delete data["protocol"];
+    switch (dependency) {
+      case "basic.protocol":
+        delete data["protocol"];
+        break;
+      default:
+        console.warn(
+          `Unsupported dependency ${dependency} encountered on cleanup`
+        );
+        break;
     }
   }
   return data;
