@@ -9,6 +9,11 @@ export const patchSchema = (
   input: InputSchema,
   structure: StructureType
 ): InputSchema => {
+  if (!structure) {
+    console.warn("No structure provided for schema patching");
+    return input;
+  }
+
   const { schema: origSchema, ui: origUi } = input;
 
   const schema: RJSFSchema = {

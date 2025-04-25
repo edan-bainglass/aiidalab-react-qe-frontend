@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Accordion } from "react-bootstrap";
-import { WEAS } from "weas";
+import { Atoms, WEAS } from "weas";
 
 import { WorkflowInputs } from "@interfaces";
 
@@ -21,7 +21,7 @@ export const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
     if (viewerContainerRef.current) {
       weasViewer = new WEAS({ domElement: viewerContainerRef.current });
       if (inputs.structure) {
-        weasViewer.avr.atoms = inputs.structure;
+        weasViewer.avr.atoms = inputs.structure as Atoms;
         weasViewer.avr.modelStyle = 1;
         weasViewer.render();
       }

@@ -6,11 +6,11 @@ import { StructureType } from "@interfaces";
 
 interface StructureSelectionStepProps {
   structure?: StructureType | null;
-  onChange: (structure: StructureType) => void;
+  onChange: (structure: StructureType | null) => void;
   controls: React.ReactNode;
 }
 
-let weasViewer: InstanceType<typeof WEAS> | null = null;
+let weasViewer: WEAS | null = null;
 
 let availableStructures: Record<string, StructureType> = {
   H2O: {
@@ -20,7 +20,6 @@ let availableStructures: Record<string, StructureType> = {
       [2.0, 3.53, 2.0],
       [2.0, 2.0, 2.0],
     ],
-    cell: [5, 5, 5],
   },
   NaCl: {
     symbols: ["Na", "Cl"],
@@ -29,6 +28,7 @@ let availableStructures: Record<string, StructureType> = {
       [2.0, 2.0, 2.0],
     ],
     cell: [5, 5, 5],
+    pbc: [true, true, true],
   },
 };
 
@@ -44,7 +44,7 @@ export const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
     if (viewerContainerRef.current) {
       weasViewer = new WEAS({ domElement: viewerContainerRef.current });
       if (structure) {
-        weasViewer.avr.atoms = structure;
+        weasViewer.avr.atoms = structure as Atoms;
         weasViewer.avr.modelStyle = 1;
         weasViewer.render();
       }

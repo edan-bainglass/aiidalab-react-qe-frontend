@@ -1,7 +1,12 @@
 import { RJSFSchema, UiSchema } from "@rjsf/utils";
-import WEAS from "weas";
 
-export type StructureType = typeof WEAS.Atoms;
+import { Atoms, AtomsData } from "weas";
+
+export type StructureType =
+  | ((Atoms | AtomsData) & {
+      label?: string;
+    })
+  | null;
 
 export type ResourcesType = any;
 
