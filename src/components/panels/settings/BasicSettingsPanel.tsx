@@ -22,7 +22,7 @@ export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
   useEffect(() => {
     const key = "basic";
     const schema = basicSchema.schema;
-    if (parameters[key] === undefined) {
+    if (!(key in parameters)) {
       const defaults = getDefaultFormState(validator, schema, {}, schema);
       onFormChange(key, defaults);
     }

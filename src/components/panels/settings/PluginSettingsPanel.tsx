@@ -55,7 +55,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
 
   useEffect(() => {
     Object.entries(pluginSchemas).forEach(([key, { schema }]) => {
-      if (parameters[key] === undefined) {
+      if (!(key in parameters)) {
         const defaults = getDefaultFormState(validator, schema, {}, schema);
         onFormChange(key, defaults);
       }

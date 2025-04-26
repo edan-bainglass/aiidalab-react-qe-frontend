@@ -26,7 +26,7 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
 }) => {
   useEffect(() => {
     Object.entries(advancedSchemas).forEach(([key, { schema }]) => {
-      if (parameters[key] === undefined) {
+      if (!(key in parameters)) {
         const defaults = getDefaultFormState(validator, schema, {}, schema);
         onFormChange(key, defaults);
       }

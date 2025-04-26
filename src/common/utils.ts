@@ -109,13 +109,15 @@ export const patchDataOut = (
   data: Record<string, any>,
   dependencies?: string[]
 ): Record<string, any> => {
+  const copy = { ...data };
+
   for (const dependency of dependencies || []) {
     switch (dependency) {
       case "basic.protocol":
-        delete data["protocol"];
+        delete copy["protocol"];
         break;
       case "structure.pbc":
-        delete data["molecule"];
+        delete copy["molecule"];
         break;
       default:
         console.warn(
@@ -124,5 +126,5 @@ export const patchDataOut = (
         break;
     }
   }
-  return data;
+  return copy;
 };
