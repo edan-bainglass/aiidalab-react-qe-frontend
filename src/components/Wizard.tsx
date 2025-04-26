@@ -84,6 +84,11 @@ const Wizard: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(1);
 
+  const getActiveProperties = (): string[] =>
+    Object.entries(state.properties)
+      .filter(([_, property]) => property.active)
+      .map(([key, _]) => key);
+
   const handleSubmission = async () => {
     try {
       const res = await fetch("/api/submit", {
@@ -93,9 +98,7 @@ const Wizard: React.FC = () => {
         },
         body: JSON.stringify({
           structure: state.structure,
-          properties: Object.keys(state.properties).filter(
-            (key) => state.properties[key].active
-          ),
+          properties: getActiveProperties(),
           parameters: state.parameters,
           resources: state.resources,
           metadata: state.metadata,
@@ -182,9 +185,7 @@ const Wizard: React.FC = () => {
           <InputsReviewStep
             inputs={{
               structure: state.structure,
-              properties: Object.keys(state.properties).filter(
-                (key) => state.properties[key].active
-              ),
+              properties: getActiveProperties(),
               parameters: state.parameters,
               resources: state.resources,
             }}
