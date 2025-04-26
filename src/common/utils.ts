@@ -68,6 +68,7 @@ export const patchSchema = (
  * Preprocess data w.r.t dependencies
  */
 export const patchDataIn = (
+  structure: StructureType,
   data: Record<string, any>,
   dependencies?: string[]
 ): Record<string, any> => {

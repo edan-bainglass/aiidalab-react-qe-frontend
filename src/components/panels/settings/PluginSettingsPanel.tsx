@@ -123,7 +123,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
     CheckboxWidget: SwitchWidget,
   };
 
-  const formData = patchDataIn(parameters, dependencies);
+  const formData = patchDataIn(structure, parameters, dependencies);
 
   const onChange = (e: any) => {
     const patchedData = patchDataOut(e.formData, dependencies);

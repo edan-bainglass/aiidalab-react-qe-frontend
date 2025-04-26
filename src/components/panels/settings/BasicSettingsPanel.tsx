@@ -4,6 +4,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
 
 import { SwitchWidget, ToggleGroupWidget } from "@common/components";
+import { patchDataIn, patchDataOut } from "@common/utils";
 import { InputSchema } from "@interfaces";
 
 import { SettingsPanelProps } from "./SettingsPanelProps";
@@ -41,9 +42,12 @@ export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
     CheckboxWidget: SwitchWidget,
   };
 
-  const formData = parameters["basic"];
+  const formData = patchDataIn(structure, parameters["basic"], dependencies);
 
-  const onChange = (e: any) => onFormChange("basic", e.formData);
+  const onChange = (e: any) => {
+    const patchedData = patchDataOut(e.formData, dependencies);
+    onFormChange("basic", patchedData);
+  };
 
   return (
     <div>
