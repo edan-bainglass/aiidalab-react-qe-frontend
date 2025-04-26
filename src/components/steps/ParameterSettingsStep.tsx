@@ -70,7 +70,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
         <Tab eventKey="advanced" title="Advanced settings">
           <AdvancedSettingsPanel
             structure={structure}
-            advancedSchema={parametersSchema.advanced}
+            advancedSchemas={parametersSchema.advanced}
             parameters={parameters}
             onFormChange={handleFormChange}
             activePanel={advancedPanel}

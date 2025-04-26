@@ -13,19 +13,19 @@ import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 interface AdvancedSettingsProps
   extends SettingsPanelProps,
     WithNestedPanelProps {
-  advancedSchema: SchemaMap;
+  advancedSchemas: SchemaMap;
 }
 
 export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   structure,
-  advancedSchema,
+  advancedSchemas,
   parameters,
   onFormChange,
   activePanel,
   onPanelChange: setPanel,
 }) => {
   useEffect(() => {
-    Object.entries(advancedSchema).forEach(([key, { schema }]) => {
+    Object.entries(advancedSchemas).forEach(([key, { schema }]) => {
       if (parameters[key] === undefined) {
         const defaults = getDefaultFormState(validator, schema, {}, schema);
         onFormChange(key, defaults);
@@ -33,13 +33,13 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
     });
   }, []);
 
-  const panelKeys = Object.keys(advancedSchema);
+  const panelKeys = Object.keys(advancedSchemas);
 
   const currentPanelKey = panelKeys.includes(activePanel)
     ? activePanel
     : panelKeys[0];
 
-  const currentSchema = advancedSchema[currentPanelKey];
+  const currentSchema = advancedSchemas[currentPanelKey];
 
   const CategorySelector = () => {
     return (
@@ -50,7 +50,7 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
       >
         {panelKeys.map((key) => (
           <Dropdown.Item key={key} eventKey={key}>
-            {advancedSchema[key]?.schema.title || key}
+            {advancedSchemas[key]?.schema.title || key}
           </Dropdown.Item>
         ))}
       </DropdownButton>
