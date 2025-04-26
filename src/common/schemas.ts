@@ -4,35 +4,83 @@ export const parameterSchemas: ParameterSchemas = {
   basic: {
     schema: {
       type: "object",
-      properties: {
-        relax: {
-          title: "Relaxation level",
-          enum: ["none", "positions", "positions-cell"],
-          default: "none",
+      oneOf: [
+        {
+          type: "object",
+          properties: {
+            molecule: {
+              type: "boolean",
+              const: true,
+            },
+            relax: {
+              type: "string",
+              title: "Relaxation level",
+              enum: ["none", "positions"],
+              default: "positions",
+            },
+            electronic_type: {
+              type: "string",
+              title: "Electronic type",
+              enum: ["Metallic", "Insulator"],
+              default: "Metallic",
+            },
+            protocol: {
+              type: "string",
+              title: "Protocol",
+              enum: ["Fast", "Balanced", "Stringent"],
+              default: "Fast",
+            },
+            spin_type: {
+              type: "boolean",
+              title: "Magnetism",
+            },
+            spin_orbit: {
+              type: "boolean",
+              title: "Spin orbit coupling",
+            },
+          },
         },
-        electronic_type: {
-          type: "string",
-          title: "Electronic type",
-          enum: ["Metallic", "Insulator"],
-          default: "Metallic",
+        {
+          type: "object",
+          properties: {
+            molecule: {
+              type: "boolean",
+              const: false,
+            },
+            relax: {
+              type: "string",
+              title: "Relaxation level",
+              enum: ["none", "positions", "positions-cell"],
+              default: "positions-cell",
+            },
+            electronic_type: {
+              type: "string",
+              title: "Electronic type",
+              enum: ["Metallic", "Insulator"],
+              default: "Metallic",
+            },
+            protocol: {
+              type: "string",
+              title: "Protocol",
+              enum: ["Fast", "Balanced", "Stringent"],
+              default: "Fast",
+            },
+            spin_type: {
+              type: "boolean",
+              title: "Magnetism",
+            },
+            spin_orbit: {
+              type: "boolean",
+              title: "Spin orbit coupling",
+            },
+          },
         },
-        protocol: {
-          type: "string",
-          title: "Protocol",
-          enum: ["Fast", "Balanced", "Stringent"],
-          default: "Fast",
-        },
-        spin_type: {
-          type: "boolean",
-          title: "Magnetism",
-        },
-        spin_orbit: {
-          type: "boolean",
-          title: "Spin orbit coupling",
-        },
-      },
+      ],
     },
     ui: {
+      molecule: {
+        "ui:widget": "hidden",
+      },
       relax: {
         "ui:widget": "toggleGroup",
         "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
@@ -44,6 +92,7 @@ export const parameterSchemas: ParameterSchemas = {
         "ui:widget": "toggleGroup",
       },
     },
+    dependencies: ["structure.pbc"],
   },
   advanced: {
     convergence: {

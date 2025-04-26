@@ -82,6 +82,15 @@ export const patchDataIn = (
           copy[dep] = data[panel][dep];
         }
         break;
+      case "structure.pbc":
+        if (!structure?.pbc) {
+          console.warn("No PBC data found in structure");
+        } else {
+          copy["molecule"] =
+            Array.isArray(structure.pbc) &&
+            structure.pbc.every((v) => v === false);
+        }
+        break;
       default:
         console.warn(
           `Unsupported dependency ${dependency} encountered on patching`
@@ -104,6 +113,9 @@ export const patchDataOut = (
     switch (dependency) {
       case "basic.protocol":
         delete data["protocol"];
+        break;
+      case "structure.pbc":
+        delete data["molecule"];
         break;
       default:
         console.warn(
