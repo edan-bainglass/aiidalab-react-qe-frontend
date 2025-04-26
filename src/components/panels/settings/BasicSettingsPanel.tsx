@@ -27,20 +27,32 @@ export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
     }
   }, []);
 
+  const { schema, ui, dependencies } = basicSchema;
+
+  const uiSchema = {
+    ...ui,
+    "ui:submitButtonOptions": {
+      norender: true,
+    },
+  };
+
+  const widgets = {
+    toggleGroup: ToggleGroupWidget,
+    CheckboxWidget: SwitchWidget,
+  };
+
+  const formData = parameters["basic"];
+
+  const onChange = (e: any) => onFormChange("basic", e.formData);
+
   return (
     <div>
       <Form
-        schema={basicSchema.schema}
-        uiSchema={{
-          ...basicSchema.ui,
-          "ui:submitButtonOptions": { norender: true },
-        }}
-        widgets={{
-          toggleGroup: ToggleGroupWidget,
-          CheckboxWidget: SwitchWidget,
-        }}
-        formData={parameters["basic"]}
-        onChange={(e) => onFormChange("basic", e.formData)}
+        schema={schema}
+        uiSchema={uiSchema}
+        widgets={widgets}
+        formData={formData}
+        onChange={onChange}
         validator={validator}
         showErrorList={false}
         liveValidate

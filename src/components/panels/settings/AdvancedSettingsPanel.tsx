@@ -24,6 +24,15 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   activePanel,
   onPanelChange: setPanel,
 }) => {
+  useEffect(() => {
+    Object.entries(advancedSchema).forEach(([key, { schema }]) => {
+      if (parameters[key] === undefined) {
+        const defaults = getDefaultFormState(validator, schema, {}, schema);
+        onFormChange(key, defaults);
+      }
+    });
+  }, []);
+
   const panelKeys = Object.keys(advancedSchema);
 
   const currentPanelKey = panelKeys.includes(activePanel)
@@ -50,14 +59,28 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
 
   const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
-  useEffect(() => {
-    Object.entries(advancedSchema).forEach(([key, { schema }]) => {
-      if (parameters[key] === undefined) {
-        const defaults = getDefaultFormState(validator, schema, {}, schema);
-        onFormChange(key, defaults);
-      }
-    });
-  }, []);
+  const uiSchema = {
+    ...ui,
+    "ui:submitButtonOptions": {
+      norender: true,
+    },
+    "ui:options": {
+      title: "",
+      classNames: `${currentPanelKey}-panel`,
+    },
+  };
+
+  const widgets = {
+    toggleGroup: ToggleGroupWidget,
+    CheckboxWidget: SwitchWidget,
+  };
+
+  const formData = patchDataIn(parameters, dependencies);
+
+  const onChange = (e: any) => {
+    const patchedData = patchDataOut(e.formData, dependencies);
+    onFormChange(currentPanelKey, patchedData);
+  };
 
   return (
     <div>
@@ -65,22 +88,10 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
       {currentSchema && (
         <Form
           schema={schema}
-          uiSchema={{
-            ...ui,
-            "ui:submitButtonOptions": { norender: true },
-            "ui:options": { title: "", classNames: `${currentPanelKey}-panel` },
-          }}
-          widgets={{
-            toggleGroup: ToggleGroupWidget,
-            CheckboxWidget: SwitchWidget,
-          }}
-          formData={patchDataIn(parameters, dependencies)}
-          onChange={(e) =>
-            onFormChange(
-              currentPanelKey,
-              patchDataOut(e.formData, dependencies)
-            )
-          }
+          uiSchema={uiSchema}
+          widgets={widgets}
+          formData={formData}
+          onChange={onChange}
           validator={validator}
           showErrorList={false}
           liveValidate

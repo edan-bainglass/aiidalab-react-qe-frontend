@@ -107,6 +107,29 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
 
   const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
+  const uiSchema = {
+    ...ui,
+    "ui:submitButtonOptions": {
+      norender: true,
+    },
+    "ui:options": {
+      title: "",
+      classNames: `${currentPanelKey}-panel`,
+    },
+  };
+
+  const widgets = {
+    toggleGroup: ToggleGroupWidget,
+    CheckboxWidget: SwitchWidget,
+  };
+
+  const formData = patchDataIn(parameters, dependencies);
+
+  const onChange = (e: any) => {
+    const patchedData = patchDataOut(e.formData, dependencies);
+    onFormChange(currentPanelKey, patchedData);
+  };
+
   return (
     <div>
       {<CategorySelector />}
@@ -114,22 +137,10 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
       {currentSchema && (
         <Form
           schema={schema}
-          uiSchema={{
-            ...ui,
-            "ui:submitButtonOptions": { norender: true },
-            "ui:options": { title: "", classNames: `${currentPanelKey}-panel` },
-          }}
-          widgets={{
-            toggleGroup: ToggleGroupWidget,
-            CheckboxWidget: SwitchWidget,
-          }}
-          formData={patchDataIn(parameters, dependencies)}
-          onChange={(e) =>
-            onFormChange(
-              currentPanelKey,
-              patchDataOut(e.formData, dependencies)
-            )
-          }
+          uiSchema={uiSchema}
+          widgets={widgets}
+          formData={formData}
+          onChange={onChange}
           validator={validator}
           showErrorList={false}
           liveValidate
