@@ -21,14 +21,14 @@ export const parameterSchemas: ParameterSchemas = {
             electronic_type: {
               type: "string",
               title: "Electronic type",
-              enum: ["Metallic", "Insulator"],
-              default: "Metallic",
+              enum: ["metallic", "insulator"],
+              default: "metallic",
             },
             protocol: {
               type: "string",
               title: "Protocol",
-              enum: ["Fast", "Balanced", "Stringent"],
-              default: "Fast",
+              enum: ["fast", "balanced", "stringent"],
+              default: "fast",
             },
             magnetism: {
               type: "boolean",
@@ -56,14 +56,14 @@ export const parameterSchemas: ParameterSchemas = {
             electronic_type: {
               type: "string",
               title: "Electronic type",
-              enum: ["Metallic", "Insulator"],
-              default: "Metallic",
+              enum: ["metallic", "insulator"],
+              default: "metallic",
             },
             protocol: {
               type: "string",
               title: "Protocol",
-              enum: ["Fast", "Balanced", "Stringent"],
-              default: "Fast",
+              enum: ["fast", "balanced", "stringent"],
+              default: "fast",
             },
             magnetism: {
               type: "boolean",
@@ -87,9 +87,11 @@ export const parameterSchemas: ParameterSchemas = {
       },
       electronic_type: {
         "ui:widget": "toggleGroup",
+        "ui:enumNames": ["Metallic", "Insulator"],
       },
       protocol: {
         "ui:widget": "toggleGroup",
+        "ui:enumNames": ["Fast", "Balanced", "Stringent"],
       },
     },
     dependencies: ["structure.pbc"],
@@ -104,7 +106,7 @@ export const parameterSchemas: ParameterSchemas = {
             type: "object",
             properties: {
               protocol: {
-                const: "Fast",
+                const: "fast",
               },
               scfConvEng: {
                 type: "number",
@@ -127,7 +129,7 @@ export const parameterSchemas: ParameterSchemas = {
             type: "object",
             properties: {
               protocol: {
-                const: "Balanced",
+                const: "balanced",
               },
               scfConvEng: {
                 type: "number",
@@ -150,7 +152,7 @@ export const parameterSchemas: ParameterSchemas = {
             type: "object",
             properties: {
               protocol: {
-                const: "Stringent",
+                const: "stringent",
               },
               scfConvEng: {
                 type: "number",
