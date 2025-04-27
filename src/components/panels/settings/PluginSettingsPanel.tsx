@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
 
 import { SwitchWidget, ToggleGroupWidget } from "@common/components";
-import { PropertyMap, SchemaMap } from "@interfaces";
-import { patchDataIn, patchDataOut, patchSchema } from "@utils";
+import { PropertyMap, SchemaMap } from "@common/interfaces";
+import { DEBUG, patchDataIn, patchDataOut, patchSchema } from "@common/utils";
 
 import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
@@ -27,6 +27,8 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   onPanelChange: setActivePanel,
   onPluginSchemasChange: updatePluginSchemas,
 }) => {
+  DEBUG && console.log("PluginSettingsPanel");
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

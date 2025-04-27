@@ -1,4 +1,5 @@
-import { ResourcesType } from "@interfaces";
+import { ResourcesType } from "@common/interfaces";
+import { DEBUG } from "@common/utils";
 
 interface ResourceSelectionStepProps {
   resources?: ResourcesType | null;
@@ -11,6 +12,8 @@ export const ResourceSelectionStep: React.FC<ResourceSelectionStepProps> = ({
   onChange,
   controls,
 }) => {
+  DEBUG && console.log("ResourceSelectionStep");
+
   return (
     <div>
       <h2>Step 4: Choose computational resources</h2>

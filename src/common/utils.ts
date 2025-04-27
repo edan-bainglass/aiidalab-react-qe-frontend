@@ -2,6 +2,8 @@ import type { RJSFSchema, UiSchema } from "@rjsf/utils";
 
 import { InputSchema, StructureType } from "./interfaces";
 
+export const DEBUG = false;
+
 /**
  * Preprocess schema w.r.t dependencies
  */

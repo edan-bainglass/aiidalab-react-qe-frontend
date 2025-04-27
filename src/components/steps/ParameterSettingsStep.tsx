@@ -6,12 +6,13 @@ import {
   PropertyMap,
   SchemaMap,
   StructureType,
-} from "@interfaces";
+} from "@common/interfaces";
+import { DEBUG } from "@common/utils";
 import {
   AdvancedSettingsPanel,
   BasicSettingsPanel,
   PluginSettingsPanel,
-} from "../panels/settings";
+} from "@panels/settings";
 
 interface ParameterSettingsStepProps {
   structure: StructureType;
@@ -44,6 +45,8 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   onPluginPanelChange: setActivePluginPanel,
   onPluginSchemasChange: updatePluginSchemas,
 }) => {
+  DEBUG && console.log("ParameterSettingsStep");
+
   const handleParametersChange = (panelKey: string, formData: any) => {
     updateParameters(panelKey, formData);
   };

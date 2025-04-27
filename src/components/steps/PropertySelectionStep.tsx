@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Form, Spinner } from "react-bootstrap";
 
-import { PropertyMap } from "@interfaces";
+import { PropertyMap } from "@common/interfaces";
+import { DEBUG } from "@common/utils";
 
 interface PropertySelectionStepProps {
   properties: PropertyMap;
@@ -14,6 +15,8 @@ export const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
   onChange,
   controls,
 }) => {
+  DEBUG && console.log("PropertySelectionStep");
+
   const hasProperties = Object.keys(properties).length > 0;
   const [loading, setLoading] = useState(!hasProperties);
 

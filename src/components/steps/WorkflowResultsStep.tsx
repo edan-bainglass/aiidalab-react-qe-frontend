@@ -1,4 +1,5 @@
-import { ResultsType } from "@interfaces";
+import { ResultsType } from "@common/interfaces";
+import { DEBUG } from "@common/utils";
 
 interface WorkflowResultsStepProps {
   results?: ResultsType | null;
@@ -9,6 +10,8 @@ export const WorkflowResultsStep: React.FC<WorkflowResultsStepProps> = ({
   results,
   controls,
 }) => {
+  DEBUG && console.log("WorkflowResultsStep");
+
   return (
     <div>
       <h2>Step 6: Monitor and analyze results</h2>

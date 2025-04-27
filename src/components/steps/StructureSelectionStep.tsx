@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Form } from "react-bootstrap";
 import { Atoms, WEAS } from "weas";
 
-import { StructureType } from "@interfaces";
+import { StructureType } from "@common/interfaces";
+import { DEBUG } from "@common/utils";
 
 interface StructureSelectionStepProps {
   structure?: StructureType | null;
@@ -37,6 +38,8 @@ export const StructureSelectionStep: React.FC<StructureSelectionStepProps> = ({
   onChange,
   controls,
 }) => {
+  DEBUG && console.log("StructureSelectionStep");
+
   const viewerContainerRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<string>(structure?.label || "H2O");
 

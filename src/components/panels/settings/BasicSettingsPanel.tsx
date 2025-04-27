@@ -4,8 +4,8 @@ import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
 
 import { SwitchWidget, ToggleGroupWidget } from "@common/components";
-import { patchDataIn, patchDataOut } from "@common/utils";
-import { InputSchema } from "@interfaces";
+import { InputSchema } from "@common/interfaces";
+import { DEBUG, patchDataIn, patchDataOut } from "@common/utils";
 
 import { SettingsPanelProps } from "./SettingsPanelProps";
 
@@ -19,6 +19,8 @@ export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
   parameters,
   onParametersChange: updateParameters,
 }) => {
+  DEBUG && console.log("BasicSettingsPanel");
+
   useEffect(() => {
     const key = "basic";
     const schema = basicSchema.schema;

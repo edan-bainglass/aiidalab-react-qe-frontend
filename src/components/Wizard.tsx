@@ -1,8 +1,9 @@
 import React, { useReducer, useState } from "react";
 import { Breadcrumb, Button, Col, Container, Row } from "react-bootstrap";
 
-import { WizardAction, WizardState } from "@interfaces";
-import { parameterSchemas } from "@schemas";
+import { WizardAction, WizardState } from "@common/interfaces";
+import { parameterSchemas } from "@common/schemas";
+import { DEBUG } from "@common/utils";
 import {
   InputsReviewStep,
   ParameterSettingsStep,
@@ -81,6 +82,8 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
 }
 
 const Wizard: React.FC = () => {
+  DEBUG && console.log("Wizard");
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(1);
 

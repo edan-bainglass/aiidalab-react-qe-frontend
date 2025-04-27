@@ -10,9 +10,6 @@
     "paths": {
       "@assets": ["assets"],
       "@common/*": ["common/*"],
-      "@interfaces": ["common/interfaces"],
-      "@utils": ["common/utils"],
-      "@schemas": ["common/schemas"],
       "@components/*": ["components/*"],
       "@steps": ["components/steps"],
       "@panels/*": ["components/panels/*"]

@@ -4,13 +4,14 @@ import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
 
 import { SwitchWidget, ToggleGroupWidget } from "@common/components";
-import { SchemaMap } from "@interfaces";
+import { SchemaMap } from "@common/interfaces";
 import {
+  DEBUG,
   isIncludedSchema,
   patchDataIn,
   patchDataOut,
   patchSchema,
-} from "@utils";
+} from "@common/utils";
 
 import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
@@ -29,6 +30,8 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   activePanel,
   onPanelChange: setActivePanel,
 }) => {
+  DEBUG && console.log("AdvancedSettingsPanel");
+
   const availablePanels = Object.keys(advancedSchemas).filter((key) =>
     isIncludedSchema(parameters, advancedSchemas[key])
   );

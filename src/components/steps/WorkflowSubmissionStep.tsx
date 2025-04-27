@@ -1,7 +1,8 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 
-import { InputSchema } from "@interfaces";
+import { InputSchema } from "@common/interfaces";
+import { DEBUG } from "@common/utils";
 
 const workflowSchema: InputSchema = {
   schema: {
@@ -31,6 +32,8 @@ export const WorkflowSubmissionStep: React.FC<WorkflowSubmissionStepProps> = ({
   onChange,
   controls,
 }) => {
+  DEBUG && console.log("WorkflowSubmissionStep");
+
   return (
     <div>
       <h2>Step 5: Submit the workflow</h2>

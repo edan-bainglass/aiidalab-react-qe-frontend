@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import { Accordion } from "react-bootstrap";
 import { Atoms, WEAS } from "weas";
 
-import { WorkflowInputs } from "@interfaces";
+import { WorkflowInputs } from "@common/interfaces";
+import { DEBUG } from "@common/utils";
 
 interface InputsReviewStepProps {
   inputs: WorkflowInputs;
@@ -15,6 +16,8 @@ export const InputsReviewStep: React.FC<InputsReviewStepProps> = ({
   inputs,
   controls,
 }) => {
+  DEBUG && console.log("InputsReviewStep");
+
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
