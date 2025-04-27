@@ -194,7 +194,7 @@ export const parameterSchemas: ParameterSchemas = {
       },
     },
     magnetization: {
-      includeIf: {
+      includedIf: {
         "basic.magnetism": {
           const: true,
         },
