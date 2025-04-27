@@ -145,7 +145,7 @@ const Wizard: React.FC = () => {
             properties={state.properties}
             parametersSchema={state.parameterSchemas}
             parameters={state.parameters}
-            onChange={(panelKey, data) =>
+            onParametersChange={(panelKey, data) =>
               dispatch({ type: "SET_PARAMETERS", payload: { panelKey, data } })
             }
             controls={<StepNavControls prev={goPrev} next={goNext} />}

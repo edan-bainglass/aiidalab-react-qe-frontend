@@ -2,12 +2,13 @@ import Form from "@rjsf/react-bootstrap";
 import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect, useState } from "react";
-import { Dropdown, DropdownButton, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 
 import { SwitchWidget, ToggleGroupWidget } from "@common/components";
 import { PropertyMap, SchemaMap } from "@interfaces";
 import { patchDataIn, patchDataOut, patchSchema } from "@utils";
 
+import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 
 interface PluginSettingsProps extends SettingsPanelProps, WithNestedPanelProps {
@@ -21,7 +22,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   properties,
   pluginSchemas,
   parameters,
-  onFormChange,
+  onParametersChange: updateParameters,
   activePanel,
   onPanelChange: setPanel,
   onPluginSchemasChange: updatePluginSchemas,
@@ -57,7 +58,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
     Object.entries(pluginSchemas).forEach(([key, { schema }]) => {
       if (!(key in parameters)) {
         const defaults = getDefaultFormState(validator, schema, {}, schema);
-        onFormChange(key, defaults);
+        updateParameters(key, defaults);
       }
     });
   }, []);
@@ -89,22 +90,6 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
 
   const currentSchema = pluginSchemas[currentPanelKey];
 
-  const CategorySelector = () => {
-    return (
-      <DropdownButton
-        title={currentSchema?.schema.title || currentPanelKey}
-        className="mb-3"
-        onSelect={(key) => setPanel(key || "")}
-      >
-        {panelKeys.map((key) => (
-          <Dropdown.Item key={key} eventKey={key}>
-            {pluginSchemas[key]?.schema.title || key}
-          </Dropdown.Item>
-        ))}
-      </DropdownButton>
-    );
-  };
-
   const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
   const uiSchema = {
@@ -127,13 +112,25 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
 
   const onChange = (e: any) => {
     const patchedData = patchDataOut(e.formData, dependencies);
-    onFormChange(currentPanelKey, patchedData);
+    updateParameters(currentPanelKey, patchedData);
   };
+
+  const panelOptions = Object.fromEntries(
+    Object.entries(pluginSchemas).map(([key, { schema }]) => [
+      key,
+      schema.title || key,
+    ])
+  );
+
+  const selectedPanel = currentSchema?.schema.title || currentPanelKey;
 
   return (
     <div>
-      {<CategorySelector />}
-
+      <PanelSelector
+        selected={selectedPanel}
+        options={panelOptions}
+        onSelect={setPanel}
+      />
       {currentSchema && (
         <Form
           schema={schema}

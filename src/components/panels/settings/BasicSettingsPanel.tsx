@@ -17,14 +17,14 @@ export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
   structure,
   basicSchema,
   parameters,
-  onFormChange,
+  onParametersChange: updateParameters,
 }) => {
   useEffect(() => {
     const key = "basic";
     const schema = basicSchema.schema;
     if (!(key in parameters)) {
       const defaults = getDefaultFormState(validator, schema, {}, schema);
-      onFormChange(key, defaults);
+      updateParameters(key, defaults);
     }
   }, []);
 
@@ -46,7 +46,7 @@ export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
 
   const onChange = (e: any) => {
     const patchedData = patchDataOut(e.formData, dependencies);
-    onFormChange("basic", patchedData);
+    updateParameters("basic", patchedData);
   };
 
   return (

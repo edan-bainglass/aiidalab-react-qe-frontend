@@ -18,7 +18,7 @@ interface ParameterSettingsStepProps {
   properties: PropertyMap;
   parametersSchema: ParameterSchemas;
   parameters: any;
-  onChange: (panelKey: string, formData: any) => void;
+  onParametersChange: (panelKey: string, formData: any) => void;
   controls: React.ReactNode;
   panel: string;
   onPanelChange: (panel: string) => void;
@@ -34,7 +34,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   properties,
   parametersSchema,
   parameters,
-  onChange,
+  onParametersChange: updateParameters,
   controls,
   panel,
   onPanelChange: setPanel,
@@ -44,8 +44,8 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   onPluginPanelChange: setPluginPanel,
   onPluginSchemasChange: updatePluginSchemas,
 }) => {
-  const handleFormChange = (panelKey: string, formData: any) => {
-    onChange(panelKey, formData);
+  const handleParametersChange = (panelKey: string, formData: any) => {
+    updateParameters(panelKey, formData);
   };
 
   return (
@@ -64,7 +64,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             structure={structure}
             basicSchema={parametersSchema.basic}
             parameters={parameters}
-            onFormChange={handleFormChange}
+            onParametersChange={handleParametersChange}
           />
         </Tab>
         <Tab eventKey="advanced" title="Advanced settings">
@@ -72,7 +72,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             structure={structure}
             advancedSchemas={parametersSchema.advanced}
             parameters={parameters}
-            onFormChange={handleFormChange}
+            onParametersChange={handleParametersChange}
             activePanel={advancedPanel}
             onPanelChange={(panel) => setAdvancedPanel(panel)}
           />
@@ -83,7 +83,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             properties={properties}
             pluginSchemas={parametersSchema.plugins}
             parameters={parameters}
-            onFormChange={handleFormChange}
+            onParametersChange={handleParametersChange}
             activePanel={pluginPanel}
             onPanelChange={(panel) => setPluginPanel(panel)}
             onPluginSchemasChange={updatePluginSchemas}

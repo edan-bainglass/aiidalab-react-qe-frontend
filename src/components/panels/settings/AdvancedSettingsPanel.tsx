@@ -2,12 +2,12 @@ import Form from "@rjsf/react-bootstrap";
 import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
-import { Dropdown, DropdownButton } from "react-bootstrap";
 
 import { SwitchWidget, ToggleGroupWidget } from "@common/components";
 import { SchemaMap } from "@interfaces";
 import { patchDataIn, patchDataOut, patchSchema } from "@utils";
 
+import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 
 interface AdvancedSettingsProps
@@ -20,7 +20,7 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   structure,
   advancedSchemas,
   parameters,
-  onFormChange,
+  onParametersChange: updateParameters,
   activePanel,
   onPanelChange: setPanel,
 }) => {
@@ -28,34 +28,12 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
     Object.entries(advancedSchemas).forEach(([key, { schema }]) => {
       if (!(key in parameters)) {
         const defaults = getDefaultFormState(validator, schema, {}, schema);
-        onFormChange(key, defaults);
+        updateParameters(key, defaults);
       }
     });
   }, []);
 
-  const panelKeys = Object.keys(advancedSchemas);
-
-  const currentPanelKey = panelKeys.includes(activePanel)
-    ? activePanel
-    : panelKeys[0];
-
-  const currentSchema = advancedSchemas[currentPanelKey];
-
-  const CategorySelector = () => {
-    return (
-      <DropdownButton
-        title={currentSchema?.schema.title || currentPanelKey}
-        className="mb-3"
-        onSelect={(key) => setPanel(key || "")}
-      >
-        {panelKeys.map((key) => (
-          <Dropdown.Item key={key} eventKey={key}>
-            {advancedSchemas[key]?.schema.title || key}
-          </Dropdown.Item>
-        ))}
-      </DropdownButton>
-    );
-  };
+  const currentSchema = advancedSchemas[activePanel];
 
   const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
@@ -66,7 +44,7 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
     },
     "ui:options": {
       title: "",
-      classNames: `${currentPanelKey}-panel`,
+      classNames: `${activePanel}-panel`,
     },
   };
 
@@ -79,12 +57,25 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
 
   const onChange = (e: any) => {
     const patchedData = patchDataOut(e.formData, dependencies);
-    onFormChange(currentPanelKey, patchedData);
+    updateParameters(activePanel, patchedData);
   };
+
+  const panelOptions = Object.fromEntries(
+    Object.entries(advancedSchemas).map(([key, { schema }]) => [
+      key,
+      schema.title || key,
+    ])
+  );
+
+  const selectedPanel = currentSchema?.schema.title || activePanel;
 
   return (
     <div>
-      {<CategorySelector />}
+      <PanelSelector
+        selected={selectedPanel}
+        options={panelOptions}
+        onSelect={setPanel}
+      />
       {currentSchema && (
         <Form
           schema={schema}
