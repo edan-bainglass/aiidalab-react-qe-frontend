@@ -75,13 +75,14 @@ export const patchDataIn = (
   const copy = {} as typeof data;
 
   for (const dependency of dependencies || []) {
+    if (dependency.startsWith("basic.")) {
+      const [panel, dep] = dependency.split(".");
+      if (data[panel]?.[dep]) {
+        copy[dep] = data[panel][dep];
+      }
+      continue;
+    }
     switch (dependency) {
-      case "basic.protocol":
-        if (data["basic"]?.protocol) {
-          const [panel, dep] = dependency.split(".");
-          copy[dep] = data[panel][dep];
-        }
-        break;
       case "structure.pbc":
         if (!structure?.pbc) {
           console.warn("No PBC data found in structure");
@@ -112,10 +113,12 @@ export const patchDataOut = (
   const copy = { ...data };
 
   for (const dependency of dependencies || []) {
+    if (dependency.startsWith("basic.")) {
+      const dep = dependency.split(".")[1];
+      delete copy[dep];
+      continue;
+    }
     switch (dependency) {
-      case "basic.protocol":
-        delete copy["protocol"];
-        break;
       case "structure.pbc":
         delete copy["molecule"];
         break;
