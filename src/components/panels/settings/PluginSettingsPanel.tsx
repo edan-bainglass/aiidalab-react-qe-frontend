@@ -24,7 +24,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   parameters,
   onParametersChange: updateParameters,
   activePanel,
-  onPanelChange: setPanel,
+  onPanelChange: setActivePanel,
   onPluginSchemasChange: updatePluginSchemas,
 }) => {
   const [loading, setLoading] = useState(true);
@@ -129,7 +129,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
       <PanelSelector
         selected={selectedPanel}
         options={panelOptions}
-        onSelect={setPanel}
+        onSelect={setActivePanel}
       />
       {currentSchema && (
         <Form

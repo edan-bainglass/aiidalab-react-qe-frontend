@@ -5,7 +5,12 @@ import { useEffect } from "react";
 
 import { SwitchWidget, ToggleGroupWidget } from "@common/components";
 import { SchemaMap } from "@interfaces";
-import { patchDataIn, patchDataOut, patchSchema } from "@utils";
+import {
+  isIncludedSchema,
+  patchDataIn,
+  patchDataOut,
+  patchSchema,
+} from "@utils";
 
 import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
@@ -22,8 +27,18 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   parameters,
   onParametersChange: updateParameters,
   activePanel,
-  onPanelChange: setPanel,
+  onPanelChange: setActivePanel,
 }) => {
+  const availablePanels = Object.keys(advancedSchemas).filter((key) =>
+    isIncludedSchema(parameters, advancedSchemas[key])
+  );
+
+  useEffect(() => {
+    const fallback = availablePanels[0];
+    const isValidPanel = availablePanels.includes(activePanel);
+    !isValidPanel && setActivePanel(fallback);
+  }, [availablePanels, activePanel]);
+
   useEffect(() => {
     Object.entries(advancedSchemas).forEach(([key, { schema }]) => {
       if (!(key in parameters)) {
@@ -61,9 +76,9 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   };
 
   const panelOptions = Object.fromEntries(
-    Object.entries(advancedSchemas).map(([key, { schema }]) => [
+    availablePanels.map((key) => [
       key,
-      schema.title || key,
+      advancedSchemas[key].schema.title || key,
     ])
   );
 
@@ -74,7 +89,7 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
       <PanelSelector
         selected={selectedPanel}
         options={panelOptions}
-        onSelect={setPanel}
+        onSelect={setActivePanel}
       />
       {currentSchema && (
         <Form

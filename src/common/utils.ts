@@ -131,3 +131,21 @@ export const patchDataOut = (
   }
   return copy;
 };
+
+export const isIncludedSchema = (
+  data: Record<string, any>,
+  schema: InputSchema
+): boolean => {
+  const includeIf = schema?.includeIf;
+
+  if (!includeIf) return true;
+
+  for (const [key, value] of Object.entries(includeIf)) {
+    if (key.startsWith("basic.")) {
+      const [category, trigger] = key.split(".");
+      if (data?.[category]?.[trigger] !== value?.const) return false;
+    }
+  }
+
+  return true;
+};

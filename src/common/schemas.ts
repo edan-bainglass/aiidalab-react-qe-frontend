@@ -30,7 +30,7 @@ export const parameterSchemas: ParameterSchemas = {
               enum: ["Fast", "Balanced", "Stringent"],
               default: "Fast",
             },
-            spin_type: {
+            magnetism: {
               type: "boolean",
               title: "Magnetism",
             },
@@ -65,7 +65,7 @@ export const parameterSchemas: ParameterSchemas = {
               enum: ["Fast", "Balanced", "Stringent"],
               default: "Fast",
             },
-            spin_type: {
+            magnetism: {
               type: "boolean",
               title: "Magnetism",
             },
@@ -194,6 +194,11 @@ export const parameterSchemas: ParameterSchemas = {
       },
     },
     magnetization: {
+      includeIf: {
+        "basic.magnetism": {
+          const: true,
+        },
+      },
       schema: {
         type: "object",
         title: "Magnetization",

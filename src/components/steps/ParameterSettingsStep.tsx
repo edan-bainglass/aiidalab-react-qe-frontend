@@ -37,11 +37,11 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   onParametersChange: updateParameters,
   controls,
   panel,
-  onPanelChange: setPanel,
+  onPanelChange: setActivePanel,
   advancedPanel,
-  onAdvancedPanelChange: setAdvancedPanel,
+  onAdvancedPanelChange: setActiveAdvancedPanel,
   pluginPanel,
-  onPluginPanelChange: setPluginPanel,
+  onPluginPanelChange: setActivePluginPanel,
   onPluginSchemasChange: updatePluginSchemas,
 }) => {
   const handleParametersChange = (panelKey: string, formData: any) => {
@@ -57,7 +57,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
         className="mb-3"
         style={{ marginTop: "1rem" }}
         activeKey={panel}
-        onSelect={(key) => setPanel(key || "basic")}
+        onSelect={(key) => setActivePanel(key || "basic")}
       >
         <Tab eventKey="basic" title="Basic settings">
           <BasicSettingsPanel
@@ -74,7 +74,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             parameters={parameters}
             onParametersChange={handleParametersChange}
             activePanel={advancedPanel}
-            onPanelChange={(panel) => setAdvancedPanel(panel)}
+            onPanelChange={(panel) => setActiveAdvancedPanel(panel)}
           />
         </Tab>
         <Tab eventKey="properties" title="Property settings">
@@ -85,7 +85,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             parameters={parameters}
             onParametersChange={handleParametersChange}
             activePanel={pluginPanel}
-            onPanelChange={(panel) => setPluginPanel(panel)}
+            onPanelChange={(panel) => setActivePluginPanel(panel)}
             onPluginSchemasChange={updatePluginSchemas}
           />
         </Tab>
