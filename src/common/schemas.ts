@@ -220,6 +220,12 @@ export const parameterSchemas: ParameterSchemas = {
         type: "object",
         title: "Magnetization",
         definitions: {
+          mode: {
+            type: "string",
+            title: "Input mode",
+            enum: ["moments", "total"],
+            default: "moments",
+          },
           tot_magnetization: {
             type: "number",
             title: "Total magnetization",
@@ -227,13 +233,74 @@ export const parameterSchemas: ParameterSchemas = {
             multipleOf: 0.1,
             default: 1,
           },
+          moments: {
+            type: "array",
+            title: "Initial magnetic moments",
+            items: {
+              type: "number",
+              default: 0.1,
+            },
+          },
         },
-        properties: {
-          tot_magnetization: {
-            $ref: "#/definitions/tot_magnetization",
+        if: {
+          properties: {
+            electronic_type: {
+              const: "insulator",
+            },
+          },
+        },
+        then: {
+          properties: {
+            tot_magnetization: {
+              $ref: "#/definitions/tot_magnetization",
+            },
+          },
+        },
+        else: {
+          properties: {
+            mode: {
+              $ref: "#/definitions/mode",
+            },
+          },
+          if: {
+            properties: {
+              mode: {
+                const: "moments",
+              },
+            },
+          },
+          then: {
+            properties: {
+              moments: {
+                $ref: "#/definitions/moments",
+              },
+            },
+          },
+          else: {
+            properties: {
+              tot_magnetization: {
+                $ref: "#/definitions/tot_magnetization",
+              },
+            },
           },
         },
       },
+      ui: {
+        mode: {
+          "ui:widget": "toggleGroup",
+          "ui:enumNames": ["Initial magnetic moments", "Total magnetization"],
+        },
+        moments: {
+          "ui:options": {
+            classNames: "mt-2",
+          },
+          items: {
+            generatedFrom: "structure.species",
+            template: "{{species}}",
+          },
+        },
+      },
+      dependencies: ["basic.electronic_type"],
     },
     hubbardU: {
       schema: {
