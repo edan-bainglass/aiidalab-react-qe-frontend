@@ -4,78 +4,79 @@ export const parameterSchemas: ParameterSchemas = {
   basic: {
     schema: {
       type: "object",
-      oneOf: [
-        {
-          type: "object",
-          properties: {
-            molecule: {
-              type: "boolean",
-              const: true,
-            },
-            relax: {
-              type: "string",
-              title: "Relaxation level",
-              enum: ["none", "positions"],
-              default: "positions",
-            },
-            electronic_type: {
-              type: "string",
-              title: "Electronic type",
-              enum: ["metallic", "insulator"],
-              default: "metallic",
-            },
-            protocol: {
-              type: "string",
-              title: "Protocol",
-              enum: ["fast", "balanced", "stringent"],
-              default: "fast",
-            },
-            magnetism: {
-              type: "boolean",
-              title: "Magnetism",
-            },
-            spin_orbit: {
-              type: "boolean",
-              title: "Spin orbit coupling",
-            },
+      definitions: {
+        protocol: {
+          type: "string",
+          title: "Protocol",
+          enum: ["fast", "balanced", "stringent"],
+          default: "fast",
+        },
+        molecule: {
+          type: "boolean",
+          default: false,
+        },
+        relax: {
+          type: "string",
+          title: "Relaxation level",
+        },
+        electronic_type: {
+          type: "string",
+          title: "Electronic type",
+          enum: ["metallic", "insulator"],
+          default: "metallic",
+        },
+        magnetism: {
+          type: "boolean",
+          title: "Magnetism",
+        },
+        spin_orbit: {
+          type: "boolean",
+          title: "Spin orbit coupling",
+        },
+      },
+      properties: {
+        relax: {
+          $ref: "#/definitions/relax",
+        },
+        electronic_type: {
+          $ref: "#/definitions/electronic_type",
+        },
+        protocol: {
+          $ref: "#/definitions/protocol",
+        },
+        magnetism: {
+          $ref: "#/definitions/magnetism",
+        },
+        spin_orbit: {
+          $ref: "#/definitions/spin_orbit",
+        },
+      },
+      if: {
+        type: "object",
+        properties: {
+          molecule: {
+            const: true,
           },
         },
-        {
-          type: "object",
-          properties: {
-            molecule: {
-              type: "boolean",
-              const: false,
-            },
-            relax: {
-              type: "string",
-              title: "Relaxation level",
-              enum: ["none", "positions", "positions-cell"],
-              default: "positions-cell",
-            },
-            electronic_type: {
-              type: "string",
-              title: "Electronic type",
-              enum: ["metallic", "insulator"],
-              default: "metallic",
-            },
-            protocol: {
-              type: "string",
-              title: "Protocol",
-              enum: ["fast", "balanced", "stringent"],
-              default: "fast",
-            },
-            magnetism: {
-              type: "boolean",
-              title: "Magnetism",
-            },
-            spin_orbit: {
-              type: "boolean",
-              title: "Spin orbit coupling",
-            },
+      },
+      then: {
+        type: "object",
+        properties: {
+          relax: {
+            enum: ["none", "positions"],
+            default: "positions",
           },
         },
-      ],
+      },
+      else: {
+        type: "object",
+        properties: {
+          relax: {
+            enum: ["none", "positions", "positions-cell"],
+            default: "positions-cell",
+          },
+        },
+      },
     },
     ui: {
       molecule: {
@@ -101,77 +102,86 @@ export const parameterSchemas: ParameterSchemas = {
       schema: {
         type: "object",
         title: "Convergence",
-        oneOf: [
-          {
-            type: "object",
-            properties: {
-              protocol: {
-                const: "fast",
-              },
-              scfConvEng: {
-                type: "number",
-                title: "SCF energy (Ry/atom)",
-                default: 4e-10,
-              },
-              ionicConvEng: {
-                type: "number",
-                title: "Ionic energy (Ry/atom)",
-                default: 0.0001,
-              },
-              ionicConvForce: {
-                type: "number",
-                title: "Ionic force (Ry/Bohr)",
-                default: 0.001,
-              },
+        definitions: {
+          scfConvEng: {
+            type: "number",
+            title: "SCF energy (Ry/atom)",
+          },
+          ionicConvEng: {
+            type: "number",
+            title: "Ionic energy (Ry/atom)",
+          },
+          ionicConvForce: {
+            type: "number",
+            title: "Ionic force (Ry/Bohr)",
+          },
+        },
+        properties: {
+          scfConvEng: {
+            $ref: "#/definitions/scfConvEng",
+          },
+          ionicConvEng: {
+            $ref: "#/definitions/ionicConvEng",
+          },
+          ionicConvForce: {
+            $ref: "#/definitions/ionicConvForce",
+          },
+        },
+        if: {
+          properties: {
+            protocol: {
+              const: "fast",
             },
           },
-          {
-            type: "object",
+        },
+        then: {
+          properties: {
+            scfConvEng: {
+              default: 4e-10,
+            },
+            ionicConvEng: {
+              default: 0.0001,
+            },
+            ionicConvForce: {
+              default: 0.001,
+            },
+          },
+        },
+        else: {
+          if: {
             properties: {
               protocol: {
                 const: "balanced",
               },
+            },
+          },
+          then: {
+            properties: {
               scfConvEng: {
-                type: "number",
-                title: "SCF energy (Ry/atom)",
                 default: 2e-10,
               },
               ionicConvEng: {
-                type: "number",
-                title: "Ionic energy (Ry/atom)",
                 default: 0.00001,
               },
               ionicConvForce: {
-                type: "number",
-                title: "Ionic force (Ry/Bohr)",
                 default: 0.0001,
               },
             },
           },
-          {
-            type: "object",
+          else: {
             properties: {
-              protocol: {
-                const: "stringent",
-              },
               scfConvEng: {
-                type: "number",
-                title: "SCF energy (Ry/atom)",
                 default: 1e-10,
               },
               ionicConvEng: {
-                type: "number",
-                title: "Ionic energy (Ry/atom)",
                 default: 0.000005,
               },
               ionicConvForce: {
-                type: "number",
-                title: "Ionic force (Ry/Bohr)",
                 default: 0.00005,
               },
             },
           },
-        ],
+        },
       },
       ui: {
         protocol: {
@@ -184,14 +194,26 @@ export const parameterSchemas: ParameterSchemas = {
       schema: {
         type: "object",
         title: "Smearing",
-        properties: {
+        definitions: {
           method: {
             type: "string",
-            title: "Method",
+            title: "Smearing",
             enum: ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
             default: "Gaussian",
           },
-          width: { type: "number", title: "Width (eV)", default: 0.05 },
+          width: {
+            type: "number",
+            title: "Width (eV)",
+            default: 0.05,
+          },
+        },
+        properties: {
+          method: {
+            $ref: "#/definitions/method",
+          },
+          width: {
+            $ref: "#/definitions/width",
+          },
         },
       },
     },
@@ -204,10 +226,18 @@ export const parameterSchemas: ParameterSchemas = {
       schema: {
         type: "object",
         title: "Magnetization",
-        properties: {
-          initialMagnetization: {
+        definitions: {
+          tot_magnetization: {
             type: "number",
-            title: "Initial magnetization",
+            title: "Total magnetization",
+            minimum: 0,
+            multipleOf: 0.1,
+            default: 1,
+          },
+        },
+        properties: {
+          tot_magnetization: {
+            $ref: "#/definitions/tot_magnetization",
           },
         },
       },
@@ -216,14 +246,24 @@ export const parameterSchemas: ParameterSchemas = {
       schema: {
         type: "object",
         title: "Hubbard U",
-        properties: {
+        definitions: {
           use_hubbard: {
-            default: false,
-            title: "Enable U",
             type: "boolean",
+            title: "Enable U",
+            default: false,
+          },
+          U: {
+            type: "number",
+            title: "U (eV)",
+            minimum: 0,
+            default: 0,
           },
         },
-        required: ["use_hubbard"],
+        properties: {
+          use_hubbard: {
+            $ref: "#/definitions/use_hubbard",
+          },
+        },
         if: {
           properties: {
             use_hubbard: {
@@ -234,10 +274,7 @@ export const parameterSchemas: ParameterSchemas = {
         then: {
           properties: {
             U: {
-              type: "number",
-              title: "U (eV)",
-              minimum: 0,
-              default: 0,
+              $ref: "#/definitions/U",
             },
           },
         },
@@ -247,7 +284,7 @@ export const parameterSchemas: ParameterSchemas = {
       schema: {
         type: "object",
         title: "Pseudopotentials",
-        properties: {
+        definitions: {
           functional: {
             type: "string",
             title: "Functional",
@@ -260,6 +297,10 @@ export const parameterSchemas: ParameterSchemas = {
             enum: ["SSSP", "PseudoDojo"],
             default: "SSSP",
           },
+          accuracy: {
+            type: "string",
+            title: "Accuracy",
+          },
           pseudopotentials: {
             type: "array",
             title: "Pseudopotentials",
@@ -269,6 +310,20 @@ export const parameterSchemas: ParameterSchemas = {
               generatedFrom: "structure.species",
               template: "{{species}}",
             } as any,
+          },
+        },
+        properties: {
+          functional: {
+            $ref: "#/definitions/functional",
+          },
+          family: {
+            $ref: "#/definitions/family",
+          },
+          accuracy: {
+            $ref: "#/definitions/accuracy",
+          },
+          pseudopotentials: {
+            $ref: "#/definitions/pseudopotentials",
           },
         },
         if: {
@@ -281,8 +336,6 @@ export const parameterSchemas: ParameterSchemas = {
         then: {
           properties: {
             accuracy: {
-              type: "string",
-              title: "Accuracy",
               enum: ["Efficiency", "Precision"],
               default: "Efficiency",
             },
@@ -299,8 +352,6 @@ export const parameterSchemas: ParameterSchemas = {
           then: {
             properties: {
               accuracy: {
-                type: "string",
-                title: "Accuracy",
                 enum: ["Standard", "Stringent"],
                 default: "Standard",
               },
@@ -329,7 +380,6 @@ export const parameterSchemas: ParameterSchemas = {
             },
           },
         },
-        "ui:order": ["functional", "family", "accuracy", "pseudopotentials"],
       },
     },
   },

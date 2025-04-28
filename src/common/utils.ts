@@ -24,7 +24,7 @@ export const patchSchema = (
   };
   const ui: UiSchema = { ...origUi };
 
-  for (const [fieldKey, fieldDef] of Object.entries(schema.properties || {})) {
+  for (const [fieldKey, fieldDef] of Object.entries(schema.definitions || {})) {
     const isArray = typeof fieldDef === "object" && fieldDef?.type === "array";
     const items = (fieldDef as any)?.items;
 
@@ -134,6 +134,9 @@ export const patchDataOut = (
   return copy;
 };
 
+/**
+ * Check if the schema should be included based on the data
+ */
 export const isIncludedSchema = (
   data: Record<string, any>,
   schema: InputSchema
