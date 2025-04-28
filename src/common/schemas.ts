@@ -5,16 +5,6 @@ export const parameterSchemas: ParameterSchemas = {
     schema: {
       type: "object",
       definitions: {
-        protocol: {
-          type: "string",
-          title: "Protocol",
-          enum: ["fast", "balanced", "stringent"],
-          default: "fast",
-        },
-        molecule: {
-          type: "boolean",
-          default: false,
-        },
         relax: {
           type: "string",
           title: "Relaxation level",
@@ -24,6 +14,12 @@ export const parameterSchemas: ParameterSchemas = {
           title: "Electronic type",
           enum: ["metallic", "insulator"],
           default: "metallic",
+        },
+        protocol: {
+          type: "string",
+          title: "Protocol",
+          enum: ["fast", "balanced", "stringent"],
+          default: "fast",
         },
         magnetism: {
           type: "boolean",
@@ -79,9 +75,6 @@ export const parameterSchemas: ParameterSchemas = {
       },
     },
     ui: {
-      molecule: {
-        "ui:widget": "hidden",
-      },
       relax: {
         "ui:widget": "toggleGroup",
         "ui:enumNames": ["Structure as is", "Positions only", "Full geometry"],
