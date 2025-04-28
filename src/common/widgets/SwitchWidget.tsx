@@ -1,6 +1,7 @@
-import { WidgetProps } from "@rjsf/utils";
 import React from "react";
 import Form from "react-bootstrap/Form";
+
+import { WidgetProps } from "@rjsf/utils";
 
 const SwitchWidget: React.FC<WidgetProps> = (props) => {
   // RJSF passes the enumOptions for booleans/widgets; here we just

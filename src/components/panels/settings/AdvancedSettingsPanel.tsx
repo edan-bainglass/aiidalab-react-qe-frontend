@@ -3,7 +3,6 @@ import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
 
-import { SwitchWidget, ToggleGroupWidget } from "@common/components";
 import { SchemaMap } from "@common/interfaces";
 import {
   DEBUG,
@@ -12,6 +11,7 @@ import {
   patchDataOut,
   patchSchema,
 } from "@common/utils";
+import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 
 import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";

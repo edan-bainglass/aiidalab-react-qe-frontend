@@ -1,5 +1,6 @@
-import { WidgetProps } from "@rjsf/utils";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+
+import { WidgetProps } from "@rjsf/utils";
 
 const ToggleGroupWidget: React.FC<WidgetProps> = (props) => {
   return (

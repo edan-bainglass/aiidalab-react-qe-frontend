@@ -4,9 +4,9 @@ import validator from "@rjsf/validator-ajv8";
 import { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
 
-import { SwitchWidget, ToggleGroupWidget } from "@common/components";
 import { PropertyMap, SchemaMap } from "@common/interfaces";
 import { DEBUG, patchDataIn, patchDataOut, patchSchema } from "@common/utils";
+import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 
 import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
