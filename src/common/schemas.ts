@@ -307,9 +307,7 @@ export const parameterSchemas: ParameterSchemas = {
             items: {
               type: "string",
               format: "data-url",
-              generatedFrom: "structure.species",
-              template: "{{species}}",
-            } as any,
+            },
           },
         },
         properties: {
@@ -378,6 +376,8 @@ export const parameterSchemas: ParameterSchemas = {
             "ui:options": {
               accept: ".UPF",
             },
+            generatedFrom: "structure.species",
+            template: "{{species}}",
           },
         },
       },

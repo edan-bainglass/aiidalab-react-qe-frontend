@@ -16,54 +16,56 @@ export const patchSchema = (
     return input;
   }
 
-  const { schema: origSchema, ui: origUi, dependencies } = input;
+  const schema: RJSFSchema = JSON.parse(JSON.stringify(input.schema));
+  const ui: UiSchema | undefined = JSON.parse(JSON.stringify(input.ui || {}));
 
-  const schema: RJSFSchema = {
-    ...origSchema,
-    properties: { ...(origSchema.properties || {}) },
-  };
-  const ui: UiSchema = { ...origUi };
+  for (const [fieldKey, fieldDef] of Object.entries(ui || {})) {
+    if (fieldDef?.items) {
+      if (!schema.definitions) {
+        console.warn("No definitions found in schema");
+        continue;
+      }
 
-  for (const [fieldKey, fieldDef] of Object.entries(schema.definitions || {})) {
-    const isArray = typeof fieldDef === "object" && fieldDef?.type === "array";
-    const items = (fieldDef as any)?.items;
+      const definition = (schema.definitions?.[fieldKey] as any)?.items;
+      if (!definition) {
+        console.warn(`No items definition found for ${fieldKey}`);
+        continue;
+      }
 
-    if (!isArray || !items || typeof items !== "object") continue;
+      const generatedFrom: string = fieldDef.items.generatedFrom;
+      if (!generatedFrom) {
+        console.warn(`No generatedFrom found for ${fieldKey}`);
+        continue;
+      }
 
-    const generatedFrom = items.generatedFrom;
-    if (!generatedFrom) continue;
+      const template: string = fieldDef.items.template || "{{ species }}";
 
-    if (generatedFrom !== "structure.species") {
-      console.warn(`Unsupported generatedFrom source: ${generatedFrom}`);
-      continue;
+      switch (generatedFrom) {
+        case "structure.species":
+          const newItems = Object.keys(structure.species || {}).map((key) => {
+            return {
+              ...definition,
+              title: template.replace(/{{\s*species\s*}}/g, key),
+            };
+          });
+
+          schema.definitions[fieldKey] = {
+            ...(schema.definitions?.[fieldKey] as any),
+            items: newItems,
+          };
+
+          delete ui?.[fieldKey].items.generatedFrom;
+          delete ui?.[fieldKey].items.template;
+
+          break;
+        default:
+          console.warn(`Unsupported generatedFrom source: ${generatedFrom}`);
+          break;
+      }
     }
-
-    const speciesKeys = Object.keys(structure.species || {});
-
-    const itemSchemas = speciesKeys.map((symbol, i) => {
-      const title = items.template
-        .replace(/{{\s*species\s*}}/g, symbol)
-        .replace(/{{\s*i\s*}}/g, String(i + 1));
-
-      const newItem: any = {
-        type: items.type,
-        title,
-        default: items.default,
-      };
-
-      if (items.format) newItem.format = items.format;
-      if (items.default !== undefined) newItem.default = items.default;
-
-      return newItem;
-    });
-
-    schema.properties![fieldKey] = {
-      ...fieldDef,
-      items: itemSchemas,
-    };
   }
 
-  return { schema, ui, dependencies };
+  return { schema, ui, dependencies: input.dependencies };
 };
 
 /**
