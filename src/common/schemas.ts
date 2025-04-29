@@ -354,8 +354,6 @@ export const parameterSchemas: ParameterSchemas = {
           family: {
             type: "string",
             title: "Family",
-            enum: ["SSSP", "PseudoDojo"],
-            default: "SSSP",
           },
           accuracy: {
             type: "string",
@@ -386,33 +384,51 @@ export const parameterSchemas: ParameterSchemas = {
         },
         if: {
           properties: {
-            family: {
-              const: "SSSP",
+            spin_orbit: {
+              const: false,
             },
           },
         },
         then: {
           properties: {
-            accuracy: {
-              enum: ["Efficiency", "Precision"],
-              default: "Efficiency",
+            family: {
+              enum: ["SSSP", "PseudoDojo"],
+              default: "SSSP",
             },
           },
-        },
-        else: {
           if: {
             properties: {
               family: {
-                const: "PseudoDojo",
+                const: "SSSP",
               },
             },
           },
           then: {
             properties: {
               accuracy: {
+                enum: ["Efficiency", "Precision"],
+                default: "Efficiency",
+              },
+            },
+          },
+          else: {
+            properties: {
+              accuracy: {
                 enum: ["Standard", "Stringent"],
                 default: "Standard",
               },
+            },
+          },
+        },
+        else: {
+          properties: {
+            family: {
+              enum: ["PseudoDojo"],
+              default: "PseudoDojo",
+            },
+            accuracy: {
+              enum: ["Standard", "Stringent"],
+              default: "Standard",
             },
           },
         },
@@ -441,6 +457,7 @@ export const parameterSchemas: ParameterSchemas = {
           },
         },
       },
+      dependencies: ["basic.spin_orbit"],
     },
   },
   plugins: {},
