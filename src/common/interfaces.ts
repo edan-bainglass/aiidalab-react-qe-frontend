@@ -64,6 +64,7 @@ export type WizardAction =
   | { type: "SET_PLUGIN_PANEL"; payload: string }
   | { type: "UPDATE_PLUGIN_SCHEMAS"; payload: SchemaMap }
   | { type: "SET_PARAMETERS"; payload: { panelKey: string; data: any } }
+  | { type: "DISCARD_PARAMETERS"; payload: string }
   | { type: "SET_RESOURCES"; payload: ResourcesType }
   | { type: "SET_RESULTS"; payload: ResultsType }
   | { type: "SET_METADATA"; payload: Record<string, string> }

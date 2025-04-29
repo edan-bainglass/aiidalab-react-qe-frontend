@@ -12,7 +12,7 @@ interface PropertySelectionStepProps {
 
 export const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
   properties,
-  onChange,
+  onChange: setProperties,
   controls,
 }) => {
   DEBUG && console.log("PropertySelectionStep");
@@ -23,7 +23,7 @@ export const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
   const handleToggle = (id: string) => {
     const updatedProperties = { ...properties };
     updatedProperties[id].active = !updatedProperties[id].active;
-    onChange(updatedProperties);
+    setProperties(updatedProperties);
   };
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
         const res = await fetch("/api/plugins");
         if (!res.ok) throw new Error("Failed to load plugins");
         const data: PropertyMap = await res.json();
-        onChange(data);
+        setProperties(data);
         setLoading(false);
       } catch (err) {
         console.error(err);

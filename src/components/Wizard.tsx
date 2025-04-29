@@ -68,6 +68,9 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
           [action.payload.panelKey]: action.payload.data,
         },
       };
+    case "DISCARD_PARAMETERS":
+      const { [action.payload]: _, ...rest } = state.parameters;
+      return { ...state, parameters: rest };
     case "SET_RESOURCES":
       return { ...state, resources: action.payload };
     case "SET_METADATA":
@@ -86,6 +89,17 @@ const Wizard: React.FC = () => {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState<number>(1);
+
+  const discardInactiveParameters = () => {
+    Object.entries(state.properties).forEach(
+      ([key, prop]) =>
+        !prop.active &&
+        dispatch({
+          type: "DISCARD_PARAMETERS",
+          payload: key,
+        })
+    );
+  };
 
   const getActiveProperties = (): string[] =>
     Object.entries(state.properties)
@@ -135,9 +149,10 @@ const Wizard: React.FC = () => {
         return (
           <PropertySelectionStep
             properties={state.properties}
-            onChange={(selected) =>
-              dispatch({ type: "SET_PROPERTIES", payload: selected })
-            }
+            onChange={(properties) => {
+              dispatch({ type: "SET_PROPERTIES", payload: properties });
+              discardInactiveParameters();
+            }}
             controls={<StepNavControls prev={goPrev} next={goNext} />}
           />
         );
