@@ -63,7 +63,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
         updateParameters(key, defaults);
       }
     });
-  }, []);
+  }, [pluginSchemas]);
 
   if (loading) {
     return (
