@@ -48,7 +48,6 @@ export const parameterSchemas: ParameterSchemas = {
         },
       },
       if: {
-        type: "object",
         properties: {
           molecule: {
             const: true,
@@ -56,7 +55,6 @@ export const parameterSchemas: ParameterSchemas = {
         },
       },
       then: {
-        type: "object",
         properties: {
           relax: {
             enum: ["none", "positions"],
@@ -65,7 +63,6 @@ export const parameterSchemas: ParameterSchemas = {
         },
       },
       else: {
-        type: "object",
         properties: {
           relax: {
             enum: ["none", "positions", "positions-cell"],
