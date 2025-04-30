@@ -1,8 +1,13 @@
 import React, { useReducer, useState } from "react";
 import { Breadcrumb, Button, Col, Container, Row } from "react-bootstrap";
 
-import { WizardAction, WizardState } from "@common/interfaces";
-import { parameterSchemas } from "@common/schemas";
+import {
+  InputSchema,
+  ParameterSchemas,
+  SchemaMap,
+  WizardAction,
+  WizardState,
+} from "@common/interfaces";
 import { DEBUG } from "@common/utils";
 import {
   InputsReviewStep,
@@ -30,7 +35,11 @@ const initialState: WizardState = {
   activeParametersPanel: "basic",
   activeAdvancedPanel: "convergence",
   activePluginPanel: "",
-  parameterSchemas: parameterSchemas,
+  parameterSchemas: {
+    basic: {},
+    advanced: {},
+    plugins: {},
+  } as ParameterSchemas,
   parameters: {},
   resources: null,
   metadata: {},
@@ -39,6 +48,27 @@ const initialState: WizardState = {
 
 function reducer(state: WizardState, action: WizardAction): WizardState {
   switch (action.type) {
+    case "SET_SCHEMA":
+      const { schema, panel, subpanel } = action.payload;
+      const categoryPayload = subpanel
+        ? {
+            ...state.parameterSchemas[panel],
+            [subpanel]: {
+              ...(state.parameterSchemas[panel] as SchemaMap)[subpanel],
+              ...schema,
+            },
+          }
+        : {
+            ...state.parameterSchemas[panel],
+            ...schema,
+          };
+      return {
+        ...state,
+        parameterSchemas: {
+          ...state.parameterSchemas,
+          [panel]: categoryPayload,
+        },
+      };
     case "SET_STRUCTURE":
       return { ...state, structure: action.payload };
     case "SET_PROPERTIES":
@@ -49,17 +79,6 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
       return { ...state, activeAdvancedPanel: action.payload };
     case "SET_PLUGIN_PANEL":
       return { ...state, activePluginPanel: action.payload };
-    case "UPDATE_PLUGIN_SCHEMAS":
-      return {
-        ...state,
-        parameterSchemas: {
-          ...state.parameterSchemas,
-          plugins: {
-            ...state.parameterSchemas.plugins,
-            ...action.payload,
-          },
-        },
-      };
     case "SET_PARAMETERS":
       return {
         ...state,
@@ -161,7 +180,7 @@ const Wizard: React.FC = () => {
           <ParameterSettingsStep
             structure={state.structure}
             properties={state.properties}
-            parametersSchema={state.parameterSchemas}
+            parameterSchemas={state.parameterSchemas}
             parameters={state.parameters}
             onParametersChange={(panelKey, data) =>
               dispatch({ type: "SET_PARAMETERS", payload: { panelKey, data } })
@@ -182,10 +201,14 @@ const Wizard: React.FC = () => {
             onPluginPanelChange={(panel) =>
               dispatch({ type: "SET_PLUGIN_PANEL", payload: panel })
             }
-            onPluginSchemasChange={(schema) =>
+            onSchemaChange={(
+              schema: InputSchema,
+              panel: keyof ParameterSchemas,
+              subpanel?: string
+            ) =>
               dispatch({
-                type: "UPDATE_PLUGIN_SCHEMAS",
-                payload: schema,
+                type: "SET_SCHEMA",
+                payload: { panel, subpanel, schema },
               })
             }
           />

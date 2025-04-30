@@ -4,7 +4,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
 
-import { PropertyMap, SchemaMap } from "@common/interfaces";
+import { InputSchema, PropertyMap, SchemaMap } from "@common/interfaces";
 import { DEBUG, patchDataIn, patchDataOut, patchSchema } from "@common/utils";
 import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 
@@ -13,7 +13,7 @@ import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 
 interface PluginSettingsProps extends SettingsPanelProps, WithNestedPanelProps {
   pluginSchemas: SchemaMap;
-  onPluginSchemasChange: (schema: SchemaMap) => void;
+  onPluginSchemaChange: (key: string, schema: InputSchema) => void;
   properties: PropertyMap;
 }
 
@@ -25,7 +25,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   onParametersChange: updateParameters,
   activePanel,
   onPanelChange: setActivePanel,
-  onPluginSchemasChange: updatePluginSchemas,
+  onPluginSchemaChange: setPluginSchema,
 }) => {
   DEBUG && console.log("PluginSettingsPanel");
 
@@ -34,19 +34,14 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   useEffect(() => {
     async function loadPluginSchemas() {
       try {
-        const fetched: SchemaMap = {};
         for (const [key, property] of Object.entries(properties)) {
           if (pluginSchemas[key]) continue;
           if (!property.active) continue;
-          const res = await fetch(`/api/plugins/${key}/input`);
+          const res = await fetch(`/api/plugin/schemas/${key}/input`);
           if (!res.ok) throw new Error("Failed to load schema");
-          fetched[key] = { ...(await res.json()), active: true };
+          const schema = { ...(await res.json()), active: true };
+          setPluginSchema(key, schema);
         }
-        const mergedSchemas = {
-          ...pluginSchemas,
-          ...fetched,
-        };
-        updatePluginSchemas(mergedSchemas);
       } catch (err) {
         console.error(err);
       } finally {
@@ -70,7 +65,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
     return (
       <div className="text-center mt-4">
         <Spinner animation="border" />
-        <p>Fetching plugin settings panels...</p>
+        <p>Refreshing plugin settings panels...</p>
       </div>
     );
   }

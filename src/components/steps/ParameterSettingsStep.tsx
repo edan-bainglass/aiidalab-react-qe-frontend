@@ -1,10 +1,10 @@
-import React from "react";
-import { Tab, Tabs } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Spinner, Tab, Tabs } from "react-bootstrap";
 
 import {
+  InputSchema,
   ParameterSchemas,
   PropertyMap,
-  SchemaMap,
   StructureType,
 } from "@common/interfaces";
 import { DEBUG } from "@common/utils";
@@ -17,7 +17,7 @@ import {
 interface ParameterSettingsStepProps {
   structure: StructureType;
   properties: PropertyMap;
-  parametersSchema: ParameterSchemas;
+  parameterSchemas: ParameterSchemas;
   parameters: any;
   onParametersChange: (panelKey: string, formData: any) => void;
   controls: React.ReactNode;
@@ -27,13 +27,17 @@ interface ParameterSettingsStepProps {
   onAdvancedPanelChange: (panel: string) => void;
   pluginPanel: string;
   onPluginPanelChange: (panel: string) => void;
-  onPluginSchemasChange: (schema: SchemaMap) => void;
+  onSchemaChange: (
+    schema: InputSchema,
+    panel: keyof ParameterSchemas,
+    subpanel?: string
+  ) => void;
 }
 
 export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   structure,
   properties,
-  parametersSchema,
+  parameterSchemas,
   parameters,
   onParametersChange: updateParameters,
   controls,
@@ -43,9 +47,39 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   onAdvancedPanelChange: setActiveAdvancedPanel,
   pluginPanel,
   onPluginPanelChange: setActivePluginPanel,
-  onPluginSchemasChange: updatePluginSchemas,
+  onSchemaChange: setSchema,
 }) => {
   DEBUG && console.log("ParameterSettingsStep");
+
+  const hasBasic = Object.keys(parameterSchemas.basic).length > 0;
+  const hasAdvanced = Object.keys(parameterSchemas.advanced).length > 0;
+  const hasSchemas = hasBasic || hasAdvanced;
+
+  const [loading, setLoading] = useState(!hasSchemas);
+
+  useEffect(() => {
+    const fetchSchemas = async () => {
+      try {
+        const response = await fetch("/api/core/schemas/input");
+        const schemas: Partial<ParameterSchemas> = await response.json();
+        if (!schemas) {
+          throw new Error("No schemas found");
+        }
+        if (!(schemas.basic && schemas.advanced)) {
+          throw new Error("Missing core schemas");
+        }
+        setSchema(schemas.basic, "basic");
+        Object.entries(schemas.advanced).forEach(([key, schema]) => {
+          setSchema(schema, "advanced", key);
+        });
+      } catch (error) {
+        console.error("Error fetching schemas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    !hasSchemas && fetchSchemas();
+  }, []);
 
   const handleParametersChange = (panelKey: string, formData: any) => {
     updateParameters(panelKey, formData);
@@ -55,44 +89,53 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
     <div>
       <h2>Step 3: Set calculation parameters</h2>
       {controls}
-      <Tabs
-        id="parameters-tabs"
-        className="mb-3"
-        style={{ marginTop: "1rem" }}
-        activeKey={panel}
-        onSelect={(key) => setActivePanel(key || "basic")}
-      >
-        <Tab eventKey="basic" title="Basic settings">
-          <BasicSettingsPanel
-            structure={structure}
-            basicSchema={parametersSchema.basic}
-            parameters={parameters}
-            onParametersChange={handleParametersChange}
-          />
-        </Tab>
-        <Tab eventKey="advanced" title="Advanced settings">
-          <AdvancedSettingsPanel
-            structure={structure}
-            advancedSchemas={parametersSchema.advanced}
-            parameters={parameters}
-            onParametersChange={handleParametersChange}
-            activePanel={advancedPanel}
-            onPanelChange={(panel) => setActiveAdvancedPanel(panel)}
-          />
-        </Tab>
-        <Tab eventKey="properties" title="Property settings">
-          <PluginSettingsPanel
-            structure={structure}
-            properties={properties}
-            pluginSchemas={parametersSchema.plugins}
-            parameters={parameters}
-            onParametersChange={handleParametersChange}
-            activePanel={pluginPanel}
-            onPanelChange={(panel) => setActivePluginPanel(panel)}
-            onPluginSchemasChange={updatePluginSchemas}
-          />
-        </Tab>
-      </Tabs>
+      {loading ? (
+        <div className="text-center mt-4">
+          <Spinner animation="border" />
+          <p>Loading settings panels...</p>
+        </div>
+      ) : (
+        <Tabs
+          id="parameters-tabs"
+          className="mb-3"
+          style={{ marginTop: "1rem" }}
+          activeKey={panel}
+          onSelect={(key) => setActivePanel(key || "basic")}
+        >
+          <Tab eventKey="basic" title="Basic settings">
+            <BasicSettingsPanel
+              structure={structure}
+              basicSchema={parameterSchemas.basic}
+              parameters={parameters}
+              onParametersChange={handleParametersChange}
+            />
+          </Tab>
+          <Tab eventKey="advanced" title="Advanced settings">
+            <AdvancedSettingsPanel
+              structure={structure}
+              advancedSchemas={parameterSchemas.advanced}
+              parameters={parameters}
+              onParametersChange={handleParametersChange}
+              activePanel={advancedPanel}
+              onPanelChange={setActiveAdvancedPanel}
+            />
+          </Tab>
+          <Tab eventKey="properties" title="Property settings">
+            <PluginSettingsPanel
+              structure={structure}
+              properties={properties}
+              pluginSchemas={parameterSchemas.plugins}
+              parameters={parameters}
+              onParametersChange={handleParametersChange}
+              activePanel={pluginPanel}
+              onPanelChange={setActivePluginPanel}
+              onPluginSchemaChange={(key, schema) =>
+                setSchema(schema, "plugins", key)
+              }
+            />
+          </Tab>
+        </Tabs>
+      )}
     </div>
   );
 };

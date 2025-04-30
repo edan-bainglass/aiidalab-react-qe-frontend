@@ -25,9 +25,6 @@ export default defineConfig({
     alias: {
       "@assets": "/src/assets",
       "@common": "/src/common",
-      "@interfaces": "/src/common/interfaces",
-      "@utils": "/src/common/utils",
-      "@schemas": "/src/common/schemas",
       "@components": "/src/components",
       "@steps": "/src/components/steps",
       "@panels": "/src/components/panels",

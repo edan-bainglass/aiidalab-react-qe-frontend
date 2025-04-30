@@ -5,6 +5,7 @@ export interface SettingsPanelProps {
   parameters: Record<string, any>;
   onParametersChange: (panelKey: string, formData: any) => void;
 }
+
 export interface WithNestedPanelProps {
   activePanel: string;
   onPanelChange: (panelKey: string) => void;
