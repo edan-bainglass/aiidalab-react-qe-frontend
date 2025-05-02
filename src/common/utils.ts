@@ -143,11 +143,11 @@ export const isIncludedSchema = (
   data: Record<string, any>,
   schema: InputSchema
 ): boolean => {
-  const includedIf = schema?.includedIf;
+  const requires = schema?.requires;
 
-  if (!includedIf) return true;
+  if (!requires) return true;
 
-  for (const [key, value] of Object.entries(includedIf)) {
+  for (const [key, value] of Object.entries(requires)) {
     if (key.startsWith("basic.")) {
       const [category, trigger] = key.split(".");
       if (data?.[category]?.[trigger] !== value?.const) return false;

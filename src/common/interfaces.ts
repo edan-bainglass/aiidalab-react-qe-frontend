@@ -24,7 +24,7 @@ export interface PropertyMap {
 export interface InputSchema {
   schema: RJSFSchema;
   ui?: UiSchema;
-  includedIf?: { [key: string]: any };
+  requires?: { [key: string]: any };
   dependencies?: string[];
 }
 
