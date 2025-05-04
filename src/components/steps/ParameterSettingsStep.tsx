@@ -56,6 +56,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   const hasSchemas = hasBasic || hasAdvanced;
 
   const [loading, setLoading] = useState(!hasSchemas);
+  const [loadingPlugins, setLoadingPlugins] = useState(true);
 
   useEffect(() => {
     const fetchSchemas = async () => {
@@ -80,6 +81,26 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
     };
     !hasSchemas && fetchSchemas();
   }, []);
+
+  useEffect(() => {
+    const fetchPluginSchemas = async () => {
+      try {
+        for (const [key, property] of Object.entries(properties)) {
+          if (parameterSchemas.plugins[key]) continue;
+          if (!property.active) continue;
+          const res = await fetch(`/api/plugin/schemas/${key}/input`);
+          if (!res.ok) throw new Error("Failed to load schema");
+          const schema: InputSchema = await res.json();
+          setSchema(schema, "plugins", key);
+        }
+      } catch (err) {
+        console.warn("Failed to load plugin schemas", err);
+      } finally {
+        setLoadingPlugins(false);
+      }
+    };
+    Object.keys(properties).length && fetchPluginSchemas();
+  }, [properties]);
 
   const handleParametersChange = (panelKey: string, formData: any) => {
     updateParameters(panelKey, formData);
@@ -129,9 +150,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
               onParametersChange={handleParametersChange}
               activePanel={pluginPanel}
               onPanelChange={setActivePluginPanel}
-              onPluginSchemaChange={(key, schema) =>
-                setSchema(schema, "plugins", key)
-              }
+              loading={loadingPlugins}
             />
           </Tab>
         </Tabs>

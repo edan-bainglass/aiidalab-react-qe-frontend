@@ -1,10 +1,10 @@
 import Form from "@rjsf/react-bootstrap";
 import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Spinner } from "react-bootstrap";
 
-import { InputSchema, PropertyMap, SchemaMap } from "@common/interfaces";
+import { PropertyMap, SchemaMap } from "@common/interfaces";
 import { DEBUG, patchDataIn, patchDataOut, patchSchema } from "@common/utils";
 import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 
@@ -13,8 +13,8 @@ import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 
 interface PluginSettingsProps extends SettingsPanelProps, WithNestedPanelProps {
   pluginSchemas: SchemaMap;
-  onPluginSchemaChange: (key: string, schema: InputSchema) => void;
   properties: PropertyMap;
+  loading: boolean;
 }
 
 export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
@@ -25,31 +25,9 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   onParametersChange: updateParameters,
   activePanel,
   onPanelChange: setActivePanel,
-  onPluginSchemaChange: setPluginSchema,
+  loading,
 }) => {
   DEBUG && console.log("PluginSettingsPanel");
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadPluginSchemas() {
-      try {
-        for (const [key, property] of Object.entries(properties)) {
-          if (pluginSchemas[key]) continue;
-          if (!property.active) continue;
-          const res = await fetch(`/api/plugin/schemas/${key}/input`);
-          if (!res.ok) throw new Error("Failed to load schema");
-          const schema = { ...(await res.json()), active: true };
-          setPluginSchema(key, schema);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    Object.keys(properties).length && loadPluginSchemas();
-  }, [properties]);
 
   useEffect(() => {
     Object.entries(pluginSchemas).forEach(([key, { schema }]) => {
