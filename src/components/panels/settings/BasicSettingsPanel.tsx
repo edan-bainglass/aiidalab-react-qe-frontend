@@ -1,7 +1,5 @@
 import Form from "@rjsf/react-bootstrap";
-import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
-import { useEffect } from "react";
 
 import { InputSchema } from "@common/interfaces";
 import { DEBUG, patchDataIn, patchDataOut } from "@common/utils";
@@ -20,15 +18,6 @@ export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
   onParametersChange: updateParameters,
 }) => {
   DEBUG && console.log("BasicSettingsPanel");
-
-  useEffect(() => {
-    const key = "basic";
-    const schema = basicSchema.schema;
-    if (!(key in parameters)) {
-      const defaults = getDefaultFormState(validator, schema, {}, schema);
-      updateParameters(key, defaults);
-    }
-  }, []);
 
   const { schema, ui, dependencies } = basicSchema;
 

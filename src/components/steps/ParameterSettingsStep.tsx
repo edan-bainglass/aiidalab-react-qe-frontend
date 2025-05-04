@@ -1,3 +1,5 @@
+import { getDefaultFormState } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
 import { useEffect, useState } from "react";
 import { Spinner, Tab, Tabs } from "react-bootstrap";
 
@@ -101,6 +103,37 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
     };
     Object.keys(properties).length && fetchPluginSchemas();
   }, [properties]);
+
+  useEffect(() => {
+    const updatedParams = { ...parameters };
+
+    if (parameterSchemas.basic?.schema && parameters.basic === undefined) {
+      updatedParams.basic = getDefaultFormState(
+        validator,
+        parameterSchemas.basic.schema,
+        {},
+        parameterSchemas.basic.schema
+      );
+    }
+
+    for (const [key, { schema }] of Object.entries(parameterSchemas.advanced)) {
+      if (parameters[key] === undefined && schema) {
+        updatedParams[key] = getDefaultFormState(validator, schema, {}, schema);
+      }
+    }
+
+    for (const [key, { schema }] of Object.entries(parameterSchemas.plugins)) {
+      if (properties[key]?.active && parameters[key] === undefined && schema) {
+        updatedParams[key] = getDefaultFormState(validator, schema, {}, schema);
+      }
+    }
+
+    if (JSON.stringify(updatedParams) !== JSON.stringify(parameters)) {
+      Object.entries(updatedParams).forEach(([key, formData]) => {
+        updateParameters(key, formData);
+      });
+    }
+  }, [parameterSchemas, parameters, properties]);
 
   const handleParametersChange = (panelKey: string, formData: any) => {
     updateParameters(panelKey, formData);

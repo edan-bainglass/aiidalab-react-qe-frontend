@@ -1,5 +1,4 @@
 import Form from "@rjsf/react-bootstrap";
-import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
 
@@ -41,15 +40,6 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
     const isValidPanel = availablePanels.includes(activePanel);
     !isValidPanel && setActivePanel(fallback);
   }, [availablePanels, activePanel]);
-
-  useEffect(() => {
-    Object.entries(advancedSchemas).forEach(([key, { schema }]) => {
-      if (!(key in parameters)) {
-        const defaults = getDefaultFormState(validator, schema, {}, schema);
-        updateParameters(key, defaults);
-      }
-    });
-  }, []);
 
   const currentSchema = advancedSchemas[activePanel];
 

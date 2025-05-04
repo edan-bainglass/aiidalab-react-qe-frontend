@@ -1,7 +1,5 @@
 import Form from "@rjsf/react-bootstrap";
-import { getDefaultFormState } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
-import { useEffect } from "react";
 import { Spinner } from "react-bootstrap";
 
 import { PropertyMap, SchemaMap } from "@common/interfaces";
@@ -28,16 +26,6 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   loading,
 }) => {
   DEBUG && console.log("PluginSettingsPanel");
-
-  useEffect(() => {
-    Object.entries(pluginSchemas).forEach(([key, { schema }]) => {
-      if (!properties[key]?.active) return;
-      if (!(key in parameters)) {
-        const defaults = getDefaultFormState(validator, schema, {}, schema);
-        updateParameters(key, defaults);
-      }
-    });
-  }, [pluginSchemas]);
 
   if (loading) {
     return (
