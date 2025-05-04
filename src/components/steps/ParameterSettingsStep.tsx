@@ -159,7 +159,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
           <Tab eventKey="basic" title="Basic settings">
             <BasicSettingsPanel
               structure={structure}
-              basicSchema={parameterSchemas.basic}
+              schema={parameterSchemas.basic}
               parameters={parameters}
               onParametersChange={handleParametersChange}
             />
@@ -167,18 +167,18 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
           <Tab eventKey="advanced" title="Advanced settings">
             <AdvancedSettingsPanel
               structure={structure}
-              advancedSchemas={parameterSchemas.advanced}
+              schemas={parameterSchemas.advanced}
               parameters={parameters}
               onParametersChange={handleParametersChange}
               activePanel={advancedPanel}
               onPanelChange={setActiveAdvancedPanel}
             />
           </Tab>
-          <Tab eventKey="properties" title="Property settings">
+          <Tab eventKey="plugins" title="Plugin settings">
             <PluginSettingsPanel
               structure={structure}
               properties={properties}
-              pluginSchemas={parameterSchemas.plugins}
+              schemas={parameterSchemas.plugins}
               parameters={parameters}
               onParametersChange={handleParametersChange}
               activePanel={pluginPanel}

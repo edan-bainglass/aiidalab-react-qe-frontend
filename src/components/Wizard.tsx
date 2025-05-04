@@ -33,7 +33,7 @@ const initialState: WizardState = {
   structure: null,
   properties: {},
   activeParametersPanel: "basic",
-  activeAdvancedPanel: "convergence",
+  activeAdvancedPanel: "",
   activePluginPanel: "",
   parameterSchemas: {
     basic: {},

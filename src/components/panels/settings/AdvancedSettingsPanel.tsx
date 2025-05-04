@@ -1,8 +1,8 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect } from "react";
+import { Spinner } from "react-bootstrap";
 
-import { SchemaMap } from "@common/interfaces";
 import {
   DEBUG,
   isIncludedSchema,
@@ -17,13 +17,11 @@ import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 
 interface AdvancedSettingsProps
   extends SettingsPanelProps,
-    WithNestedPanelProps {
-  advancedSchemas: SchemaMap;
-}
+    WithNestedPanelProps {}
 
 export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   structure,
-  advancedSchemas,
+  schemas,
   parameters,
   onParametersChange: updateParameters,
   activePanel,
@@ -31,17 +29,27 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
 }) => {
   DEBUG && console.log("AdvancedSettingsPanel");
 
-  const availablePanels = Object.keys(advancedSchemas).filter((key) =>
-    isIncludedSchema(parameters, advancedSchemas[key])
+  const availablePanels = Object.keys(schemas).filter((key) =>
+    isIncludedSchema(parameters, schemas[key])
   );
 
   useEffect(() => {
+    if (!availablePanels.length) return;
     const fallback = availablePanels[0];
     const isValidPanel = availablePanels.includes(activePanel);
     !isValidPanel && setActivePanel(fallback);
   }, [availablePanels, activePanel]);
 
-  const currentSchema = advancedSchemas[activePanel];
+  if (!activePanel || !availablePanels.includes(activePanel)) {
+    return (
+      <div className="text-center mt-4">
+        <Spinner animation="border" />
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  const currentSchema = schemas[activePanel];
 
   const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
@@ -69,10 +77,7 @@ export const AdvancedSettingsPanel: React.FC<AdvancedSettingsProps> = ({
   };
 
   const panelOptions = Object.fromEntries(
-    availablePanels.map((key) => [
-      key,
-      advancedSchemas[key].schema.title || key,
-    ])
+    availablePanels.map((key) => [key, schemas[key].schema.title || key])
   );
 
   const selectedPanel = currentSchema?.schema.title || activePanel;

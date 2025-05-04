@@ -1,4 +1,4 @@
-import { StructureType } from "@common/interfaces";
+import { SchemaMap, StructureType } from "@common/interfaces";
 
 export interface SettingsPanelProps {
   structure: StructureType;
@@ -7,6 +7,7 @@ export interface SettingsPanelProps {
 }
 
 export interface WithNestedPanelProps {
+  schemas: SchemaMap;
   activePanel: string;
   onPanelChange: (panelKey: string) => void;
 }

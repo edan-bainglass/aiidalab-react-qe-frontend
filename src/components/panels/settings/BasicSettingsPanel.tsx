@@ -8,12 +8,12 @@ import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 import { SettingsPanelProps } from "./SettingsPanelProps";
 
 interface BasicSettingsProps extends SettingsPanelProps {
-  basicSchema: InputSchema;
+  schema: InputSchema;
 }
 
 export const BasicSettingsPanel: React.FC<BasicSettingsProps> = ({
   structure,
-  basicSchema,
+  schema: basicSchema,
   parameters,
   onParametersChange: updateParameters,
 }) => {

@@ -1,8 +1,9 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
+import { useEffect } from "react";
 import { Spinner } from "react-bootstrap";
 
-import { PropertyMap, SchemaMap } from "@common/interfaces";
+import { PropertyMap } from "@common/interfaces";
 import { DEBUG, patchDataIn, patchDataOut, patchSchema } from "@common/utils";
 import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 
@@ -10,7 +11,6 @@ import PanelSelector from "./PanelSelector";
 import { SettingsPanelProps, WithNestedPanelProps } from "./SettingsPanelProps";
 
 interface PluginSettingsProps extends SettingsPanelProps, WithNestedPanelProps {
-  pluginSchemas: SchemaMap;
   properties: PropertyMap;
   loading: boolean;
 }
@@ -18,7 +18,7 @@ interface PluginSettingsProps extends SettingsPanelProps, WithNestedPanelProps {
 export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
   structure,
   properties,
-  pluginSchemas,
+  schemas,
   parameters,
   onParametersChange: updateParameters,
   activePanel,
@@ -27,16 +27,27 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
 }) => {
   DEBUG && console.log("PluginSettingsPanel");
 
+  const availablePanels = Object.keys(schemas).filter(
+    (key) => !properties[key] || properties[key]?.active
+  );
+
+  useEffect(() => {
+    if (!availablePanels.length) return;
+    const fallback = availablePanels[0];
+    const isValidPanel = availablePanels.includes(activePanel);
+    !isValidPanel && setActivePanel(fallback);
+  }, [availablePanels, activePanel]);
+
   if (loading) {
     return (
       <div className="text-center mt-4">
         <Spinner animation="border" />
-        <p>Refreshing plugin settings panels...</p>
+        <p>Loading plugins...</p>
       </div>
     );
   }
 
-  if (!Object.values(properties).some((property) => property.active)) {
+  if (!availablePanels.length) {
     return (
       <div className="text-center mt-4">
         <p>Please select a property to compute in step 2</p>
@@ -44,15 +55,16 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
     );
   }
 
-  const panelKeys = Object.keys(pluginSchemas).filter(
-    (key) => !properties[key] || properties[key]?.active
-  );
+  if (!activePanel || !availablePanels.includes(activePanel)) {
+    return (
+      <div className="text-center mt-4">
+        <Spinner animation="border" />
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
-  const currentPanelKey = panelKeys.includes(activePanel)
-    ? activePanel
-    : panelKeys[0];
-
-  const currentSchema = pluginSchemas[currentPanelKey];
+  const currentSchema = schemas[activePanel];
 
   const { schema, ui, dependencies } = patchSchema(currentSchema, structure);
 
@@ -63,7 +75,7 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
     },
     "ui:options": {
       title: "",
-      classNames: `${currentPanelKey}-panel`,
+      classNames: `${activePanel}-panel`,
     },
   };
 
@@ -76,17 +88,14 @@ export const PluginSettingsPanel: React.FC<PluginSettingsProps> = ({
 
   const onChange = (e: any) => {
     const patchedData = patchDataOut(e.formData, dependencies);
-    updateParameters(currentPanelKey, patchedData);
+    updateParameters(activePanel, patchedData);
   };
 
   const panelOptions = Object.fromEntries(
-    Object.entries(pluginSchemas).map(([key, { schema }]) => [
-      key,
-      schema.title || key,
-    ])
+    availablePanels.map((key) => [key, schemas[key].schema.title || key])
   );
 
-  const selectedPanel = currentSchema?.schema.title || currentPanelKey;
+  const selectedPanel = currentSchema?.schema.title || activePanel;
 
   return (
     <div>
