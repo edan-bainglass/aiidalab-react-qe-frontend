@@ -19,7 +19,7 @@ export const SettingsPanels: React.FC<SettingsPanelsProps> = ({
   parameters,
   onParametersChange,
   activePanel,
-  onPanelChange,
+  onPanelChange: setActivePanel,
 }) => {
   const panelKeys = Object.keys(schemas).filter((key) =>
     isIncludedSchema(parameters, schemas[key])
@@ -28,7 +28,7 @@ export const SettingsPanels: React.FC<SettingsPanelsProps> = ({
   useEffect(() => {
     if (!panelKeys.length) return;
     if (!activePanel || !panelKeys.includes(activePanel)) {
-      onPanelChange(panelKeys[0]);
+      setActivePanel(panelKeys[0]);
     }
   }, [panelKeys, activePanel]);
 
@@ -60,7 +60,7 @@ export const SettingsPanels: React.FC<SettingsPanelsProps> = ({
       <PanelSelector
         selected={currentSchema?.schema.title || activePanel}
         options={panelOptions}
-        onSelect={onPanelChange}
+        onSelect={setActivePanel}
       />
       <SettingsPanel
         key={activePanel}

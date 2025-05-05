@@ -74,33 +74,50 @@ export const patchSchema = (
 export const getDependencyData = (
   structure: StructureType,
   data: Record<string, any>,
-  dependencies?: string[]
+  dependencyMap?: { [key: string]: string[] }
 ): Record<string, any> => {
   const dependencyData = {} as typeof data;
 
-  for (const dependency of dependencies || []) {
-    if (dependency.startsWith("basic.")) {
-      const [panel, dep] = dependency.split(".");
-      if (data[panel]?.[dep]) {
-        dependencyData[dep] = data[panel][dep];
-      }
-      continue;
-    }
-    switch (dependency) {
-      case "structure.pbc":
-        if (!structure?.pbc) {
-          console.warn("No PBC data found in structure");
-        } else {
-          dependencyData["molecule"] =
-            Array.isArray(structure.pbc) &&
-            structure.pbc.every((v) => v === false);
-        }
-        break;
-      default:
+  if (!dependencyMap) return dependencyData;
+
+  for (const dependencies of Object.values(dependencyMap)) {
+    for (const dependency of dependencies) {
+      if (dependency in dependencyData) continue;
+      if (!dependency.includes(".")) {
         console.warn(
-          `Unsupported dependency ${dependency} encountered on patching`
+          `Invalid dependency format ${dependency} encountered on patching`
         );
-        break;
+        continue;
+      }
+      const [panel, dep] = dependency.split(".");
+      switch (panel) {
+        case "structure":
+          switch (dep) {
+            case "pbc":
+              if (!structure?.pbc) {
+                console.warn("No PBC data found in structure");
+              } else {
+                dependencyData[dependency] = structure.pbc;
+              }
+              break;
+            default:
+              console.warn(
+                `Unsupported structure dependency ${dependency} encountered on patching`
+              );
+              break;
+          }
+          break;
+        case "basic":
+          if (data[panel]?.[dep]) {
+            dependencyData[dependency] = data[panel][dep];
+          }
+          break;
+        default:
+          console.warn(
+            `Unsupported dependency ${dependency} encountered on patching`
+          );
+          break;
+      }
     }
   }
 
@@ -112,28 +129,21 @@ export const getDependencyData = (
  */
 export const clearDependencyData = (
   data: Record<string, any>,
-  dependencies?: string[]
+  dependencyMap?: { [field: string]: string[] }
 ): Record<string, any> => {
-  const copy = { ...data };
+  const cleaned = { ...data };
 
-  for (const dependency of dependencies || []) {
-    if (dependency.startsWith("basic.")) {
-      const dep = dependency.split(".")[1];
-      delete copy[dep];
-      continue;
-    }
-    switch (dependency) {
-      case "structure.pbc":
-        delete copy["molecule"];
-        break;
-      default:
-        console.warn(
-          `Unsupported dependency ${dependency} encountered on cleanup`
-        );
-        break;
+  if (!dependencyMap) return cleaned;
+
+  for (const dependencies of Object.values(dependencyMap)) {
+    for (const dependency of dependencies) {
+      if (dependency in cleaned) {
+        delete cleaned[dependency];
+      }
     }
   }
-  return copy;
+
+  return cleaned;
 };
 
 /**

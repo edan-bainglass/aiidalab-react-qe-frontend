@@ -24,7 +24,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   panelKey,
   structure,
   parameters,
-  onParametersChange: onChange,
+  onParametersChange: updateParameters,
   schema: inputSchema,
 }) => {
   const { schema, ui, dependencies } = patchSchema(inputSchema, structure);
@@ -53,7 +53,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
   const handleChange = (e: any) => {
     const cleanedData = clearDependencyData(e.formData, dependencies);
-    onChange(panelKey, cleanedData);
+    updateParameters(panelKey, cleanedData);
   };
 
   return (

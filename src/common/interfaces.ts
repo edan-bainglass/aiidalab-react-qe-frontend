@@ -25,7 +25,7 @@ export interface InputSchema {
   schema: RJSFSchema;
   ui?: UiSchema;
   requires?: { [key: string]: any };
-  dependencies?: string[];
+  dependencies?: { [key: string]: string[] };
 }
 
 export type SchemaMap = Record<string, InputSchema>;
