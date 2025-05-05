@@ -1,10 +1,7 @@
-import { getDefaultFormState } from "@rjsf/utils";
-import validator from "@rjsf/validator-ajv8";
-import { useEffect, useState } from "react";
 import { Spinner, Tab, Tabs } from "react-bootstrap";
 
+import { useCoreSchemas, usePluginSchemas } from "@common/hooks";
 import {
-  InputSchema,
   ParameterSchemas,
   PropertyMap,
   StructureType,
@@ -30,7 +27,7 @@ interface ParameterSettingsStepProps {
   pluginPanel: string;
   onPluginPanelChange: (panel: string) => void;
   onSchemaChange: (
-    schema: InputSchema,
+    schema: any,
     panel: keyof ParameterSchemas,
     subpanel?: string
   ) => void;
@@ -53,97 +50,30 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
 }) => {
   DEBUG && console.log("ParameterSettingsStep");
 
-  const hasBasic = Object.keys(parameterSchemas.basic).length > 0;
-  const hasAdvanced = Object.keys(parameterSchemas.advanced).length > 0;
-  const hasSchemas = hasBasic || hasAdvanced;
+  const { loading: loadingCore, error } = useCoreSchemas(
+    structure,
+    setSchema,
+    updateParameters,
+    parameters
+  );
 
-  const [loading, setLoading] = useState(!hasSchemas);
-  const [loadingPlugins, setLoadingPlugins] = useState(true);
-
-  useEffect(() => {
-    const fetchSchemas = async () => {
-      try {
-        const response = await fetch("/api/core/schemas/input");
-        const schemas: Partial<ParameterSchemas> = await response.json();
-        if (!schemas) {
-          throw new Error("No schemas found");
-        }
-        if (!(schemas.basic && schemas.advanced)) {
-          throw new Error("Missing core schemas");
-        }
-        setSchema(schemas.basic, "basic");
-        Object.entries(schemas.advanced).forEach(([key, schema]) => {
-          setSchema(schema, "advanced", key);
-        });
-      } catch (error) {
-        console.error("Error fetching schemas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    !hasSchemas && fetchSchemas();
-  }, []);
-
-  useEffect(() => {
-    const fetchPluginSchemas = async () => {
-      try {
-        for (const [key, property] of Object.entries(properties)) {
-          if (parameterSchemas.plugins[key]) continue;
-          if (!property.active) continue;
-          const res = await fetch(`/api/plugin/schemas/${key}/input`);
-          if (!res.ok) throw new Error("Failed to load schema");
-          const schema: InputSchema = await res.json();
-          setSchema(schema, "plugins", key);
-        }
-      } catch (err) {
-        console.warn("Failed to load plugin schemas", err);
-      } finally {
-        setLoadingPlugins(false);
-      }
-    };
-    Object.keys(properties).length && fetchPluginSchemas();
-  }, [properties]);
-
-  useEffect(() => {
-    const updatedParams = { ...parameters };
-
-    if (parameterSchemas.basic?.schema && parameters.basic === undefined) {
-      updatedParams.basic = getDefaultFormState(
-        validator,
-        parameterSchemas.basic.schema,
-        {},
-        parameterSchemas.basic.schema
-      );
-    }
-
-    for (const [key, { schema }] of Object.entries(parameterSchemas.advanced)) {
-      if (parameters[key] === undefined && schema) {
-        updatedParams[key] = getDefaultFormState(validator, schema, {}, schema);
-      }
-    }
-
-    for (const [key, { schema }] of Object.entries(parameterSchemas.plugins)) {
-      if (properties[key]?.active && parameters[key] === undefined && schema) {
-        updatedParams[key] = getDefaultFormState(validator, schema, {}, schema);
-      }
-    }
-
-    if (JSON.stringify(updatedParams) !== JSON.stringify(parameters)) {
-      Object.entries(updatedParams).forEach(([key, formData]) => {
-        updateParameters(key, formData);
-      });
-    }
-  }, [parameterSchemas, parameters, properties]);
-
-  const handleParametersChange = (panelKey: string, formData: any) => {
-    updateParameters(panelKey, formData);
-  };
+  const { loading: loadingPlugins } = usePluginSchemas(
+    structure,
+    properties,
+    setSchema,
+    updateParameters,
+    parameters
+  );
 
   return (
     <div>
       <h2>Step 3: Set calculation parameters</h2>
       {controls}
-      {loading ? (
+      {error ? (
+        <div className="text-center mt-4">
+          <p className="text-danger">{error}</p>
+        </div>
+      ) : loadingCore ? (
         <div className="text-center mt-4">
           <Spinner animation="border" />
           <p>Loading settings panels...</p>
@@ -161,7 +91,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
               structure={structure}
               schema={parameterSchemas.basic}
               parameters={parameters}
-              onParametersChange={handleParametersChange}
+              onParametersChange={updateParameters}
             />
           </Tab>
           <Tab eventKey="advanced" title="Advanced settings">
@@ -169,7 +99,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
               structure={structure}
               schemas={parameterSchemas.advanced}
               parameters={parameters}
-              onParametersChange={handleParametersChange}
+              onParametersChange={updateParameters}
               activePanel={advancedPanel}
               onPanelChange={setActiveAdvancedPanel}
             />
@@ -180,7 +110,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
               properties={properties}
               schemas={parameterSchemas.plugins}
               parameters={parameters}
-              onParametersChange={handleParametersChange}
+              onParametersChange={updateParameters}
               activePanel={pluginPanel}
               onPanelChange={setActivePluginPanel}
               loading={loadingPlugins}
