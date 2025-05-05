@@ -8,9 +8,9 @@ import {
 } from "@common/interfaces";
 import { DEBUG } from "@common/utils";
 import {
-  AdvancedSettingsPanel,
-  BasicSettingsPanel,
-  PluginSettingsPanel,
+  PluginSettingsPanels,
+  SettingsPanel,
+  SettingsPanels,
 } from "@panels/settings";
 
 interface ParameterSettingsStepProps {
@@ -87,17 +87,18 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
           onSelect={(key) => setActivePanel(key || "basic")}
         >
           <Tab eventKey="basic" title="Basic settings">
-            <BasicSettingsPanel
-              structure={structure}
+            <SettingsPanel
+              panelKey="basic"
               schema={parameterSchemas.basic}
+              structure={structure}
               parameters={parameters}
               onParametersChange={updateParameters}
             />
           </Tab>
           <Tab eventKey="advanced" title="Advanced settings">
-            <AdvancedSettingsPanel
-              structure={structure}
+            <SettingsPanels
               schemas={parameterSchemas.advanced}
+              structure={structure}
               parameters={parameters}
               onParametersChange={updateParameters}
               activePanel={advancedPanel}
@@ -105,14 +106,14 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
             />
           </Tab>
           <Tab eventKey="plugins" title="Plugin settings">
-            <PluginSettingsPanel
-              structure={structure}
-              properties={properties}
+            <PluginSettingsPanels
               schemas={parameterSchemas.plugins}
+              structure={structure}
               parameters={parameters}
               onParametersChange={updateParameters}
               activePanel={pluginPanel}
               onPanelChange={setActivePluginPanel}
+              properties={properties}
               loading={loadingPlugins}
             />
           </Tab>

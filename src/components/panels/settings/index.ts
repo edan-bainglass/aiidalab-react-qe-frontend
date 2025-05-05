@@ -1,3 +1,3 @@
-export { AdvancedSettingsPanel } from "./AdvancedSettingsPanel";
-export { BasicSettingsPanel } from "./BasicSettingsPanel";
-export { PluginSettingsPanel } from "./PluginSettingsPanel";
+export { PluginSettingsPanels } from "./PluginSettingsPanels";
+export { SettingsPanel } from "./SettingsPanel";
+export { SettingsPanels } from "./SettingsPanels";
