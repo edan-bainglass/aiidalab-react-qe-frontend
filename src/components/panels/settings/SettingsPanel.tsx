@@ -1,5 +1,6 @@
 import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
+import { useEffect } from "react";
 
 import { InputSchema, StructureType } from "@common/interfaces";
 import {
@@ -9,10 +10,17 @@ import {
 } from "@common/utils";
 import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 
+const widgets = {
+  toggleGroup: ToggleGroupWidget,
+  CheckboxWidget: SwitchWidget,
+};
+
 export interface CommonSettingsPanelProps {
   structure: StructureType;
   parameters: Record<string, any>;
   onParametersChange: (panelKey: string, data: any) => void;
+  dependencyCache: Record<string, any>;
+  onDependencyCacheChange: (deps: Record<string, any>) => void;
 }
 
 interface SettingsPanelProps extends CommonSettingsPanelProps {
@@ -21,13 +29,19 @@ interface SettingsPanelProps extends CommonSettingsPanelProps {
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
-  panelKey,
   structure,
   parameters,
   onParametersChange: updateParameters,
+  dependencyCache,
+  onDependencyCacheChange: updateDependencyCache,
   schema: inputSchema,
+  panelKey,
 }) => {
-  const { schema, ui, dependencies } = patchSchema(inputSchema, structure);
+  const {
+    schema,
+    ui,
+    dependencies: dependencyMap,
+  } = patchSchema(inputSchema, structure);
 
   const uiSchema = {
     ...ui,
@@ -40,24 +54,48 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     },
   };
 
-  const widgets = {
-    toggleGroup: ToggleGroupWidget,
-    CheckboxWidget: SwitchWidget,
-  };
+  const dependencyData = getDependencyData(
+    structure,
+    parameters,
+    dependencyMap
+  );
 
-  const dependencyData = getDependencyData(structure, parameters, dependencies);
+  useEffect(() => {
+    if (!dependencyMap || Object.keys(dependencyMap).length === 0) return;
+
+    const newData = { ...parameters[panelKey] };
+    let hasUpdates = false;
+
+    for (const [field, deps] of Object.entries(dependencyMap)) {
+      if (
+        deps.some((dep) => dependencyData[dep] !== dependencyCache?.[dep]) &&
+        newData[field] !== undefined
+      ) {
+        delete newData[field];
+        hasUpdates = true;
+      }
+    }
+
+    if (hasUpdates) {
+      updateParameters(panelKey, newData);
+    }
+
+    updateDependencyCache(dependencyData);
+  }, [JSON.stringify(dependencyData)]);
+
   const formData = {
     ...parameters[panelKey],
     ...dependencyData,
   };
 
-  const handleChange = (e: any) => {
-    const cleanedData = clearDependencyData(e.formData, dependencies);
+  const handleChange = ({ formData }: any) => {
+    const cleanedData = clearDependencyData(formData, dependencyMap);
     updateParameters(panelKey, cleanedData);
   };
 
   return (
     <Form
+      key={panelKey}
       schema={schema}
       uiSchema={uiSchema}
       widgets={widgets}

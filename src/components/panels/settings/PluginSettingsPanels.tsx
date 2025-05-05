@@ -14,6 +14,8 @@ export const PluginSettingsPanels: React.FC<PluginSettingsPanelsProps> = ({
   properties,
   parameters,
   onParametersChange,
+  dependencyCache,
+  onDependencyCacheChange,
   activePanel,
   onPanelChange,
   loading = false,
@@ -47,6 +49,8 @@ export const PluginSettingsPanels: React.FC<PluginSettingsPanelsProps> = ({
       structure={structure}
       parameters={parameters}
       onParametersChange={onParametersChange}
+      dependencyCache={dependencyCache}
+      onDependencyCacheChange={onDependencyCacheChange}
       activePanel={activePanel}
       onPanelChange={onPanelChange}
     />

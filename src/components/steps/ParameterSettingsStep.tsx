@@ -19,6 +19,8 @@ interface ParameterSettingsStepProps {
   parameterSchemas: ParameterSchemas;
   parameters: any;
   onParametersChange: (panelKey: string, formData: any) => void;
+  dependencyCache: Record<string, any>;
+  onDependencyCacheChange: (deps: Record<string, any>) => void;
   controls: React.ReactNode;
   panel: string;
   onPanelChange: (panel: string) => void;
@@ -39,6 +41,8 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
   parameterSchemas,
   parameters,
   onParametersChange: updateParameters,
+  dependencyCache,
+  onDependencyCacheChange,
   controls,
   panel,
   onPanelChange: setActivePanel,
@@ -94,6 +98,8 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
               structure={structure}
               parameters={parameters}
               onParametersChange={updateParameters}
+              dependencyCache={dependencyCache}
+              onDependencyCacheChange={onDependencyCacheChange}
             />
           </Tab>
           <Tab eventKey="advanced" title="Advanced settings">
@@ -102,6 +108,8 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
               structure={structure}
               parameters={parameters}
               onParametersChange={updateParameters}
+              dependencyCache={dependencyCache}
+              onDependencyCacheChange={onDependencyCacheChange}
               activePanel={advancedPanel}
               onPanelChange={setActiveAdvancedPanel}
             />
@@ -112,6 +120,8 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
               structure={structure}
               parameters={parameters}
               onParametersChange={updateParameters}
+              dependencyCache={dependencyCache}
+              onDependencyCacheChange={onDependencyCacheChange}
               activePanel={pluginPanel}
               onPanelChange={setActivePluginPanel}
               properties={properties}

@@ -51,6 +51,7 @@ export interface WizardState {
   activePluginPanel: string;
   parameterSchemas: ParameterSchemas;
   parameters: Record<string, any>;
+  dependencyCache: Record<string, any>;
   resources: ResourcesType | null;
   metadata: Record<string, string>;
   results: ResultsType | null;
@@ -78,6 +79,10 @@ export type WizardAction =
       };
     }
   | { type: "DISCARD_PARAMETERS"; payload: string }
+  | {
+      type: "UPDATE_DEPENDENCY_CACHE";
+      payload: Record<string, any>;
+    }
   | { type: "SET_RESOURCES"; payload: ResourcesType }
   | { type: "SET_RESULTS"; payload: ResultsType }
   | { type: "SET_METADATA"; payload: Record<string, string> }

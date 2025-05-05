@@ -18,6 +18,8 @@ export const SettingsPanels: React.FC<SettingsPanelsProps> = ({
   structure,
   parameters,
   onParametersChange,
+  dependencyCache,
+  onDependencyCacheChange,
   activePanel,
   onPanelChange: setActivePanel,
 }) => {
@@ -69,6 +71,8 @@ export const SettingsPanels: React.FC<SettingsPanelsProps> = ({
         structure={structure}
         parameters={parameters}
         onParametersChange={onParametersChange}
+        dependencyCache={dependencyCache}
+        onDependencyCacheChange={onDependencyCacheChange}
       />
     </div>
   );

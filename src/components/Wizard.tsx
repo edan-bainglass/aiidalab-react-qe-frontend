@@ -41,6 +41,7 @@ const initialState: WizardState = {
     plugins: {},
   } as ParameterSchemas,
   parameters: {},
+  dependencyCache: {},
   resources: null,
   metadata: {},
   results: null,
@@ -90,6 +91,14 @@ function reducer(state: WizardState, action: WizardAction): WizardState {
     case "DISCARD_PARAMETERS":
       const { [action.payload]: _, ...rest } = state.parameters;
       return { ...state, parameters: rest };
+    case "UPDATE_DEPENDENCY_CACHE":
+      return {
+        ...state,
+        dependencyCache: {
+          ...state.dependencyCache,
+          ...action.payload,
+        },
+      };
     case "SET_RESOURCES":
       return { ...state, resources: action.payload };
     case "SET_METADATA":
@@ -184,6 +193,13 @@ const Wizard: React.FC = () => {
             parameters={state.parameters}
             onParametersChange={(panelKey, data) =>
               dispatch({ type: "SET_PARAMETERS", payload: { panelKey, data } })
+            }
+            dependencyCache={state.dependencyCache}
+            onDependencyCacheChange={(dependencies) =>
+              dispatch({
+                type: "UPDATE_DEPENDENCY_CACHE",
+                payload: dependencies,
+              })
             }
             controls={<StepNavControls prev={goPrev} next={goNext} />}
             panel={state.activeParametersPanel}
