@@ -2,8 +2,12 @@ import Form from "@rjsf/react-bootstrap";
 import validator from "@rjsf/validator-ajv8";
 
 import { InputSchema, StructureType } from "@common/interfaces";
-import { patchSchema, patchDataIn, patchDataOut } from "@common/utils";
-import { ToggleGroupWidget, SwitchWidget } from "@common/widgets";
+import {
+  clearDependencyData,
+  getDependencyData,
+  patchSchema,
+} from "@common/utils";
+import { SwitchWidget, ToggleGroupWidget } from "@common/widgets";
 
 export interface CommonSettingsPanelProps {
   structure: StructureType;
@@ -41,11 +45,15 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     CheckboxWidget: SwitchWidget,
   };
 
-  const formData = patchDataIn(structure, parameters, dependencies);
+  const dependencyData = getDependencyData(structure, parameters, dependencies);
+  const formData = {
+    ...parameters[panelKey],
+    ...dependencyData,
+  };
 
   const handleChange = (e: any) => {
-    const patchedData = patchDataOut(e.formData, dependencies);
-    onChange(panelKey, patchedData);
+    const cleanedData = clearDependencyData(e.formData, dependencies);
+    onChange(panelKey, cleanedData);
   };
 
   return (

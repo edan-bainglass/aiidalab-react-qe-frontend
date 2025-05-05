@@ -71,18 +71,18 @@ export const patchSchema = (
 /**
  * Preprocess data w.r.t dependencies
  */
-export const patchDataIn = (
+export const getDependencyData = (
   structure: StructureType,
   data: Record<string, any>,
   dependencies?: string[]
 ): Record<string, any> => {
-  const copy = {} as typeof data;
+  const dependencyData = {} as typeof data;
 
   for (const dependency of dependencies || []) {
     if (dependency.startsWith("basic.")) {
       const [panel, dep] = dependency.split(".");
       if (data[panel]?.[dep]) {
-        copy[dep] = data[panel][dep];
+        dependencyData[dep] = data[panel][dep];
       }
       continue;
     }
@@ -91,7 +91,7 @@ export const patchDataIn = (
         if (!structure?.pbc) {
           console.warn("No PBC data found in structure");
         } else {
-          copy["molecule"] =
+          dependencyData["molecule"] =
             Array.isArray(structure.pbc) &&
             structure.pbc.every((v) => v === false);
         }
@@ -104,13 +104,13 @@ export const patchDataIn = (
     }
   }
 
-  return copy;
+  return dependencyData;
 };
 
 /**
  * Postprocess data w.r.t dependencies
  */
-export const patchDataOut = (
+export const clearDependencyData = (
   data: Record<string, any>,
   dependencies?: string[]
 ): Record<string, any> => {
