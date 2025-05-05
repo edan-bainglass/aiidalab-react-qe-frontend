@@ -10,6 +10,7 @@ import {
 
 export const useCoreSchemas = (
   structure: StructureType,
+  parameterSchemas: ParameterSchemas,
   setSchema: (
     schema: InputSchema,
     panel: keyof ParameterSchemas,
@@ -18,7 +19,11 @@ export const useCoreSchemas = (
   updateParameters: (panelKey: string, formData: any) => void,
   parameters: Record<string, any>
 ): { loading: boolean; error?: string } => {
-  const [loading, setLoading] = useState(true);
+  const alreadyFetched =
+    parameterSchemas.basic?.schema &&
+    Object.keys(parameterSchemas.advanced || {}).length > 0;
+
+  const [loading, setLoading] = useState(!alreadyFetched);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
@@ -61,7 +66,7 @@ export const useCoreSchemas = (
       }
     };
 
-    fetchCoreSchemas();
+    !alreadyFetched && fetchCoreSchemas();
   }, []);
 
   return { loading, error };

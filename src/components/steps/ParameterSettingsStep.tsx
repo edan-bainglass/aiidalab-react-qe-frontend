@@ -52,6 +52,7 @@ export const ParameterSettingsStep: React.FC<ParameterSettingsStepProps> = ({
 
   const { loading: loadingCore, error } = useCoreSchemas(
     structure,
+    parameterSchemas,
     setSchema,
     updateParameters,
     parameters
