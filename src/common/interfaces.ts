@@ -17,10 +17,6 @@ export interface Property {
   active: boolean;
 }
 
-export interface PropertyMap {
-  [key: string]: Property;
-}
-
 export interface DynamicField {
   endpoint: string;
   requires: string[];
@@ -33,9 +29,7 @@ export interface InputSchema {
   ui?: UiSchema;
   requires?: { [key: string]: any };
   dependencies?: { [key: string]: string[] };
-  dynamic?: {
-    [key: string]: DynamicField[];
-  };
+  dynamic?: Record<string, DynamicField[]>;
 }
 
 export type SchemaMap = Record<string, InputSchema>;
@@ -55,7 +49,7 @@ export interface WorkflowInputs {
 
 export interface WizardState {
   structure: StructureType | null;
-  properties: PropertyMap;
+  properties: Record<string, Property>;
   activeParametersPanel: string;
   activeAdvancedPanel: string;
   activePluginPanel: string;
@@ -77,7 +71,7 @@ export type WizardAction =
       };
     }
   | { type: "SET_STRUCTURE"; payload: StructureType }
-  | { type: "SET_PROPERTIES"; payload: PropertyMap }
+  | { type: "SET_PROPERTIES"; payload: Record<string, Property> }
   | { type: "SET_PARAMETERS_PANEL"; payload: string }
   | { type: "SET_ADVANCED_PANEL"; payload: string }
   | { type: "SET_PLUGIN_PANEL"; payload: string }

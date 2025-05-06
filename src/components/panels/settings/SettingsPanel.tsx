@@ -34,6 +34,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 }) => {
   const { formSchema, uiSchema } = useFormSchemas({
     structure,
+    parameters,
     panelKey,
     schema,
   });

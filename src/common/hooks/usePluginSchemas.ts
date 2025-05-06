@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import {
   InputSchema,
   ParameterSchemas,
-  PropertyMap,
+  Property,
   StructureType,
 } from "@common/interfaces";
 
 export const usePluginSchemas = (
   structure: StructureType,
-  properties: PropertyMap,
+  properties: Record<string, Property>,
   setSchema: (
     schema: InputSchema,
     panel: keyof ParameterSchemas,

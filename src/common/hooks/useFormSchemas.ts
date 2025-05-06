@@ -1,16 +1,21 @@
 import { useMemo } from "react";
 
+import merge from "lodash/merge";
+
+import { useDynamicSchemaFragments } from "@common/hooks";
 import { InputSchema, StructureType } from "@common/interfaces";
 import { patchSchema } from "@common/utils";
 
 interface UseFormSchemasProps {
-  schema: InputSchema;
-  panelKey: string;
   structure: StructureType;
+  parameters: Record<string, any>;
+  panelKey: string;
+  schema: InputSchema;
 }
 
 export const useFormSchemas = ({
   structure,
+  parameters,
   panelKey,
   schema: inputSchema,
 }: UseFormSchemasProps) => {
@@ -19,19 +24,35 @@ export const useFormSchemas = ({
     [inputSchema, structure]
   );
 
-  const uiSchema = {
-    ...ui,
-    "ui:submitButtonOptions": {
-      norender: true,
-    },
-    "ui:options": {
-      title: "",
-      classNames: `${panelKey}-panel`,
-    },
-  };
+  const { schemaPatch, uiPatch, loading } = useDynamicSchemaFragments({
+    schema: inputSchema,
+    structure,
+    parameters,
+  });
+
+  const formSchema = useMemo(
+    () => ({
+      ...schema,
+      ...schemaPatch,
+    }),
+    [schema, schemaPatch]
+  );
+
+  const uiSchema = useMemo(() => {
+    return merge({}, ui, uiPatch, {
+      "ui:submitButtonOptions": {
+        norender: true,
+      },
+      "ui:options": {
+        title: "",
+        classNames: `${panelKey}-panel`,
+      },
+    });
+  }, [ui, uiPatch, panelKey]);
 
   return {
-    formSchema: schema,
-    uiSchema: uiSchema,
+    formSchema,
+    uiSchema,
+    loading,
   };
 };

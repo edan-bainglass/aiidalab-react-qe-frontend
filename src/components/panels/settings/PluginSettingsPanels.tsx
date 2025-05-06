@@ -1,10 +1,11 @@
 import { Spinner } from "react-bootstrap";
 
-import { PropertyMap } from "@common/interfaces";
+import { Property } from "@common/interfaces";
+
 import { SettingsPanels, SettingsPanelsProps } from "./SettingsPanels";
 
 interface PluginSettingsPanelsProps extends SettingsPanelsProps {
-  properties: PropertyMap;
+  properties: Record<string, Property>;
   loading?: boolean;
 }
 
