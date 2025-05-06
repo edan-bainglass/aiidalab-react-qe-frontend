@@ -1,11 +1,7 @@
 import { Spinner, Tab, Tabs } from "react-bootstrap";
 
 import { useCoreSchemas, usePluginSchemas } from "@common/hooks";
-import {
-  ParameterSchemas,
-  PropertyMap,
-  StructureType,
-} from "@common/interfaces";
+import { ParameterSchemas, Property, StructureType } from "@common/interfaces";
 import { DEBUG } from "@common/utils";
 import {
   PluginSettingsPanels,
@@ -15,7 +11,7 @@ import {
 
 interface ParameterSettingsStepProps {
   structure: StructureType;
-  properties: PropertyMap;
+  properties: Record<string, Property>;
   parameterSchemas: ParameterSchemas;
   parameters: any;
   onParametersChange: (panelKey: string, formData: any) => void;
