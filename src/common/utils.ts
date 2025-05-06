@@ -93,6 +93,13 @@ export const getDependencyData = (
       switch (panel) {
         case "structure":
           switch (dep) {
+            case "species":
+              if (!structure?.species) {
+                console.warn("No label data found in structure");
+              } else {
+                dependencyData[dependency] = structure.species;
+              }
+              break;
             case "pbc":
               if (!structure?.pbc) {
                 console.warn("No PBC data found in structure");
