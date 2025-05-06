@@ -33,6 +33,9 @@ const fetcher = async ([dynamicSpecs, structure, parameters]: [
         } else {
           payload[payload_key] = parameters[panel]?.[name];
         }
+        if (payload[payload_key] === undefined) {
+          return { schemaPatch: {}, uiPatch: {} };
+        }
       }
 
       const res = await fetch(fragment.endpoint, {
