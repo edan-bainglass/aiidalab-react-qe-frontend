@@ -21,11 +21,21 @@ export interface PropertyMap {
   [key: string]: Property;
 }
 
+export interface DynamicField {
+  endpoint: string;
+  requires: string[];
+  target: string;
+  path: string;
+}
+
 export interface InputSchema {
   schema: RJSFSchema;
   ui?: UiSchema;
   requires?: { [key: string]: any };
   dependencies?: { [key: string]: string[] };
+  dynamic?: {
+    [key: string]: DynamicField[];
+  };
 }
 
 export type SchemaMap = Record<string, InputSchema>;
