@@ -366,6 +366,16 @@ export const parameterSchemas: ParameterSchemas = {
         accuracy: ["basic.protocol"],
         pseudopotentials: ["structure.species"],
       },
+      dynamic: {
+        accuracy: [
+          {
+            endpoint: "/api/core/schema/dynamic/accuracy/labels",
+            requires: ["pseudos.family"],
+            target: "ui",
+            path: "ui:enumNames",
+          },
+        ],
+      },
       schema: {
         properties: {
           functional: {
@@ -449,27 +459,7 @@ export const parameterSchemas: ParameterSchemas = {
             properties: {
               accuracy: {
                 enum: ["efficiency", "precision"],
-              },
-            },
-            if: {
-              properties: {
-                "basic.protocol": {
-                  const: "stringent",
-                },
-              },
-            },
-            then: {
-              properties: {
-                accuracy: {
-                  default: "efficiency",
-                },
-              },
-            },
-            else: {
-              properties: {
-                accuracy: {
-                  default: "precision",
-                },
+                default: "efficiency",
               },
             },
           },
@@ -520,16 +510,6 @@ export const parameterSchemas: ParameterSchemas = {
             template: "{{species}}",
           },
         },
-      },
-      dynamic: {
-        accuracy: [
-          {
-            endpoint: "/api/core/schema/dynamic/accuracy/labels",
-            requires: ["pseudos.family"],
-            target: "ui",
-            path: "ui:enumNames",
-          },
-        ],
       },
     },
   },
