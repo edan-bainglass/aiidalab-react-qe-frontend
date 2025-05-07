@@ -2,34 +2,10 @@ import { ParameterSchemas } from "./interfaces";
 
 export const parameterSchemas: ParameterSchemas = {
   basic: {
+    dependencies: {
+      relax: ["structure.pbc"],
+    },
     schema: {
-      type: "object",
-      definitions: {
-        relax: {
-          type: "string",
-          title: "Relaxation level",
-        },
-        electronic_type: {
-          type: "string",
-          title: "Electronic type",
-          enum: ["metallic", "insulator"],
-          default: "metallic",
-        },
-        protocol: {
-          type: "string",
-          title: "Protocol",
-          enum: ["fast", "balanced", "stringent"],
-          default: "fast",
-        },
-        magnetism: {
-          type: "boolean",
-          title: "Magnetism",
-        },
-        spin_orbit: {
-          type: "boolean",
-          title: "Spin orbit coupling",
-        },
-      },
       properties: {
         relax: {
           $ref: "#/definitions/relax",
@@ -47,10 +23,48 @@ export const parameterSchemas: ParameterSchemas = {
           $ref: "#/definitions/spin_orbit",
         },
       },
+      title: "",
+      type: "object",
+      definitions: {
+        relax: {
+          anyOf: [
+            {
+              type: "string",
+            },
+            {
+              type: "null",
+            },
+          ],
+          default: null,
+          title: "Relaxation level",
+        },
+        electronic_type: {
+          default: "metallic",
+          enum: ["metallic", "insulator"],
+          title: "Electronic type",
+          type: "string",
+        },
+        protocol: {
+          default: "fast",
+          enum: ["fast", "balanced", "stringent"],
+          title: "Protocol",
+          type: "string",
+        },
+        magnetism: {
+          default: false,
+          title: "Magnetism",
+          type: "boolean",
+        },
+        spin_orbit: {
+          default: false,
+          title: "Spin-orbit coupling",
+          type: "boolean",
+        },
+      },
       if: {
         properties: {
-          molecule: {
-            const: true,
+          "structure.pbc": {
+            const: [false, false, false],
           },
         },
       },
@@ -85,27 +99,15 @@ export const parameterSchemas: ParameterSchemas = {
         "ui:enumNames": ["Fast", "Balanced", "Stringent"],
       },
     },
-    dependencies: ["structure.pbc"],
   },
   advanced: {
     convergence: {
+      dependencies: {
+        scfConvEng: ["basic.protocol"],
+        ionicConvEng: ["basic.protocol"],
+        ionicConvForce: ["basic.protocol"],
+      },
       schema: {
-        type: "object",
-        title: "Convergence",
-        definitions: {
-          scfConvEng: {
-            type: "number",
-            title: "SCF energy (Ry/atom)",
-          },
-          ionicConvEng: {
-            type: "number",
-            title: "Ionic energy (Ry/atom)",
-          },
-          ionicConvForce: {
-            type: "number",
-            title: "Ionic force (Ry/Bohr)",
-          },
-        },
         properties: {
           scfConvEng: {
             $ref: "#/definitions/scfConvEng",
@@ -117,9 +119,26 @@ export const parameterSchemas: ParameterSchemas = {
             $ref: "#/definitions/ionicConvForce",
           },
         },
+        required: ["scfConvEng", "ionicConvEng", "ionicConvForce"],
+        title: "Convergence",
+        type: "object",
+        definitions: {
+          scfConvEng: {
+            title: "SCF energy (Ry/atom)",
+            type: "number",
+          },
+          ionicConvEng: {
+            title: "Ionic energy (Ry/atom)",
+            type: "number",
+          },
+          ionicConvForce: {
+            title: "Ionic force (Ry/Bohr)",
+            type: "number",
+          },
+        },
         if: {
           properties: {
-            protocol: {
+            "basic.protocol": {
               const: "fast",
             },
           },
@@ -140,7 +159,7 @@ export const parameterSchemas: ParameterSchemas = {
         else: {
           if: {
             properties: {
-              protocol: {
+              "basic.protocol": {
                 const: "balanced",
               },
             },
@@ -151,7 +170,7 @@ export const parameterSchemas: ParameterSchemas = {
                 default: 2e-10,
               },
               ionicConvEng: {
-                default: 0.00001,
+                default: 1e-5,
               },
               ionicConvForce: {
                 default: 0.0001,
@@ -164,39 +183,18 @@ export const parameterSchemas: ParameterSchemas = {
                 default: 1e-10,
               },
               ionicConvEng: {
-                default: 0.000005,
+                default: 5e-6,
               },
               ionicConvForce: {
-                default: 0.00005,
+                default: 5e-5,
               },
             },
           },
         },
       },
-      ui: {
-        protocol: {
-          "ui:widget": "hidden",
-        },
-      },
-      dependencies: ["basic.protocol"],
     },
     smearing: {
       schema: {
-        type: "object",
-        title: "Smearing",
-        definitions: {
-          method: {
-            type: "string",
-            title: "Smearing",
-            enum: ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
-            default: "Gaussian",
-          },
-          width: {
-            type: "number",
-            title: "Width (eV)",
-            default: 0.05,
-          },
-        },
         properties: {
           method: {
             $ref: "#/definitions/method",
@@ -204,6 +202,26 @@ export const parameterSchemas: ParameterSchemas = {
           width: {
             $ref: "#/definitions/width",
           },
+        },
+        title: "Smearing",
+        type: "object",
+        definitions: {
+          method: {
+            default: "gaussian",
+            enum: ["gaussian", "methfessel-paxton", "fermi-dirac"],
+            title: "Method",
+            type: "string",
+          },
+          width: {
+            default: 0.05,
+            title: "Width (Ry)",
+            type: "number",
+          },
+        },
+      },
+      ui: {
+        method: {
+          "ui:enumNames": ["Gaussian", "Methfessel-Paxton", "Fermi-Dirac"],
         },
       },
     },
@@ -213,35 +231,41 @@ export const parameterSchemas: ParameterSchemas = {
           const: true,
         },
       },
+      dependencies: {
+        mode: ["basic.electronic_type"],
+        tot_magnetization: ["basic.electronic_type"],
+        moments: ["structure.species", "basic.electronic_type"],
+      },
       schema: {
-        type: "object",
+        required: ["moments"],
         title: "Magnetization",
+        type: "object",
         definitions: {
           mode: {
-            type: "string",
-            title: "Input mode",
-            enum: ["moments", "total"],
             default: "moments",
+            enum: ["moments", "total"],
+            title: "Input mode",
+            type: "string",
           },
           tot_magnetization: {
-            type: "number",
-            title: "Total magnetization",
-            minimum: 0,
-            multipleOf: 0.1,
             default: 1,
+            minimum: 0.0,
+            multipleOf: 0.1,
+            title: "Total magnetization",
+            type: "number",
           },
           moments: {
-            type: "array",
-            title: "Initial magnetic moments",
             items: {
               type: "number",
               default: 0.1,
             },
+            title: "Initial magnetic moments",
+            type: "array",
           },
         },
         if: {
           properties: {
-            electronic_type: {
+            "basic.electronic_type": {
               const: "insulator",
             },
           },
@@ -297,28 +321,27 @@ export const parameterSchemas: ParameterSchemas = {
           },
         },
       },
-      dependencies: ["basic.electronic_type"],
     },
-    hubbardU: {
+    hubbard: {
       schema: {
-        type: "object",
-        title: "Hubbard U",
-        definitions: {
-          use_hubbard: {
-            type: "boolean",
-            title: "Enable U",
-            default: false,
-          },
-          U: {
-            type: "number",
-            title: "U (eV)",
-            minimum: 0,
-            default: 0,
-          },
-        },
         properties: {
           use_hubbard: {
             $ref: "#/definitions/use_hubbard",
+          },
+        },
+        title: "Hubbard U",
+        type: "object",
+        definitions: {
+          use_hubbard: {
+            default: false,
+            title: "Enable U",
+            type: "boolean",
+          },
+          U: {
+            default: 0.0,
+            minimum: 0.0,
+            title: "U (eV)",
+            type: "number",
           },
         },
         if: {
@@ -337,34 +360,13 @@ export const parameterSchemas: ParameterSchemas = {
         },
       },
     },
-    pseudopotentials: {
+    pseudos: {
+      dependencies: {
+        family: ["basic.spin_orbit"],
+        accuracy: ["basic.protocol"],
+        pseudopotentials: ["structure.species"],
+      },
       schema: {
-        type: "object",
-        title: "Pseudopotentials",
-        definitions: {
-          functional: {
-            type: "string",
-            title: "Functional",
-            enum: ["PBE", "PBEsol"],
-            default: "PBEsol",
-          },
-          family: {
-            type: "string",
-            title: "Family",
-          },
-          accuracy: {
-            type: "string",
-            title: "Accuracy",
-          },
-          pseudopotentials: {
-            type: "array",
-            title: "Pseudopotentials",
-            items: {
-              type: "string",
-              format: "data-url",
-            },
-          },
-        },
         properties: {
           functional: {
             $ref: "#/definitions/functional",
@@ -379,9 +381,52 @@ export const parameterSchemas: ParameterSchemas = {
             $ref: "#/definitions/pseudopotentials",
           },
         },
+        required: ["pseudopotentials"],
+        title: "Pseudopotentials",
+        type: "object",
+        definitions: {
+          functional: {
+            default: "pbe_sol",
+            enum: ["pbe", "pbe_sol"],
+            title: "Functional",
+            type: "string",
+          },
+          family: {
+            anyOf: [
+              {
+                type: "string",
+              },
+              {
+                type: "null",
+              },
+            ],
+            default: null,
+            title: "Family",
+          },
+          accuracy: {
+            anyOf: [
+              {
+                type: "string",
+              },
+              {
+                type: "null",
+              },
+            ],
+            default: null,
+            title: "Accuracy",
+          },
+          pseudopotentials: {
+            items: {
+              type: "string",
+              format: "data-url",
+            },
+            title: "Pseudopotentials",
+            type: "array",
+          },
+        },
         if: {
           properties: {
-            spin_orbit: {
+            "basic.spin_orbit": {
               const: false,
             },
           },
@@ -389,7 +434,7 @@ export const parameterSchemas: ParameterSchemas = {
         then: {
           properties: {
             family: {
-              enum: ["SSSP", "PseudoDojo"],
+              enum: ["PseudoDojo", "SSSP"],
               default: "SSSP",
             },
           },
@@ -403,16 +448,36 @@ export const parameterSchemas: ParameterSchemas = {
           then: {
             properties: {
               accuracy: {
-                enum: ["Efficiency", "Precision"],
-                default: "Efficiency",
+                enum: ["efficiency", "precision"],
+              },
+            },
+            if: {
+              properties: {
+                "basic.protocol": {
+                  const: "stringent",
+                },
+              },
+            },
+            then: {
+              properties: {
+                accuracy: {
+                  default: "efficiency",
+                },
+              },
+            },
+            else: {
+              properties: {
+                accuracy: {
+                  default: "precision",
+                },
               },
             },
           },
           else: {
             properties: {
               accuracy: {
-                enum: ["Standard", "Stringent"],
-                default: "Standard",
+                enum: ["standard", "stringent"],
+                default: "standard",
               },
             },
           },
@@ -424,8 +489,8 @@ export const parameterSchemas: ParameterSchemas = {
               default: "PseudoDojo",
             },
             accuracy: {
-              enum: ["Standard", "Stringent"],
-              default: "Standard",
+              enum: ["standard", "stringent"],
+              default: "standard",
             },
           },
         },
@@ -433,9 +498,11 @@ export const parameterSchemas: ParameterSchemas = {
       ui: {
         functional: {
           "ui:widget": "toggleGroup",
+          "ui:enumNames": ["PBE", "PBEsol"],
         },
         family: {
           "ui:widget": "toggleGroup",
+          "ui:enumNames": ["PseudoDojo", "SSSP"],
         },
         accuracy: {
           "ui:widget": "toggleGroup",
@@ -454,7 +521,16 @@ export const parameterSchemas: ParameterSchemas = {
           },
         },
       },
-      dependencies: ["basic.spin_orbit"],
+      dynamic: {
+        accuracy: [
+          {
+            endpoint: "/api/core/schema/dynamic/accuracy/labels",
+            requires: ["pseudos.family"],
+            target: "ui",
+            path: "ui:enumNames",
+          },
+        ],
+      },
     },
   },
   plugins: {},

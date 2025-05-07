@@ -8,7 +8,8 @@ import {
   WizardAction,
   WizardState,
 } from "@common/interfaces";
-import { DEBUG } from "@common/utils";
+import { parameterSchemas } from "@common/schemas";
+import { DEBUG, USE_LOCAL_SCHEMA } from "@common/utils";
 import {
   InputsReviewStep,
   ParameterSettingsStep,
@@ -35,11 +36,13 @@ const initialState: WizardState = {
   activeParametersPanel: "basic",
   activeAdvancedPanel: "",
   activePluginPanel: "",
-  parameterSchemas: {
-    basic: {},
-    advanced: {},
-    plugins: {},
-  } as ParameterSchemas,
+  parameterSchemas: USE_LOCAL_SCHEMA
+    ? parameterSchemas
+    : ({
+        basic: {},
+        advanced: {},
+        plugins: {},
+      } as ParameterSchemas),
   parameters: {},
   dependencyCache: {},
   resources: null,
