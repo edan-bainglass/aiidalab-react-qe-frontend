@@ -20,7 +20,7 @@ export interface Property {
 export interface DynamicField {
   endpoint: string;
   requires: string[];
-  target: string;
+  target: "schema" | "ui" | "both";
   path: string;
 }
 

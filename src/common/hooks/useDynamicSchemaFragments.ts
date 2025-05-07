@@ -5,60 +5,25 @@ import useSWR from "swr";
 
 import { DynamicField, InputSchema, StructureType } from "@common/interfaces";
 
+interface FragmentSpec extends DynamicField {
+  field: string;
+  payload: Record<string, any>;
+}
+
 interface UseDynamicSchemaFragmentsProps {
   schema: InputSchema;
   structure: StructureType;
   parameters: Record<string, any>;
 }
 
-const fetcher = async ([dynamicSpecs, structure, parameters]: [
-  Record<string, DynamicField[]>,
-  StructureType,
-  Record<string, any>
-]) => {
-  if (!structure) return { schemaPatch: {}, uiPatch: {} };
-
-  const schemaPatch: Record<string, any> = {};
-  const uiPatch: Record<string, any> = {};
-
-  for (const [field, fragments] of Object.entries(dynamicSpecs)) {
-    for (const fragment of fragments) {
-      const payload: Record<string, any> = {};
-
-      for (const key of fragment.requires) {
-        const [panel, name] = key.split(".");
-        const payload_key = key.replace(/\./g, "_");
-        if (panel === "structure") {
-          payload[payload_key] = structure[name as keyof StructureType];
-        } else {
-          payload[payload_key] = parameters[panel]?.[name];
-        }
-        if (payload[payload_key] === undefined) {
-          return { schemaPatch: {}, uiPatch: {} };
-        }
-      }
-
-      const res = await fetch(fragment.endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch dynamic fragment");
-      const result = await res.json();
-
-      const fullPath = `${field}.${fragment.path}`;
-
-      if (fragment.target === "schema" || fragment.target === "both") {
-        set(schemaPatch, fullPath, result);
-      }
-      if (fragment.target === "ui" || fragment.target === "both") {
-        set(uiPatch, fullPath, result);
-      }
-    }
-  }
-
-  return { schemaPatch, uiPatch };
+const fetcher = async ([endpoint, payload]: [string, Record<string, any>]) => {
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to fetch dynamic fragment");
+  return res.json();
 };
 
 export const useDynamicSchemaFragments = ({
@@ -66,16 +31,58 @@ export const useDynamicSchemaFragments = ({
   structure,
   parameters,
 }: UseDynamicSchemaFragmentsProps) => {
-  const dynamicSpecs = useMemo(() => schema.dynamic || {}, [schema]);
+  if (!structure) return { schemaPatch: {}, uiPatch: {}, loading: false };
+  const fragmentList: FragmentSpec[] = useMemo(() => {
+    const dynamicSpecs = schema.dynamic || {};
+    const fragments: FragmentSpec[] = [];
 
-  const { data, isLoading } = useSWR(
-    [dynamicSpecs, structure, parameters],
-    fetcher
-  );
+    for (const [field, specs] of Object.entries(dynamicSpecs)) {
+      for (const spec of specs) {
+        const payload: Record<string, any> = {};
+        for (const key of spec.requires) {
+          const [panel, name] = key.split(".");
+          const payloadKey = key.replace(/\./g, "_");
+          payload[payloadKey] =
+            panel === "structure"
+              ? structure[name as keyof StructureType]
+              : parameters[panel]?.[name];
+        }
+        fragments.push({ ...spec, field, payload });
+      }
+    }
 
-  return {
-    schemaPatch: data?.schemaPatch || {},
-    uiPatch: data?.uiPatch || {},
-    loading: isLoading,
-  };
+    return fragments;
+  }, [schema, structure, parameters]);
+
+  const swrResponses = fragmentList.map((frag) => {
+    const key = [frag.endpoint, frag.payload] as const;
+    return {
+      frag,
+      ...useSWR(key, fetcher, { revalidateOnFocus: false }),
+    };
+  });
+
+  const { schemaPatch, uiPatch, loading } = useMemo(() => {
+    const schemaPatch: Record<string, any> = {};
+    const uiPatch: Record<string, any> = {};
+    let anyLoading = false;
+
+    for (const { frag, data, error, isLoading } of swrResponses) {
+      if (isLoading) anyLoading = true;
+      if (!data || error) continue;
+
+      const fullPath = `${frag.field}.${frag.path}`;
+
+      if (frag.target === "schema" || frag.target === "both") {
+        set(schemaPatch, fullPath, data);
+      }
+      if (frag.target === "ui" || frag.target === "both") {
+        set(uiPatch, fullPath, data);
+      }
+    }
+
+    return { schemaPatch, uiPatch, loading: anyLoading };
+  }, [swrResponses]);
+
+  return { schemaPatch, uiPatch, loading };
 };
