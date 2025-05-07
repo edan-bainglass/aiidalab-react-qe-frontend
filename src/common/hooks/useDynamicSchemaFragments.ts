@@ -16,7 +16,10 @@ interface UseDynamicSchemaFragmentsProps {
   parameters: Record<string, any>;
 }
 
-const fetcher = async ([endpoint, payload]: [string, Record<string, any>]) => {
+const fetcher = async (key: string) => {
+  const [endpoint, payloadStr] = key.split("|");
+  const payload = JSON.parse(payloadStr);
+  if (!payload || Object.keys(payload).length === 0) return null;
   const res = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -42,10 +45,13 @@ export const useDynamicSchemaFragments = ({
         for (const key of spec.requires) {
           const [panel, name] = key.split(".");
           const payloadKey = key.replace(/\./g, "_");
-          payload[payloadKey] =
+          const value =
             panel === "structure"
               ? structure[name as keyof StructureType]
               : parameters[panel]?.[name];
+          if (value !== undefined) {
+            payload[payloadKey] = value;
+          }
         }
         fragments.push({ ...spec, field, payload });
       }
@@ -55,10 +61,14 @@ export const useDynamicSchemaFragments = ({
   }, [schema, structure, parameters]);
 
   const swrResponses = fragmentList.map((frag) => {
-    const key = [frag.endpoint, frag.payload] as const;
+    const payloadStr = JSON.stringify(
+      frag.payload,
+      Object.keys(frag.payload).sort()
+    );
+    const key = `${frag.endpoint}|${payloadStr}`;
     return {
       frag,
-      ...useSWR(key, fetcher, { revalidateOnFocus: false }),
+      ...useSWR(key, fetcher, { revalidateIfStale: false }),
     };
   });
 
