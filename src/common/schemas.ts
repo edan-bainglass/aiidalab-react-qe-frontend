@@ -136,61 +136,74 @@ export const parameterSchemas: ParameterSchemas = {
             type: "number",
           },
         },
-        if: {
-          properties: {
-            "basic.protocol": {
-              const: "fast",
+        allOf: [
+          {
+            if: {
+              properties: {
+                "basic.protocol": {
+                  const: "fast",
+                },
+              },
             },
-          },
-        },
-        then: {
-          properties: {
-            scfConvEng: {
-              default: 4e-10,
-            },
-            ionicConvEng: {
-              default: 0.0001,
-            },
-            ionicConvForce: {
-              default: 0.001,
-            },
-          },
-        },
-        else: {
-          if: {
-            properties: {
-              "basic.protocol": {
-                const: "balanced",
+            then: {
+              properties: {
+                scfConvEng: {
+                  default: 4e-10,
+                },
+                ionicConvEng: {
+                  default: 0.0001,
+                },
+                ionicConvForce: {
+                  default: 0.001,
+                },
               },
             },
           },
-          then: {
-            properties: {
-              scfConvEng: {
-                default: 2e-10,
+          {
+            if: {
+              properties: {
+                "basic.protocol": {
+                  const: "balanced",
+                },
               },
-              ionicConvEng: {
-                default: 1e-5,
-              },
-              ionicConvForce: {
-                default: 0.0001,
+            },
+            then: {
+              properties: {
+                scfConvEng: {
+                  default: 2e-10,
+                },
+                ionicConvEng: {
+                  default: 1e-5,
+                },
+                ionicConvForce: {
+                  default: 0.0001,
+                },
               },
             },
           },
-          else: {
-            properties: {
-              scfConvEng: {
-                default: 1e-10,
+          {
+            if: {
+              properties: {
+                "basic.protocol": {
+                  const: "stringent",
+                },
               },
-              ionicConvEng: {
-                default: 5e-6,
-              },
-              ionicConvForce: {
-                default: 5e-5,
+            },
+            then: {
+              properties: {
+                scfConvEng: {
+                  default: 1e-10,
+                },
+                ionicConvEng: {
+                  default: 5e-6,
+                },
+                ionicConvForce: {
+                  default: 5e-5,
+                },
               },
             },
           },
-        },
+        ],
       },
     },
     smearing: {
