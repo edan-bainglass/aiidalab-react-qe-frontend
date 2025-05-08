@@ -13,6 +13,7 @@ interface PatchSpec extends Patch {
 }
 
 interface UseSchemaPatchesProps {
+  panelKey: string;
   schema: InputSchema;
   structure: StructureType;
   parameters: Record<string, any>;
@@ -39,6 +40,7 @@ const fetcher = async (key: string) => {
 };
 
 export const useSchemaPatches = ({
+  panelKey,
   schema,
   structure,
   parameters,
@@ -69,7 +71,7 @@ export const useSchemaPatches = ({
         patchSpecs.push({
           field,
           type,
-          endpoint: `/api/core/schema/patches/${field}/${type}`,
+          endpoint: `/api/core/schema/patches/${panelKey}/${field}/${type}`,
           requires: patch.requires,
           payload: { requirements: payload },
         });

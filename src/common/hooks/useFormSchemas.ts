@@ -25,6 +25,7 @@ export const useFormSchemas = ({
   );
 
   const { schemaPatch, uiPatch, loading } = useSchemaPatches({
+    panelKey,
     schema: inputSchema,
     structure,
     parameters,

@@ -3,7 +3,7 @@ import type { RJSFSchema, UiSchema } from "@rjsf/utils";
 import { InputSchema, StructureType } from "./interfaces";
 
 export const DEBUG = false;
-export const USE_LOCAL_SCHEMA = true;
+export const USE_LOCAL_SCHEMA = false;
 
 /**
  * Preprocess schema w.r.t dependencies
