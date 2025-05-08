@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 
-import { InputSchema, StructureType } from "@common/interfaces";
-import { getDependencyData } from "@common/utils";
+import { InputSchema } from "@common/interfaces";
 
 export const useDependencyReset = (
-  structure: StructureType,
   parameters: Record<string, any>,
+  dependencyData: Record<string, any>,
   dependencyCache: Record<string, any>,
   updateDependencyCache: (newDeps: Record<string, any>) => void,
   updateParameters: (panelKey: string, data: Record<string, any>) => void,
@@ -13,12 +12,6 @@ export const useDependencyReset = (
   schema: InputSchema
 ): void => {
   const dependencyMap = schema.dependencies;
-
-  const dependencyData = getDependencyData(
-    structure,
-    parameters,
-    dependencyMap
-  );
 
   useEffect(() => {
     if (!dependencyMap || Object.keys(dependencyMap).length === 0) return;

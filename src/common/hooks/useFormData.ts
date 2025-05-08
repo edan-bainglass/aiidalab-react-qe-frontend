@@ -33,8 +33,8 @@ export const useFormData = ({
   );
 
   useDependencyReset(
-    structure,
     parameters,
+    dependencyData,
     dependencyCache,
     updateDependencyCache,
     updateParameters,
