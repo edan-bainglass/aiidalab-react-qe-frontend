@@ -116,7 +116,7 @@ export const getDependencyData = (
           }
           break;
         case "basic":
-          if (data[panel]?.[dep]) {
+          if (data[panel]?.[dep] !== undefined) {
             dependencyData[dependency] = data[panel][dep];
           }
           break;
