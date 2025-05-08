@@ -415,27 +415,11 @@ export const parameterSchemas: ParameterSchemas = {
             type: "string",
           },
           family: {
-            anyOf: [
-              {
-                type: "string",
-              },
-              {
-                type: "null",
-              },
-            ],
-            default: null,
+            type: "string",
             title: "Family",
           },
           accuracy: {
-            anyOf: [
-              {
-                type: "string",
-              },
-              {
-                type: "null",
-              },
-            ],
-            default: null,
+            type: "string",
             title: "Accuracy",
           },
           pseudopotentials: {
@@ -447,56 +431,98 @@ export const parameterSchemas: ParameterSchemas = {
             type: "array",
           },
         },
-        if: {
-          properties: {
-            "basic.spin_orbit": {
-              const: false,
+        allOf: [
+          {
+            if: {
+              properties: {
+                "basic.spin_orbit": {
+                  const: true,
+                },
+              },
             },
-          },
-        },
-        then: {
-          properties: {
-            family: {
-              enum: ["PseudoDojo", "SSSP"],
-              default: "SSSP",
+            then: {
+              properties: {
+                family: {
+                  enum: ["PseudoDojo"],
+                  default: "PseudoDojo",
+                },
+              },
             },
-          },
-          if: {
-            properties: {
-              family: {
-                const: "SSSP",
+            else: {
+              properties: {
+                family: {
+                  enum: ["PseudoDojo", "SSSP"],
+                  default: "SSSP",
+                },
               },
             },
           },
-          then: {
-            properties: {
-              accuracy: {
-                enum: ["efficiency", "precision"],
-                default: "efficiency",
+          {
+            if: {
+              properties: {
+                family: {
+                  const: "SSSP",
+                },
+              },
+            },
+            then: {
+              properties: {
+                accuracy: {
+                  enum: ["efficiency", "precision"],
+                },
+              },
+              if: {
+                properties: {
+                  "basic.protocol": {
+                    const: "stringent",
+                  },
+                },
+              },
+              then: {
+                properties: {
+                  accuracy: {
+                    default: "precision",
+                  },
+                },
+              },
+              else: {
+                properties: {
+                  accuracy: {
+                    default: "efficiency",
+                  },
+                },
+              },
+            },
+            else: {
+              properties: {
+                accuracy: {
+                  enum: ["standard", "stringent"],
+                },
+              },
+              if: {
+                properties: {
+                  "basic.protocol": {
+                    const: "stringent",
+                  },
+                },
+              },
+              then: {
+                properties: {
+                  accuracy: {
+                    default: "stringent",
+                  },
+                },
+              },
+              else: {
+                properties: {
+                  accuracy: {
+                    default: "standard",
+                  },
+                },
               },
             },
           },
-          else: {
-            properties: {
-              accuracy: {
-                enum: ["standard", "stringent"],
-                default: "standard",
-              },
-            },
-          },
-        },
-        else: {
-          properties: {
-            family: {
-              enum: ["PseudoDojo"],
-              default: "PseudoDojo",
-            },
-            accuracy: {
-              enum: ["standard", "stringent"],
-              default: "standard",
-            },
-          },
-        },
+        ],
       },
       ui: {
         functional: {
