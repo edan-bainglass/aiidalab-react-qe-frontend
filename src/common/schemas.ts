@@ -379,15 +379,12 @@ export const parameterSchemas: ParameterSchemas = {
         accuracy: ["basic.protocol"],
         pseudopotentials: ["structure.species"],
       },
-      dynamic: {
-        accuracy: [
-          {
-            endpoint: "/api/core/schema/dynamic/accuracy/labels",
+      patches: {
+        accuracy: {
+          ui: {
             requires: ["pseudos.family"],
-            target: "ui",
-            path: "ui:enumNames",
           },
-        ],
+        },
       },
       schema: {
         properties: {

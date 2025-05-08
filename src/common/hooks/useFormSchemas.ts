@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import merge from "lodash/merge";
 
-import { useDynamicSchemaFragments } from "@common/hooks";
+import { useSchemaPatches } from "@common/hooks";
 import { InputSchema, StructureType } from "@common/interfaces";
 import { patchSchema } from "@common/utils";
 
@@ -24,19 +24,15 @@ export const useFormSchemas = ({
     [inputSchema, structure]
   );
 
-  const { schemaPatch, uiPatch, loading } = useDynamicSchemaFragments({
+  const { schemaPatch, uiPatch, loading } = useSchemaPatches({
     schema: inputSchema,
     structure,
     parameters,
   });
 
-  const formSchema = useMemo(
-    () => ({
-      ...schema,
-      ...schemaPatch,
-    }),
-    [schema, schemaPatch]
-  );
+  const formSchema = useMemo(() => {
+    return merge({}, schema, schemaPatch);
+  }, [schema, schemaPatch]);
 
   const uiSchema = useMemo(() => {
     return merge({}, ui, uiPatch, {
@@ -45,7 +41,7 @@ export const useFormSchemas = ({
       },
       "ui:options": {
         title: "",
-        classNames: `${panelKey}-panel`,
+        classNames: `settings-panel ${panelKey}-panel`,
       },
     });
   }, [ui, uiPatch, panelKey]);

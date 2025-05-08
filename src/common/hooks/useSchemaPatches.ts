@@ -3,14 +3,16 @@ import { useMemo } from "react";
 import set from "lodash/set";
 import useSWR from "swr";
 
-import { DynamicField, InputSchema, StructureType } from "@common/interfaces";
+import { InputSchema, Patch, Patches, StructureType } from "@common/interfaces";
 
-interface FragmentSpec extends DynamicField {
+interface PatchSpec extends Patch {
   field: string;
+  type: keyof Patches;
+  endpoint: string;
   payload: Record<string, any>;
 }
 
-interface UseDynamicSchemaFragmentsProps {
+interface UseSchemaPatchesProps {
   schema: InputSchema;
   structure: StructureType;
   parameters: Record<string, any>;
@@ -19,55 +21,69 @@ interface UseDynamicSchemaFragmentsProps {
 const fetcher = async (key: string) => {
   const [endpoint, payloadStr] = key.split("|");
   const payload = JSON.parse(payloadStr);
-  if (!payload || Object.keys(payload).length === 0) return null;
+  if (
+    !payload ||
+    !Object.keys(payload).length ||
+    !Object.keys(payload.requirements).length
+  ) {
+    return null;
+  }
   const res = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+
   if (!res.ok) throw new Error("Failed to fetch dynamic fragment");
   return res.json();
 };
 
-export const useDynamicSchemaFragments = ({
+export const useSchemaPatches = ({
   schema,
   structure,
   parameters,
-}: UseDynamicSchemaFragmentsProps) => {
+}: UseSchemaPatchesProps) => {
   if (!structure) return { schemaPatch: {}, uiPatch: {}, loading: false };
-  const fragmentList: FragmentSpec[] = useMemo(() => {
-    const dynamicSpecs = schema.dynamic || {};
-    const fragments: FragmentSpec[] = [];
 
-    for (const [field, specs] of Object.entries(dynamicSpecs)) {
-      for (const spec of specs) {
+  const patchList: PatchSpec[] = useMemo(() => {
+    const patches = schema.patches || {};
+    const patchSpecs: PatchSpec[] = [];
+
+    for (const [field, patchGroup] of Object.entries(patches)) {
+      for (const type of ["definition", "ui"] as const) {
+        const patch: Patch | undefined = patchGroup[type];
+        if (!patch) continue;
+
         const payload: Record<string, any> = {};
-        for (const key of spec.requires) {
+        for (const key of patch.requires) {
           const [panel, name] = key.split(".");
-          const payloadKey = key.replace(/\./g, "_");
           const value =
             panel === "structure"
               ? structure[name as keyof StructureType]
               : parameters[panel]?.[name];
           if (value !== undefined) {
-            payload[payloadKey] = value;
+            payload[key] = value;
           }
         }
-        fragments.push({ ...spec, field, payload });
+
+        patchSpecs.push({
+          field,
+          type,
+          endpoint: `/api/core/schema/patches/${field}/${type}`,
+          requires: patch.requires,
+          payload: { requirements: payload },
+        });
       }
     }
 
-    return fragments;
+    return patchSpecs;
   }, [schema, structure, parameters]);
 
-  const swrResponses = fragmentList.map((frag) => {
-    const payloadStr = JSON.stringify(
-      frag.payload,
-      Object.keys(frag.payload).sort()
-    );
-    const key = `${frag.endpoint}|${payloadStr}`;
+  const swrResponses = patchList.map((patch) => {
+    const payloadStr = JSON.stringify(patch.payload);
+    const key = `${patch.endpoint}|${payloadStr}`;
     return {
-      frag,
+      frag: patch,
       ...useSWR(key, fetcher, { revalidateIfStale: false }),
     };
   });
@@ -77,17 +93,15 @@ export const useDynamicSchemaFragments = ({
     const uiPatch: Record<string, any> = {};
     let anyLoading = false;
 
-    for (const { frag, data, error, isLoading } of swrResponses) {
+    for (const { frag: patch, data, error, isLoading } of swrResponses) {
       if (isLoading) anyLoading = true;
       if (!data || error) continue;
 
-      const fullPath = `${frag.field}.${frag.path}`;
-
-      if (frag.target === "schema" || frag.target === "both") {
-        set(schemaPatch, fullPath, data);
+      if (patch.type === "definition") {
+        set(schemaPatch, patch.field, data);
       }
-      if (frag.target === "ui" || frag.target === "both") {
-        set(uiPatch, fullPath, data);
+      if (patch.type === "ui") {
+        set(uiPatch, patch.field, data);
       }
     }
 

@@ -17,19 +17,21 @@ export interface Property {
   active: boolean;
 }
 
-export interface DynamicField {
-  endpoint: string;
+export interface Patch {
   requires: string[];
-  target: "schema" | "ui" | "both";
-  path: string;
+}
+
+export interface Patches {
+  definition?: Patch;
+  ui?: Patch;
 }
 
 export interface InputSchema {
   schema: RJSFSchema;
   ui?: UiSchema;
-  requires?: { [key: string]: any };
-  dependencies?: { [key: string]: string[] };
-  dynamic?: Record<string, DynamicField[]>;
+  requires?: Record<string, any>;
+  dependencies?: Record<string, string[]>;
+  patches?: Record<string, Patches>;
 }
 
 export type SchemaMap = Record<string, InputSchema>;
